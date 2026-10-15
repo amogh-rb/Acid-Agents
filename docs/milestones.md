@@ -9,8 +9,8 @@ A milestone is done only when it is **Defined** (deliverable committed), **Verif
 | M1 | B1-B3 | Provider, module list, build base | All | ✅ 12:25 | ☐ | ✅ gate M1 12:17 (72 checks) | Evidence: `docs/evidence/gate_M01_*.txt` |
 | M2 | B4-B7 | Entities: Master data, Profile, Jobs | A, B | ✅ 12:24 | ☐ | ✅ gate M2 12:27 | 96 entities (2 stubs, 50 ref of which 3 built in M1, 24 profile, 20 job); `docs/phase1/entities.md` |
 | M3 | B8-B11 | Relationships + ERD + stubs | A, B | ✅ 12:26 | ☐ | ✅ gate M3 12:27 (5/5 files) | 153 FKs; `docs/phase1/relationships.md`, `docs/erd/phase1.mmd`, `ddl/10_ref.sql` (status lookups), `ddl/15_stubs.sql` |
-| M4 | B12-B15 | Columns + comments + lookup seed | A, B | ☐ | ☐ | ☐ | |
-| M5 | B16-B19 | Dictionary + generated ERD + design note | C | ☐ | ☐ | ☐ | |
+| M4 | B12-B15 | Columns + comments + lookup seed | A, B | ✅ 12:42 | ☐ | ✅ gate M4 12:46 | `ddl/10_ref.sql`, `20_profile.sql`, `30_jobs.sql`: 96 tables, PKs + FKs declared now (D13), 0 lint violations |
+| M5 | B16-B19 | Dictionary + generated ERD + design note | C | ✅ 12:45 | ☐ | ✅ gate M5 12:46 (7/7 files) | `dictionary/*.csv` (994 columns), `docs/erd/phase1_generated.mmd`, `docs/phase1/design.md`; design vs catalog proven by test |
 | M6 | B20-B23 | Keys, constraints, transition trigger, Phase 1 sign-off | A, B | ☐ | ☐ | ☐ | Must pass by 13:20 |
 | M7 | B24-B26 | Entities: Admin / Org / Gig | A / B / C | ☐ | ☐ | ☐ | |
 | M8 | B27-B29 | Relationships: Admin / Org / Gig | A / B / C | ☐ | ☐ | ☐ | |

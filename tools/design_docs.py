@@ -3,6 +3,7 @@
   python tools/design_docs.py entities  ENTITIES.md
   python tools/design_docs.py relations ENTITIES.md RELATIONSHIPS.md
   python tools/design_docs.py erd       ENTITIES.md RELATIONSHIPS.md OUT.mmd [--check]
+  python tools/design_docs.py compare   ENTITIES.md RELATIONSHIPS.md dictionary/columns.csv dictionary/tables.csv
 
 entities:   unique names, schema, delete class, tier and owner are valid.
 relations:  every child and parent is a known entity; parent schema matches; cardinality,
@@ -10,6 +11,9 @@ relations:  every child and parent is a known entity; parent schema matches; car
             optional rows give a NULL reason; CASCADE rows say the child is owned;
             SET NULL only on optional FKs.
 erd:        writes a Mermaid erDiagram from the relationship table (--check: fail if OUT differs).
+compare:    design vs built database (from .\\run.ps1 dict): every entity is a table with the same delete
+            class and vice versa; every relationship row is an FK with the same target, ON DELETE and
+            nullability; every FK (except created_by/updated_by/label_key) is documented.
 Rows whose child cell starts with '(' (for example "(each lookup).label_key") are notes, not checked.
 """
 import pathlib
@@ -128,6 +132,68 @@ def render_erd(entities, relations):
     return "\n".join(lines) + "\n"
 
 
+REF_PATTERN = re.compile(r"([a-z0-9_]+)\.([a-z0-9_]+)\(([a-z0-9_]+)\) ON DELETE (RESTRICT|CASCADE|SET NULL|NO ACTION|SET DEFAULT)")
+IMPLICIT_FK_COLUMNS = {"created_by", "updated_by", "label_key"}   # documented once as conventions, not per row
+
+
+def read_csv(path):
+    import csv
+    with open(path, encoding="utf-8", newline="") as f:
+        return list(csv.DictReader(f))
+
+
+def compare_catalog(entities_path, relations_path, columns_csv, tables_csv, problems):
+    """Design docs vs the built catalog (dictionary export), both directions."""
+    entities = load_entities(entities_path, problems)
+    delete_class = {clean(r["entity"]): clean(r["delete class"])
+                    for _, r in read_tables(entities_path) if "entity" in r and "delete class" in r}
+    relations = load_relations(relations_path, entities, problems)
+    schemas = set(entities.values())
+
+    tables = {(r["schema_name"], r["table_name"]): r for r in read_csv(tables_csv) if r["schema_name"] in schemas}
+    columns = {(r["schema_name"], r["table_name"], r["column_name"]): r
+               for r in read_csv(columns_csv) if r["schema_name"] in schemas}
+
+    # entities <-> tables
+    for name, schema in entities.items():
+        t = tables.get((schema, name))
+        if t is None:
+            problems.append(f"entity {schema}.{name} has no table in the database")
+        elif t["delete_class"] != delete_class[name]:
+            problems.append(f"{schema}.{name}: delete class is '{t['delete_class']}' in the database, '{delete_class[name]}' in the design")
+    for (schema, name) in tables:
+        if entities.get(name) != schema:
+            problems.append(f"table {schema}.{name} is not in the entity list")
+
+    # relationship rows -> FKs
+    documented = set()
+    for child, column, parent_schema, parent, card, optional in relations:
+        schema = entities.get(child)
+        documented.add((schema, child, column))
+        col = columns.get((schema, child, column))
+        where = f"{schema}.{child}.{column}"
+        if col is None:
+            problems.append(f"{where}: column documented in relationships.md does not exist")
+            continue
+        refs = REF_PATTERN.findall(col["references_to"])
+        match = [r for r in refs if (r[0], r[1]) == (parent_schema, parent)]
+        if not match:
+            problems.append(f"{where}: no FK to {parent_schema}.{parent} in the database (found: {col['references_to'] or 'none'})")
+        else:
+            expected = next(clean(r.get("on delete", "")) for _, r in read_tables(relations_path)
+                            if clean(r.get("child.column", "")) == f"{child}.{column}")
+            if match[0][3] != expected.upper():
+                problems.append(f"{where}: ON DELETE {match[0][3]} in the database, {expected} in relationships.md")
+        if (col["nullability"] == "NULL") != (optional == "yes"):
+            problems.append(f"{where}: nullability {col['nullability']} in the database, optional={optional} in relationships.md")
+
+    # FKs -> relationship rows
+    for (schema, table, column), col in columns.items():
+        if col["references_to"] and column not in IMPLICIT_FK_COLUMNS and (schema, table, column) not in documented:
+            problems.append(f"{schema}.{table}.{column}: FK to {col['references_to']} is not documented in relationships.md")
+    return len(entities), len(relations)
+
+
 def report(problems, ok_message):
     for p in problems:
         print(p)
@@ -143,6 +209,10 @@ def main(argv):
         print(__doc__)
         return 2
     command, problems = argv[0], []
+    if command == "compare":
+        n_ent, n_rel = compare_catalog(argv[1], argv[2], argv[3], argv[4], problems)
+        return report(problems, f"design matches the database: {n_ent} entities (tables, delete classes) and "
+                                f"{n_rel} relationships (FK target, ON DELETE, nullability); no undocumented tables or FKs")
     entities = load_entities(argv[1], problems)
     if command == "entities":
         return report(problems, f"{len(entities)} entities: unique, schema, delete class, tier and owner valid")

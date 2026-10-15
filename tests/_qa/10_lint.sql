@@ -144,12 +144,15 @@ SELECT 'RG3 money domain', fq, 'money column must use d_money'
   FROM col
  WHERE basetype = 'numeric' AND coalesce(domname, '') <> 'd_money'
    AND attname ~ '(^|_)(amount|price|salary|balance|fee|cost|ctc|earning|earnings)(_|$)'
+   AND attname !~ '_(pct|percent|percentage)$'
 UNION ALL
-SELECT 'RG3 money currency', fq, 'd_money column needs ' || attname || '_currency_code or currency_code in the same table'
+SELECT 'RG3 money currency', fq, 'd_money column needs ' || attname || '_currency_code, <prefix>_currency_code or currency_code in the same table'
   FROM col c
  WHERE c.domname = 'd_money'
    AND NOT EXISTS (SELECT 1 FROM col c2 WHERE c2.relid = c.relid
-                      AND c2.attname IN (c.attname || '_currency_code', 'currency_code'))
+                      AND (c2.attname IN (c.attname || '_currency_code', 'currency_code')
+                           OR (c2.attname ~ '_currency_code$'
+                               AND left(c.attname, length(c2.attname) - 13) = left(c2.attname, length(c2.attname) - 13))))
 UNION ALL
 SELECT 'RG3 unbounded text', fq, 'unbounded text needs a stated reason ("unbounded:") or a max length'
   FROM col

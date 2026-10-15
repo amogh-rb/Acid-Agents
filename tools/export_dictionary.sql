@@ -5,8 +5,14 @@
 
 \pset format csv
 \pset tuples_only off
+\if :{?outdir}
+\else
+  \set outdir dictionary
+\endif
+\set columns_file :outdir '/columns.csv'
+\set tables_file :outdir '/tables.csv'
 
-\o dictionary/columns.csv
+\o :columns_file
 WITH cols AS (
   SELECT n.nspname AS schema_name,
          c.relname AS table_name,
@@ -57,7 +63,7 @@ SELECT schema_name,
   FROM cols
  ORDER BY schema_name, table_name, ordinal;
 
-\o dictionary/tables.csv
+\o :tables_file
 SELECT n.nspname AS schema_name,
        c.relname AS table_name,
        CASE c.relkind WHEN 'p' THEN 'partitioned table' ELSE 'table' END AS kind,

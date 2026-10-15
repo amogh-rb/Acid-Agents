@@ -182,6 +182,28 @@ BEGIN
 END
 $$;
 
+-- Ensures a UI label '<prefix>.<slug of english>' exists with its default-language text; returns the key.
+-- Used for translatable master data (industry, job_role ...) and lookups with extra columns.
+CREATE FUNCTION ref.label_for(p_prefix text, p_english text) RETURNS varchar
+LANGUAGE plpgsql AS
+$$
+DECLARE
+  v_key text := p_prefix || '.' || trim(BOTH '_' FROM regexp_replace(lower(p_english), '[^a-z0-9]+', '_', 'g'));
+BEGIN
+  INSERT INTO ref.ui_label (label_key, translator_note)
+  VALUES (v_key, 'Name: ' || p_english)
+  ON CONFLICT (label_key) DO NOTHING;
+
+  INSERT INTO ref.ui_translation (ui_label_id, language_id, translated_text)
+  SELECT l.id, lang.id, p_english
+    FROM ref.ui_label l, ref.language lang
+   WHERE l.label_key = v_key AND lang.is_default
+  ON CONFLICT (ui_label_id, language_id) DO NOTHING;
+
+  RETURN v_key;
+END
+$$;
+
 -- Adds one enumeration value with its UI label and default-language text (requires ddl/07_ui_label.sql).
 CREATE FUNCTION ref.add_lookup_value(p_table regclass, p_code text, p_label text, p_sort_order integer DEFAULT 0)
 RETURNS void

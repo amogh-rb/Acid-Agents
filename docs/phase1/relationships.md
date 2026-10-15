@@ -17,6 +17,7 @@
 |---|---|---|---|---|---|
 | app_user.user_status_code | ref.user_status | N:1 | no | RESTRICT | Every account has a status |
 | organisation.organisation_status_code | ref.organisation_status | N:1 | no | RESTRICT | Every organisation has a status |
+| country.default_currency_code | ref.currency | N:1 | no | RESTRICT | Currency proposed for amounts entered in the country |
 | state.country_id | ref.country | N:1 | no | RESTRICT | A subdivision belongs to one country |
 | city.country_id | ref.country | N:1 | no | RESTRICT | Kept even when a state exists, so cities in countries without states (Singapore) are valid |
 | city.state_id | ref.state | N:1 | yes | RESTRICT | NULL: the country has no first-level subdivision. Composite FK (country_id, state_id) → state (country_id, id) stops a city pointing at another country's state |
@@ -29,6 +30,8 @@
 | industry.parent_industry_id | ref.industry | N:1 | yes | RESTRICT | NULL: top-level industry |
 | job_role.job_function_id | ref.job_function | N:1 | no | RESTRICT | A role belongs to one function |
 | identifier_type.country_id | ref.country | N:1 | yes | RESTRICT | NULL: identifier is not country-specific (passport) |
+| ui_translation.ui_label_id | ref.ui_label | N:1 | no | CASCADE | Owned child: translations exist only for their label |
+| ui_translation.language_id | ref.language | N:1 | no | RESTRICT | Language of the translated text |
 | (each lookup).label_key | ref.ui_label | N:1 | no | RESTRICT | Display text per language (built by `ref.create_lookup`) |
 
 ## Profile
@@ -42,8 +45,8 @@
 | candidate_profile.notice_period_code | ref.notice_period | N:1 | yes | RESTRICT | NULL: not currently employed (not applicable) |
 | candidate_profile.current_salary_disclosure_code | ref.disclosure | N:1 | no | RESTRICT | Unknown vs not applicable for current salary (RG5) |
 | candidate_profile.expected_salary_disclosure_code | ref.disclosure | N:1 | no | RESTRICT | Same for expected salary |
-| candidate_profile.salary_currency_code | ref.currency | N:1 | yes | RESTRICT | NULL only when neither salary is disclosed (CHECK) |
-| candidate_profile.salary_pay_period_code | ref.pay_period | N:1 | yes | RESTRICT | NULL only when neither salary is disclosed (CHECK) |
+| candidate_profile.currency_code | ref.currency | N:1 | yes | RESTRICT | NULL only when neither salary is disclosed (CHECK) |
+| candidate_profile.pay_period_code | ref.pay_period | N:1 | yes | RESTRICT | NULL only when neither salary is disclosed (CHECK) |
 | candidate_profile.summary_language_id | ref.language | N:1 | yes | RESTRICT | NULL: language of the summary not detected (RG7) |
 | candidate_contact.candidate_profile_id | profile.candidate_profile | N:1 | no | CASCADE | Owned child: contact points die with the profile on purge |
 | candidate_contact.contact_type_code | ref.contact_type | N:1 | no | RESTRICT | Selects which value column (email or phone) is filled (CHECK) |
@@ -67,6 +70,7 @@
 | candidate_work_experience.job_role_id | ref.job_role | N:1 | yes | RESTRICT | NULL: role not mapped to the master list; the designation text is kept |
 | candidate_work_experience.industry_id | ref.industry | N:1 | yes | RESTRICT | NULL: not provided |
 | candidate_work_experience.employment_type_code | ref.employment_type | N:1 | no | RESTRICT | Permanent, contract, internship ... |
+| candidate_work_experience.description_language_id | ref.language | N:1 | yes | RESTRICT | NULL: no description or language not detected (RG7) |
 | candidate_work_experience.city_id | ref.city | N:1 | yes | RESTRICT | NULL: remote role or not provided |
 | candidate_skill.candidate_profile_id | profile.candidate_profile | N:1 | no | CASCADE | Owned junction row |
 | candidate_skill.skill_id | ref.skill | N:1 | no | RESTRICT | Master data |
@@ -76,6 +80,7 @@
 | candidate_project.candidate_profile_id | profile.candidate_profile | N:1 | no | CASCADE | Owned child |
 | candidate_project.project_kind_code | ref.project_kind | N:1 | no | RESTRICT | employment, academic, personal, gig |
 | candidate_project.candidate_work_experience_id | profile.candidate_work_experience | N:1 | yes | SET NULL | NULL: project not done in a listed job. SET NULL keeps the project if the job entry is removed |
+| candidate_project.description_language_id | ref.language | N:1 | yes | RESTRICT | NULL: no description or language not detected (RG7) |
 | candidate_preferred_location.candidate_profile_id | profile.candidate_profile | N:1 | no | CASCADE | Owned junction row |
 | candidate_preferred_location.city_id | ref.city | N:1 | no | RESTRICT | Master data |
 | candidate_preferred_role.candidate_profile_id | profile.candidate_profile | N:1 | no | CASCADE | Owned junction row |
@@ -140,6 +145,7 @@
 | job_requirement_qualification.qualification_id | ref.qualification | N:1 | no | RESTRICT | Master data |
 | job_requirement_qualification.field_of_study_id | ref.field_of_study | N:1 | yes | RESTRICT | NULL: any field accepted |
 | questionnaire.organisation_id | org.organisation | N:1 | no | RESTRICT | Questionnaires are reusable across the organisation's jobs |
+| questionnaire.language_id | ref.language | N:1 | yes | RESTRICT | NULL: language of the questions not stated (RG7) |
 | questionnaire_question.questionnaire_id | job.questionnaire | N:1 | no | CASCADE | Owned child |
 | questionnaire_question.question_type_code | ref.question_type | N:1 | no | RESTRICT | Answer format |
 | question_option.questionnaire_question_id | job.questionnaire_question | N:1 | no | CASCADE | Owned child |
@@ -170,6 +176,7 @@
 | interview.interview_status_code | ref.interview_status | N:1 | no | RESTRICT | Scheduling state |
 | interview.interview_outcome_code | ref.interview_outcome | N:1 | yes | RESTRICT | NULL: not yet held (CHECK: set only when completed) |
 | interview.interviewer_app_user_id | admin.app_user | N:1 | yes | RESTRICT | NULL: panel not assigned yet |
+| interview.timezone_id | ref.timezone | N:1 | yes | RESTRICT | NULL: schedule shown in the viewer's zone; set when the source zone matters (RG3) |
 | offer.application_id | job.application | N:1 | no | RESTRICT | Offer history kept (a revised offer is a new row) |
 | offer.offer_status_code | ref.offer_status | N:1 | no | RESTRICT | State |
 | offer.ctc_currency_code | ref.currency | N:1 | no | RESTRICT | Money companion |

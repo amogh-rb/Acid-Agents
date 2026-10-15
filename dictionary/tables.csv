@@ -1,0 +1,97 @@
+schema_name,table_name,kind,delete_class,description,column_count
+admin,app_user,table,soft-delete,"Login identity (candidate, recruiter, consultant, admin, system). Stub in Phase 1; extended by Administration in M7-M10",8
+job,application,table,soft-delete,"Candidate application to a requirement: current status, source, resume, applied_at; one per candidate per job. Retention: anonymised with the profile",16
+job,application_answer,table,hard-delete,Candidate answer to a screening question (owned by the application),10
+job,application_status_history,table,append-only,"Every application status transition with actor (created_by), time and reason",8
+job,application_status_transition,table,hard-delete,"Legal (from, to) status moves read by trg_application_status_transition",8
+job,interview,table,hard-delete,Interview round of an application,17
+job,job_position,table,hard-delete,One opening within a requirement and its fill state (positions count = rows; owned by the requirement),9
+job,job_requirement,table,soft-delete,"Job posting (non-gig categories): owner and client, category, role, salary with disclosure, experience range, lifecycle, publish state, consultant openness",33
+job,job_requirement_location,table,hard-delete,"City a requirement is open in (junction, owned by the requirement)",7
+job,job_requirement_qualification,table,hard-delete,"Qualification accepted for a requirement (junction, owned by the requirement)",9
+job,job_requirement_questionnaire,table,hard-delete,"Questionnaire attached to a requirement (junction, owned by the requirement)",7
+job,job_requirement_skill,table,hard-delete,"Skill required by a requirement (junction, owned by the requirement)",10
+job,job_search_event,table,append-only,Each job search run by a candidate or guest (job search history),9
+job,joining,table,hard-delete,Joining against an accepted offer; one per application,10
+job,offer,table,hard-delete,Offer made on an application; a revised offer is a new row,14
+job,question_option,table,hard-delete,Allowed answer of a choice question (owned by the question),9
+job,questionnaire,table,hard-delete,Reusable screening questionnaire owned by an organisation,9
+job,questionnaire_question,table,hard-delete,Ordered question in a questionnaire (owned by the questionnaire),11
+job,saved_search,table,hard-delete,Candidate saved job search (owned by the candidate); job alerts on it live in Notifications,8
+job,shortlist,table,hard-delete,Named shortlist owned by an organisation (Sourcing references it),9
+job,shortlist_entry,table,soft-delete,"Candidate on a shortlist; removal sets deleted_at so shortlist history (who added, when removed) is kept",9
+org,organisation,table,soft-delete,"Employer, client, consultancy or campus. Stub in Phase 1; extended by Organisation and account in M7-M10",8
+profile,assessment,table,hard-delete,Assessment catalogue entry,11
+profile,assessment_attempt,table,append-only,One submitted assessment attempt with its score; abandoned attempts are not recorded,10
+profile,candidate_activity_event,table,append-only,"Candidate activity log: login, profile update, resume download ...",7
+profile,candidate_address,table,hard-delete,Candidate address (owned by the profile),14
+profile,candidate_bookmark_event,table,append-only,Bookmark added or removed by an employer or recruiter (bookmark history),9
+profile,candidate_certification,table,hard-delete,Certification held by a candidate (owned by the profile),12
+profile,candidate_contact,table,hard-delete,"Email, phone and WhatsApp contact points of a candidate (owned by the profile)",13
+profile,candidate_education,table,hard-delete,Education history entry (owned by the profile),16
+profile,candidate_identity_document,table,hard-delete,National identifier reference from the identity verification service; the raw number is never stored (docket Section 6),12
+profile,candidate_language,table,hard-delete,"Languages a candidate knows (junction, owned by the profile)",11
+profile,candidate_preferred_location,table,hard-delete,"City a candidate wants to work in (junction, owned by the profile)",7
+profile,candidate_preferred_role,table,hard-delete,"Job role a candidate is looking for (junction, owned by the profile)",7
+profile,candidate_profile,table,soft-delete,"Candidate personal details, headline, summary, experience and salary with disclosure; 1:1 with app_user. Retention: anonymised and purged 30 days after a deletion request, or after 36 months of inactivity",28
+profile,candidate_project,table,hard-delete,"Candidate or gig project with role, duration and outcome (owned by the profile)",16
+profile,candidate_skill,table,hard-delete,Candidate-to-skill junction (owned by the profile),10
+profile,candidate_web_link,table,hard-delete,External profile link (owned by the profile),8
+profile,candidate_work_experience,table,hard-delete,Employment history entry (owned by the profile),18
+profile,course,table,hard-delete,Course catalogue entry,11
+profile,course_enrolment,table,hard-delete,Candidate enrolment in a course (owned by the candidate),11
+profile,profile_completion_score,table,hard-delete,"Current completion score of a profile (derived, one row per profile, recomputed on change)",9
+profile,profile_view_event,table,append-only,"Which employer or recruiter viewed which profile, and when (profile view history). Paid views link their ledger debit in M14",7
+profile,referral,table,hard-delete,"Who referred whom, optionally for a job, and how far it progressed (referral tracking and events)",11
+profile,resume_template,table,hard-delete,Platform resume layout candidates build from,9
+profile,resume_version,table,soft-delete,"A saved resume, built from a template or uploaded (owned by the profile)",16
+ref,activity_event_type,table,hard-delete,"Lookup: candidate activity log event. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,address_type,table,hard-delete,"Lookup: purpose of an address. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,application_source,table,hard-delete,"Lookup: how an application reached the pipeline. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,application_status,table,hard-delete,"Lookup: application pipeline status. Rows are deactivated (is_active), not deleted, once referenced.",11
+ref,assessment_type,table,hard-delete,"Lookup: kind of assessment. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,bookmark_action,table,hard-delete,"Lookup: bookmark history action. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,city,table,hard-delete,"City or town; job locations, addresses and preferred locations",13
+ref,contact_type,table,hard-delete,"Lookup: kind of contact point. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,country,table,hard-delete,ISO 3166-1 country,13
+ref,currency,table,hard-delete,ISO 4217 currency; FK target of every money companion column,12
+ref,disclosure,table,hard-delete,"Lookup: unknown vs not applicable for amounts (RG5): disclosed, not_disclosed, not_applicable. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,employment_type,table,hard-delete,"Lookup: employment type of a job or a past role. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,enrolment_status,table,hard-delete,"Lookup: state of a course enrolment. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,field_of_study,table,hard-delete,"Specialisation (Computer Science, Mechanical)",8
+ref,gender,table,hard-delete,"Lookup: self-described gender. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,identifier_type,table,hard-delete,"Lookup: national and tax identifier types with validation rules. Rows are deactivated (is_active), not deleted, once referenced.",13
+ref,industry,table,hard-delete,Hierarchical industry classification,10
+ref,institution,table,hard-delete,"School, college or university (education records, campus hiring)",10
+ref,interview_mode,table,hard-delete,"Lookup: how an interview is held. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,interview_outcome,table,hard-delete,"Lookup: result of a completed interview. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,interview_status,table,hard-delete,"Lookup: scheduling state of an interview. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,job_category,table,hard-delete,"Lookup: business category of a job requirement (docket Section 2). Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,job_function,table,hard-delete,"Department or function (Engineering, Sales, Operations)",9
+ref,job_requirement_status,table,hard-delete,"Lookup: job requirement lifecycle. Rows are deactivated (is_active), not deleted, once referenced.",10
+ref,job_role,table,hard-delete,"Standard role within a function (Backend Developer, Forklift Operator)",9
+ref,joining_status,table,hard-delete,"Lookup: state of a joining. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,language,table,hard-delete,"Lookup: languages for UI, profiles and user-entered content. Exactly one default (fallback) language.",13
+ref,notice_period,table,hard-delete,"Lookup: notice period a candidate must serve. Rows are deactivated (is_active), not deleted, once referenced.",10
+ref,offer_status,table,hard-delete,"Lookup: state of an offer. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,organisation_status,table,hard-delete,"Lookup: organisation account status. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,pay_period,table,hard-delete,"Lookup: period a salary, CTC or rate is quoted in. Rows are deactivated (is_active), not deleted, once referenced.",10
+ref,proficiency_level,table,hard-delete,"Lookup: proficiency in a skill or language. Rows are deactivated (is_active), not deleted, once referenced.",10
+ref,project_kind,table,hard-delete,"Lookup: context a profile project was done in. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,publish_state,table,hard-delete,"Lookup: visibility of a job requirement. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,qualification,table,hard-delete,"Named qualification (B.Tech, ITI Fitter, MBA) at a level",10
+ref,qualification_level,table,hard-delete,"Lookup: level of a qualification. Rows are deactivated (is_active), not deleted, once referenced.",10
+ref,question_type,table,hard-delete,"Lookup: answer format of a screening question. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,referral_status,table,hard-delete,"Lookup: progress of a referral. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,rejection_reason,table,hard-delete,"Lookup: why an application was rejected. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,skill,table,hard-delete,"Canonical skill shared by profiles, jobs, assessments and courses (name is a proper noun, not translated)",8
+ref,skill_category,table,hard-delete,Hierarchical grouping of skills,10
+ref,state,table,hard-delete,"First-level subdivision (state, province) of a country",9
+ref,study_mode,table,hard-delete,"Lookup: mode of study. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,timezone,table,hard-delete,IANA time zone used to display UTC timestamps in local time (RG3 Timestamp),7
+ref,ui_label,table,hard-delete,"UI string key; one row per key, translations in ref.ui_translation",7
+ref,ui_translation,table,hard-delete,Translation of one UI label into one language (CASCADE: owned by the label),8
+ref,user_status,table,hard-delete,"Lookup: app_user account status. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,verification_status,table,hard-delete,"Lookup: outcome of an external verification (identity, company, tax). Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,web_link_type,table,hard-delete,"Lookup: kind of external profile link. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,work_type,table,hard-delete,"Lookup: where the work happens. Rows are deactivated (is_active), not deleted, once referenced.",9
