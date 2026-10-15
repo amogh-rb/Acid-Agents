@@ -1079,6 +1079,7 @@ erDiagram
   profile__referral |o--o{ job__application : "fk_application_referral_id"
   profile__resume_template |o--o{ profile__resume_version : "fk_resume_version_resume_template_id"
   profile__resume_version |o--o{ job__application : "fk_application_resume_version_id"
+  profile__resume_version |o--o{ job__application : "fk_application_resume_version_owner"
   ref__activity_event_type ||--o{ profile__candidate_activity_event : "fk_candidate_activity_event_activity_event_type_code"
   ref__address_type ||--o{ profile__candidate_address : "fk_candidate_address_address_type_code"
   ref__application_source ||--o{ job__application : "fk_application_application_source_code"

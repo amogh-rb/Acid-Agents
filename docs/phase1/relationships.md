@@ -158,7 +158,7 @@
 | application.application_status_code | ref.application_status | N:1 | no | RESTRICT | No free-text status (M6 test 7) |
 | application.application_source_code | ref.application_source | N:1 | no | RESTRICT | Direct, sourced, referral, campus, consultant |
 | application.rejection_reason_code | ref.rejection_reason | N:1 | yes | RESTRICT | NULL: not rejected (CHECK: set if and only if status is rejected) |
-| application.resume_version_id | profile.resume_version | N:1 | yes | RESTRICT | NULL: applied with the profile only, no resume attached |
+| application.resume_version_id | profile.resume_version | N:1 | yes | RESTRICT | NULL: applied with the profile only, no resume attached. Composite FK (resume_version_id, candidate_profile_id) also proves the resume belongs to the applicant (review R1) |
 | application.referral_id | profile.referral | N:1 | yes | RESTRICT | NULL: not a referral application |
 | application_answer.application_id | job.application | N:1 | no | CASCADE | Owned child |
 | application_answer.candidate_profile_id | job.application(candidate_profile_id) | N:1 | no | CASCADE | Owned child; partition key of application, half of the composite FK (application_id, candidate_profile_id) (D5) |
@@ -211,8 +211,10 @@
 | candidate ↔ course | course_enrolment |
 
 ## Validation checklist (B9, B11: reviewer C ticks)
-- [ ] Every many-to-many has a junction table (above).
-- [ ] RESTRICT by default. Every CASCADE is an owned child and says why. The only SET NULL is candidate_project.candidate_work_experience_id.
-- [ ] Every optional relationship has a reason.
-- [ ] No relationship leaves Phase 1 except to the stubs (admin.app_user, org.organisation).
-- [ ] `docs/erd/phase1.mmd` matches this table.
+- [x] Every many-to-many has a junction table (above).
+- [x] RESTRICT by default. Every CASCADE is an owned child and says why. The only SET NULL is candidate_project.candidate_work_experience_id.
+- [x] Every optional relationship has a reason.
+- [x] No relationship leaves Phase 1 except to the stubs (admin.app_user, org.organisation).
+- [x] `docs/erd/phase1.mmd` matches this table.
+
+_Ticked by the AI pre-review (`docs/phase1/review.md`, 13:07). Reviewer C confirms._

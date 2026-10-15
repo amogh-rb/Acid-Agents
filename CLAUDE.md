@@ -78,7 +78,7 @@ python tools/design_docs.py compare docs/phase1/entities.md docs/phase1/relation
 6. Commit `MNN: <summary>` with a green suite. Push when the user says so.
 
 ## Current state
-- **Done:** M1-M6, Phase 1 complete (gate M6 PASS, 8/8 files). Tag `phase1`. Reviewer C still has to sign `docs/phase1/signoff.md` and tick Verified on the board.
+- **Done:** M1-M6, Phase 1 complete (gate M6 PASS, 8/8 files). Tag `phase1`. AI pre-review done (`docs/phase1/review.md`: F1 and F2 fixed; F3 interviewer-org check deferred to M10/M18; F4 answer-question-belongs-to-job deferred). Reviewer C must still confirm and sign `docs/phase1/signoff.md`.
 - **Next:** Phase 2, M7-M10 (13:15-13:50). One module per member, each on its own branch (`m07-admin`, `m07-org`, `m07-gig`), merged after review. Per module:
   - M7 entities and M8 relationships: new `docs/phase2/<module>_entities.md` and `_relationships.md` in the same table format as phase1. Check them with `tools/design_docs.py`, and add `tests/docs/m07_*.ps1` / `m08_*.ps1` like m02/m03.
   - M9 columns and M10 keys: new DDL files `ddl/40_admin.sql` (A), `ddl/45_org.sql` (B), `ddl/50_gig.sql` (C). Extend the stubs with `ALTER TABLE admin.app_user` / `org.organisation`. Do not recreate them.
@@ -110,3 +110,4 @@ python tools/design_docs.py compare docs/phase1/entities.md docs/phase1/relation
     - **`job.application` hash-partitioned on candidate_profile_id, 32 partitions (D5)**; children carry `candidate_profile_id` (D15).
   - Tests: `m06_phase1.sql` (41 checks: Milestone Plan 1-9, 15+ extra rejections, full pipeline, partitioning). Docs: `docs/phase1/signoff.md`, `docs/02_compliance_table.md` (environment doc renamed to `04_environment.md`, D16).
   - Harness and lint: `qa.expect_error` maps partition index names to parent constraints; new lint rule "RG1 truncated name"; dictionary `references_to` is deterministic.
+- **Phase 1 AI pre-review (13:07):** the catalog review found that an application could attach another candidate's resume (fixed with a composite FK) and 15 unindexed FKs on large tables (fixed). Open: F3, F4.

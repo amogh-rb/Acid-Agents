@@ -134,14 +134,16 @@ Created in `ddl/15_stubs.sql` with only an id, a status, the audit columns and t
 
 ## Validation checklist (B5, B7: reviewer C ticks)
 
-- [ ] **Coverage:** every Profile and Jobs domain in the docket Section 7 module table has at least one entity.
+- [x] **Coverage:** every Profile and Jobs domain in the docket Section 7 module table has at least one entity.
   - **Profile:** identity and contact (candidate_profile, candidate_contact, candidate_identity_document); education; work experience; skills; languages; resume versions and templates; profile projects; assessments and scores; course enrolments; profile completion scoring; profile view history; candidate activity log; bookmark history; referral tracking.
   - **Jobs:** job requirements; positions; questionnaires; publish state; applications; status pipeline; shortlists; interviews; offers; joins; rejections (status + rejection_reason); job search history (job_search_event, saved_search); application history (application_status_history).
-- [ ] **No two entities hold the same fact.**
+- [x] **No two entities hold the same fact.**
   - Rejection is a status plus `rejection_reason`, not a table.
   - Positions count is the number of `job_position` rows, not a column.
   - Current status lives on `application`, and the full history lives in `application_status_history`; the trigger keeps them in step.
   - Identity sessions are not duplicated here (Licences owns `login_session`).
-- [ ] **Shared ownership settled:** `shortlist` and `shortlist_entry` belong to Jobs (Sourcing references them); `candidate_bookmark_event` belongs to Profile; `referral` belongs to Profile; `identifier_type` is master data used by Profile and Organisation.
-- [ ] **Every enumeration has its own `ref` lookup:** every fixed value set above is listed under "Enumeration lookups", plus qualification_level and identifier_type. No free-text status or type columns.
-- [ ] **Names checked:** `python tools/reserved_words.py docs/phase1/entities.md` passes (`gate M2`).
+- [x] **Shared ownership settled:** `shortlist` and `shortlist_entry` belong to Jobs (Sourcing references them); `candidate_bookmark_event` belongs to Profile; `referral` belongs to Profile; `identifier_type` is master data used by Profile and Organisation.
+- [x] **Every enumeration has its own `ref` lookup:** every fixed value set above is listed under "Enumeration lookups", plus qualification_level and identifier_type. No free-text status or type columns.
+- [x] **Names checked:** `python tools/reserved_words.py docs/phase1/entities.md` passes (`gate M2`).
+
+_Ticked by the AI pre-review (`docs/phase1/review.md`, 13:07). Reviewer C confirms._

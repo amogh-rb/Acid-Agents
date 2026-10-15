@@ -631,6 +631,30 @@ ALTER TABLE job.application
   ADD CONSTRAINT ck_application_status_changed_at CHECK (status_changed_at >= applied_at);
 CREATE INDEX idx_application_job_requirement_id ON job.application (job_requirement_id, application_status_code);
 
+-- Review fix R1: the attached resume must belong to the applicant (was only checked to exist)
+ALTER TABLE profile.resume_version
+  ADD CONSTRAINT uq_resume_version_id_candidate_profile_id UNIQUE (id, candidate_profile_id);
+ALTER TABLE job.application
+  ADD CONSTRAINT fk_application_resume_version_owner FOREIGN KEY (resume_version_id, candidate_profile_id)
+    REFERENCES profile.resume_version (id, candidate_profile_id) ON UPDATE NO ACTION ON DELETE RESTRICT;
+
+-- Review fix R2: indexes on FK columns of large tables (parent deletes, purge and joins would otherwise scan)
+CREATE INDEX idx_application_resume_version_id ON job.application (resume_version_id) WHERE resume_version_id IS NOT NULL;
+CREATE INDEX idx_application_referral_id ON job.application (referral_id) WHERE referral_id IS NOT NULL;
+CREATE INDEX idx_job_requirement_posted_by_app_user_id ON job.job_requirement (posted_by_app_user_id);
+CREATE INDEX idx_job_requirement_client_organisation_id ON job.job_requirement (client_organisation_id) WHERE client_organisation_id IS NOT NULL;
+CREATE INDEX idx_job_requirement_questionnaire_questionnaire_id ON job.job_requirement_questionnaire (questionnaire_id);
+CREATE INDEX idx_interview_interviewer_app_user_id ON job.interview (interviewer_app_user_id, scheduled_start) WHERE interviewer_app_user_id IS NOT NULL;
+CREATE INDEX idx_shortlist_owner_app_user_id ON job.shortlist (owner_app_user_id);
+CREATE INDEX idx_shortlist_job_requirement_id ON job.shortlist (job_requirement_id) WHERE job_requirement_id IS NOT NULL;
+CREATE INDEX idx_candidate_project_candidate_work_experience_id ON profile.candidate_project (candidate_work_experience_id) WHERE candidate_work_experience_id IS NOT NULL;
+CREATE INDEX idx_profile_view_event_viewer_app_user_id ON profile.profile_view_event (viewer_app_user_id, viewed_at);
+CREATE INDEX idx_candidate_bookmark_event_job_requirement_id ON profile.candidate_bookmark_event (job_requirement_id) WHERE job_requirement_id IS NOT NULL;
+CREATE INDEX idx_referral_referred_candidate_profile_id ON profile.referral (referred_candidate_profile_id) WHERE referred_candidate_profile_id IS NOT NULL;
+CREATE INDEX idx_referral_job_requirement_id ON profile.referral (job_requirement_id) WHERE job_requirement_id IS NOT NULL;
+CREATE INDEX idx_assessment_attempt_assessment_id ON profile.assessment_attempt (assessment_id);
+CREATE INDEX idx_resume_version_resume_template_id ON profile.resume_version (resume_template_id) WHERE resume_template_id IS NOT NULL;
+
 -- An opening can only be filled by an application to the same requirement
 ALTER TABLE job.job_position
   ADD CONSTRAINT fk_job_position_filled_by_application

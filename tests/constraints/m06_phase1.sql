@@ -175,6 +175,19 @@ BEGIN
            v_app, v_profile2, 'applied'),
     'fk_application_status_history_application');
 
+  -- review fix R1: an application cannot carry someone else's resume
+  PERFORM set_config('app.current_user_id', v_cand_user::text, true);
+  INSERT INTO profile.resume_version (candidate_profile_id, version_number, body, body_language_id)
+  SELECT v_profile, 1, 'Priya Raman - Backend Developer', id FROM ref.language WHERE code = 'en';
+  PERFORM set_config('app.current_user_id', v_recruiter::text, true);
+  PERFORM qa.expect_error('application attaching another candidate''s resume',
+    format('UPDATE job.application SET resume_version_id = (SELECT id FROM profile.resume_version WHERE candidate_profile_id = %s) WHERE id = %s',
+           v_profile, v_app2),
+    'fk_application_resume_version_owner');
+  PERFORM qa.expect_ok('application attaching the applicant''s own resume',
+    format('UPDATE job.application SET resume_version_id = (SELECT id FROM profile.resume_version WHERE candidate_profile_id = %s) WHERE id = %s',
+           v_profile, v_app));
+
   -- ---------------- positive pipeline: applied -> shortlisted -> interviewed -> offered -> joined ----------------
   PERFORM qa.expect_ok('shortlist',
     format('UPDATE job.application SET application_status_code = %L WHERE id = %s', 'shortlisted', v_app));
