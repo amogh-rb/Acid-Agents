@@ -160,4 +160,7 @@ Every business table has `created_at`, `created_by`, `updated_at` and `updated_b
 | D5 | Partitioned `application` unique key | Decided in M6 | PostgreSQL requires the partition key in unique constraints on a partitioned table |
 | D6 | Analytics tables (`dw`) | No audit columns; `[derived]` class | Rows are rebuilt from operational tables; lineage via `etl_` watermarks |
 | D7 | Milestone Plan references `Talentra_Merged_Build_Plan.md` | The Delivery Plan PDF is used as that document ("section 5 of the merged plan" = Delivery Plan section 4) | The merged file was not available |
+| D9 | Status FK column names | `application.application_status_code`, `from_application_status_code`, `to_application_status_code` (the Delivery Plan said `current_status_code`, `from_code`, `to_code`) | RG1: an FK is the referenced table name + `_id`/`_code`, optionally with a role prefix. `tools/design_docs.py` enforces it |
+| D10 | Lookup table for unknown vs not applicable | `ref.disclosure` (the Milestone Plan said `disclosure_code`); columns are `<x>_disclosure_code` | A table named `*_code` would break the FK naming rule above |
+| D11 | Status lookups needed by the stubs | `ref.user_status` and `ref.organisation_status` are created in `ddl/10_ref.sql` at M3 | The stubs (15) need them; M4 extends `10_ref.sql` |
 | D8 | Docket Sections 8 (KPIs), 10 (performance method, RTO) and 12 | Referenced but not issued | Request them from the organisers before M15-M23; assumptions recorded where needed |

@@ -7,8 +7,8 @@ A milestone is done only when it is **Defined** (deliverable committed), **Verif
 | M | Backlogs | Scope | Owner | Defined | Verified (by, time) | Tested (gate, time) | Notes |
 |---|---|---|---|---|---|---|---|
 | M1 | B1-B3 | Provider, module list, build base | All | ✅ 12:25 | ☐ | ✅ gate M1 12:17 (72 checks) | Evidence: `docs/evidence/gate_M01_*.txt` |
-| M2 | B4-B7 | Entities: Master data, Profile, Jobs | A, B | ☐ | ☐ | ☐ | |
-| M3 | B8-B11 | Relationships + ERD + stubs | A, B | ☐ | ☐ | ☐ | |
+| M2 | B4-B7 | Entities: Master data, Profile, Jobs | A, B | ✅ 12:24 | ☐ | ✅ gate M2 12:27 | 96 entities (2 stubs, 50 ref of which 3 built in M1, 24 profile, 20 job); `docs/phase1/entities.md` |
+| M3 | B8-B11 | Relationships + ERD + stubs | A, B | ✅ 12:26 | ☐ | ✅ gate M3 12:27 (5/5 files) | 153 FKs; `docs/phase1/relationships.md`, `docs/erd/phase1.mmd`, `ddl/10_ref.sql` (status lookups), `ddl/15_stubs.sql` |
 | M4 | B12-B15 | Columns + comments + lookup seed | A, B | ☐ | ☐ | ☐ | |
 | M5 | B16-B19 | Dictionary + generated ERD + design note | C | ☐ | ☐ | ☐ | |
 | M6 | B20-B23 | Keys, constraints, transition trigger, Phase 1 sign-off | A, B | ☐ | ☐ | ☐ | Must pass by 13:20 |
@@ -26,6 +26,9 @@ A milestone is done only when it is **Defined** (deliverable committed), **Verif
 | M21 | B70-B74 | Performance + extrapolation | C | ☐ | ☐ | ☐ | |
 | M22 | B75-B79 | Security | A | ☐ | ☐ | ☐ | |
 | M23 | B80-B82 | Backup/restore + Gate 2 | All | ☐ | ☐ | ☐ | |
+
+## M2 / M3 verification checklists
+In `docs/phase1/entities.md` and `docs/phase1/relationships.md` (bottom of each file). Reviewer: C.
 
 ## M1 verification checklist (reviewer ticks)
 - [ ] Every Section 4 domain (Tier 1 and 2) appears in exactly one module (`docs/01_module_list.md`)

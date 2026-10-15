@@ -37,8 +37,12 @@ def split_row(line):
 
 
 def check_name(raw, header):
-    """Return problems for one cell. 'profile.candidate_skill' checks every part."""
-    match = IDENT.search(raw.replace("`", "").replace("*", ""))
+    """Return problems for one cell. 'profile.candidate_skill' checks every part.
+    Cells starting with '(' are notes such as "(each lookup).label_key" and are skipped."""
+    text = raw.replace("`", "").replace("*", "").strip()
+    if text.startswith("("):
+        return []
+    match = IDENT.search(text)
     if not match:
         return []
     parts = [p for p in match.group(0).split(".") if p]

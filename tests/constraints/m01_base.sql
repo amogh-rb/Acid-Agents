@@ -76,20 +76,29 @@ CREATE TABLE lint_probe.probe_doc (
 COMMENT ON TABLE  lint_probe.probe_doc IS '[soft-delete] Probe for the default soft-delete view';
 COMMENT ON COLUMN lint_probe.probe_doc.title IS '[Internal] Probe value';
 
-SELECT public.apply_table_standards('lint_probe.probe_event');
-SELECT public.apply_table_standards('lint_probe.probe_item');
-SELECT public.apply_table_standards('lint_probe.probe_doc');
+DO $$ BEGIN
+  PERFORM public.apply_table_standards('lint_probe.probe_event');
+  PERFORM public.apply_table_standards('lint_probe.probe_item');
+  PERFORM public.apply_table_standards('lint_probe.probe_doc');
+END $$;
 
 DO $test$
 DECLARE
   v_item lint_probe.probe_item;
+  v_a    bigint := 7;   -- two distinct actors; real app_user rows once the stub exists (M3+)
+  v_b    bigint := 8;
 BEGIN
-  PERFORM set_config('app.current_user_id', '7', true);
-  PERFORM qa.assert_equals('current_actor_id reads app.current_user_id', public.current_actor_id(), 7::bigint);
+  IF to_regclass('admin.app_user') IS NOT NULL THEN
+    PERFORM set_config('app.current_user_id', '1', true);
+    EXECUTE 'INSERT INTO admin.app_user (user_status_code) VALUES (''active'') RETURNING id' INTO v_a;
+    EXECUTE 'INSERT INTO admin.app_user (user_status_code) VALUES (''active'') RETURNING id' INTO v_b;
+  END IF;
+  PERFORM set_config('app.current_user_id', v_a::text, true);
+  PERFORM qa.assert_equals('current_actor_id reads app.current_user_id', public.current_actor_id(), v_a);
 
   INSERT INTO lint_probe.probe_event (note) VALUES ('first');
   PERFORM qa.assert_equals('created_by defaults to the current actor',
-    (SELECT created_by FROM lint_probe.probe_event), 7::bigint);
+    (SELECT created_by FROM lint_probe.probe_event), v_a);
   PERFORM qa.expect_error('append-only table rejects UPDATE',   $q$UPDATE lint_probe.probe_event SET note = 'changed'$q$, 'forbid_update_delete');
   PERFORM qa.expect_error('append-only table rejects DELETE',   $q$DELETE FROM lint_probe.probe_event$q$, 'forbid_update_delete');
   PERFORM qa.expect_error('append-only table rejects TRUNCATE', $q$TRUNCATE lint_probe.probe_event$q$, 'forbid_update_delete');
@@ -97,19 +106,19 @@ BEGIN
     NOT has_table_privilege('talentra_app', 'lint_probe.probe_event', 'UPDATE'));
 
   INSERT INTO lint_probe.probe_item (label) VALUES ('a');
-  PERFORM set_config('app.current_user_id', '8', true);
+  PERFORM set_config('app.current_user_id', v_b::text, true);
   UPDATE lint_probe.probe_item SET label = 'b', updated_at = '2000-01-01', created_by = 99, created_at = '2000-01-01';
   SELECT * INTO v_item FROM lint_probe.probe_item;
   PERFORM qa.assert('set_updated_at overrides a stale updated_at', v_item.updated_at > '2001-01-01');
-  PERFORM qa.assert_equals('set_updated_at records the updating actor', v_item.updated_by, 8::bigint);
-  PERFORM qa.assert_equals('created_by is immutable', v_item.created_by, 7::bigint);
+  PERFORM qa.assert_equals('set_updated_at records the updating actor', v_item.updated_by, v_b);
+  PERFORM qa.assert_equals('created_by is immutable', v_item.created_by, v_a);
   PERFORM qa.assert('created_at is immutable', v_item.created_at > '2001-01-01');
 
   PERFORM set_config('app.current_user_id', '', true);
   PERFORM qa.assert('current_actor_id is NULL when unset', public.current_actor_id() IS NULL);
   PERFORM qa.expect_error('insert without an actor fails (no fake actor)',
     $q$INSERT INTO lint_probe.probe_item (label) VALUES ('c')$q$, 'created_by');
-  PERFORM set_config('app.current_user_id', '7', true);
+  PERFORM set_config('app.current_user_id', v_a::text, true);
 
   INSERT INTO lint_probe.probe_doc (title) VALUES ('kept'), ('removed');
   UPDATE lint_probe.probe_doc SET deleted_at = now() WHERE title = 'removed';
@@ -122,8 +131,10 @@ END
 $test$;
 
 -- 4. UI-label pattern: create a lookup, add a value, translate it, resolve with fallback
-SELECT ref.create_lookup('lint_probe.probe_status', 'probe status values');
-SELECT public.apply_table_standards('lint_probe.probe_status');
+DO $$ BEGIN
+  PERFORM ref.create_lookup('lint_probe.probe_status', 'probe status values');
+  PERFORM public.apply_table_standards('lint_probe.probe_status');
+END $$;
 
 DO $test$
 BEGIN

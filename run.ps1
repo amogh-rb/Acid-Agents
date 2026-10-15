@@ -68,6 +68,7 @@ function Invoke-Exe([string]$File, [string[]]$Arguments) {
   $psi.FileName = $File
   $psi.Arguments = ($Arguments | ForEach-Object { Format-Arg $_ }) -join ' '
   $psi.UseShellExecute = $false
+  $psi.WorkingDirectory = $PSScriptRoot   # Set-Location does not change the .NET current directory
   $psi.RedirectStandardOutput = $true
   $psi.RedirectStandardError = $true
   $psi.StandardOutputEncoding = [System.Text.Encoding]::UTF8

@@ -1,0 +1,97 @@
+== gate M03  (2026-10-15 12:28:21, db talentra) ==
+up    talentra rebuilt from 7 ddl files
+PASS  tests/constraints/m01_base.sql  (71 checks)
+        PASS  database encoding is UTF8 (= UTF8)
+        PASS  13 module schemas exist (= 13)
+        PASS  extensions btree_gist, pg_trgm, pgcrypto installed (= 3)
+        PASS  group roles exist
+        PASS  d_email rejects uppercase Foo@X.com: rejected by ck_d_email_lowercase
+        PASS  d_email rejects a value without @: rejected by ck_d_email_format
+        PASS  d_email accepts foo@x.com
+        PASS  d_phone_e164 accepts +919840012345
+        PASS  d_phone_e164 rejects 98400 12345: rejected by ck_d_phone_e164_format
+        PASS  d_pct rejects -1: rejected by ck_d_pct_range
+        PASS  d_pct rejects 100.01: rejected by ck_d_pct_range
+        PASS  d_pct accepts 0 and 100
+        PASS  d_person_name rejects blank: rejected by ck_d_person_name_not_blank
+        PASS  d_person_name accepts any script
+        PASS  d_lat rejects 90.5: rejected by ck_d_lat_range
+        PASS  d_lng rejects 181: rejected by ck_d_lng_range
+        PASS  d_code rejects Applied: rejected by ck_d_code_format
+        PASS  d_currency_code rejects inr: rejected by ck_d_currency_code_format
+        PASS  d_money is fixed precision numeric(14,2) (= numeric(14,2))
+        PASS  current_actor_id reads app.current_user_id (= 2)
+        PASS  created_by defaults to the current actor (= 2)
+        PASS  append-only table rejects UPDATE: rejected by forbid_update_delete
+        PASS  append-only table rejects DELETE: rejected by forbid_update_delete
+        PASS  append-only table rejects TRUNCATE: rejected by forbid_update_delete
+        PASS  talentra_app has no UPDATE on the append-only table
+        PASS  set_updated_at overrides a stale updated_at
+        PASS  set_updated_at records the updating actor (= 3)
+        PASS  created_by is immutable (= 2)
+        PASS  created_at is immutable
+        PASS  current_actor_id is NULL when unset
+        PASS  insert without an actor fails (no fake actor): rejected by created_by
+        PASS  soft-delete view v_probe_doc hides deleted rows (= 1)
+        PASS  compliant probe tables produce no lint violations (= 0)
+        PASS  exactly one default language (= 1)
+        PASS  ui_text returns the requested language (= खुला)
+        PASS  ui_text falls back to the default language (= Open)
+        PASS  ui_text never returns the key for an unknown label
+        PASS  second default language is rejected: rejected by uq_language_is_default
+        PASS  lookup code must be lowercase snake_case: rejected by ck_d_code_format
+        PASS  lookup label_key must exist in ref.ui_label: rejected by fk_probe_status_label_key
+        PASS  lookup tables built by the pattern pass the lint (= 0)
+        PASS  lint detects RG1 snake_case
+        PASS  lint detects RG1 singular
+        PASS  lint detects RG1 reserved word
+        PASS  lint detects RG1 constraint name
+        PASS  lint detects RG1 index name
+        PASS  lint detects RG1 trigger name
+        PASS  lint detects RG2 primary key
+        PASS  lint detects RG2 surrogate key
+        PASS  lint detects RG2 foreign key
+        PASS  lint detects RG3 float
+        PASS  lint detects RG3 timestamp
+        PASS  lint detects RG3 money domain
+        PASS  lint detects RG3 money currency
+        PASS  lint detects RG3 unbounded text
+        PASS  lint detects RG3 email
+        PASS  lint detects RG3 phone
+        PASS  lint detects RG3 person name
+        PASS  lint detects RG3 coordinates
+        PASS  lint detects RG3 percentage
+        PASS  lint detects RG3 boolean
+        PASS  lint detects RG4 delete class
+        PASS  lint detects RG4 audit columns
+        PASS  lint detects RG4 soft delete
+        PASS  lint detects RG4 append-only
+        PASS  lint detects RG4 updated_at trigger
+        PASS  lint detects RG5 null reason
+        PASS  lint detects RG6 class tag
+        PASS  lint detects RG6 sensitive form
+        PASS  lint detects RG7 language
+        PASS  lint detects RG8 physical name
+PASS  tests/lint/m01_lint.sql  (1 checks)
+        PASS  lint: 0 violations across 9 tables and 78 columns
+PASS  tests/docs/m02_entities.ps1  (2 checks)
+        PASS  96 names checked: snake_case, singular, no PostgreSQL/MySQL reserved words
+        PASS  96 entities: unique, schema, delete class, tier and owner valid
+PASS  tests/constraints/m03_stubs.sql  (12 checks)
+        PASS  system actor id 1 exists, active and flagged
+        PASS  audit FKs to app_user were added to earlier tables (ref.language)
+        PASS  soft-delete default views exist for both stubs
+        PASS  identity continues after the system actor (no id collision)
+        PASS  organisation created_by is the acting user (= 4)
+        PASS  organisation defaults to pending_verification (= pending_verification)
+        PASS  unknown user status is rejected: rejected by fk_app_user_user_status_code
+        PASS  unknown organisation status is rejected: rejected by fk_organisation_organisation_status_code
+        PASS  blank organisation name is rejected: rejected by ck_organisation_organisation_name_not_blank
+        PASS  system actor cannot be suspended: rejected by ck_app_user_system_actor_active
+        PASS  system actor cannot be deleted while it owns rows: rejected by fk_app_user_created_by
+        PASS  an actor that does not exist is rejected: rejected by fk_organisation_created_by
+PASS  tests/docs/m03_relationships.ps1  (3 checks)
+        PASS  308 names checked: snake_case, singular, no PostgreSQL/MySQL reserved words
+        PASS  153 relationships: known entities, naming, cardinality, ON DELETE and reasons valid
+        PASS  docs\erd\phase1.mmd matches the relationship table (153 lines)
+== gate M03: PASS (5/5 files) ==
