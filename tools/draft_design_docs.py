@@ -21,7 +21,7 @@ SKIP_COLUMNS = {"created_by", "updated_by", "label_key"}
 
 
 def strip_tag(text):
-    return re.sub(r"^\[[A-Za-z-]+\]\s*", "", re.sub(r"\s*\[integration-write\]", "", text or "")).strip()
+    return re.sub(r"^\[[A-Za-z-]+\]\s*", "", re.sub(r"\s*\[(integration|api)-write\]", "", text or "")).strip()
 
 
 def main(argv):
@@ -55,7 +55,6 @@ def main(argv):
         ent.append(f"| {name} | {schema} | {module} | {purpose} | {tier} | {t['delete_class']} | {owner} |")
 
     rel = ["| child.column | parent | cardinality | optional? | ON DELETE | reason |", "|---|---|---|---|---|---|"]
-    uniques = {}  # (schema, table) -> set of single unique columns, from comments is unreliable; use catalog via tables.csv not available
     for r in cols:
         key = (r["schema_name"], r["table_name"])
         if key not in set(tables) or r["column_name"] in SKIP_COLUMNS or not r["references_to"]:

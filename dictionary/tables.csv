@@ -9,6 +9,19 @@ admin,user_credential,table,hard-delete,"Password credential of a login identity
 admin,user_role,table,hard-delete,"Role held by a user, optionally scoped to an organisation, over an effective period; revocation closes the period (history kept)",9
 audit,audit_event,table,append-only,Audit trail of sensitive actions (RG4); application users cannot update or delete it (trigger + revoked grants). Retention: 7 years,10
 audit,error_log,table,append-only,System errors (application and integration). Retention: 90 days,9
+billing,credit_consumption,table,append-only,"[api-write] What a ledger debit paid for: a job posting, an outreach batch, a profile download or view",8
+billing,invoice,table,hard-delete,Tax invoice for a payment order; corrections void the invoice and issue a new one,14
+billing,payment_event,table,append-only,"[integration-write] Gateway webhook event (payment transaction history). A replayed event is rejected by (gateway, event id); each event moves the order status",10
+billing,payment_order,table,hard-delete,Payment order sent to the gateway for a subscription or a wallet recharge; no card or bank data is stored (docket Section 6). Status follows payment_event,14
+billing,plan,table,hard-delete,"Commercial plan: price per cycle and the licence limits it grants; deactivated, not deleted, once sold",14
+billing,plan_entitlement,table,hard-delete,Quantity of an entitlement a plan includes per billing cycle (owned by the plan),8
+billing,profile_download_event,table,append-only,"[api-write] Which recruiter or employer downloaded which profile, when, and the ledger debit that paid for it. Partition monthly at full scale (M21)",8
+billing,refund,table,hard-delete,Refund against a captured payment; the sum of non-failed refunds never exceeds the payment (trg_refund_within_payment),13
+billing,subscription,table,hard-delete,Paid period of a plan on a licence; periods of one licence never overlap. Renewal = a new row linked by subscription_renewal,12
+billing,subscription_cancellation,table,hard-delete,Cancellation of a subscription (who = created_by); marks the subscription cancelled (trigger),9
+billing,subscription_renewal,table,hard-delete,Renewal: links a subscription to the one that continues it (each renewed at most once),9
+billing,wallet,table,hard-delete,[api-write] Prepaid wallet of an account in one currency; balance changes only through billing.post_ledger_entry and always equals the sum of its ledger,8
+billing,wallet_ledger_entry,table,append-only,"[api-write] Wallet ledger: every recharge, consumption, refund, grant and correction (RG10). A correction reverses an earlier entry by a new row with the opposite amount",13
 gig,gig_application,table,hard-delete,Gig worker applies to a gig request; bids flow one way and only the requester decides,13
 gig,gig_assignment,table,hard-delete,Accepted gig application turned into work for a window; fulfilment itself runs in the external system,12
 gig,gig_availability,table,hard-delete,Time slot a gig worker is available; slots of one worker do not overlap (owned by the worker profile),8
@@ -40,6 +53,12 @@ job,questionnaire_question,table,hard-delete,Ordered question in a questionnaire
 job,saved_search,table,hard-delete,Candidate saved job search (owned by the candidate); job alerts on it live in Notifications,8
 job,shortlist,table,hard-delete,Named shortlist owned by an organisation (Sourcing references it),9
 job,shortlist_entry,table,soft-delete,"Candidate on a shortlist; removal sets deleted_at so shortlist history (who added, when removed) is kept",9
+lic,licence,table,hard-delete,Subscription licence of an account: users allowed and devices allowed per user (RG9). Limits are copied from the plan when a subscription starts and may be raised per licence,12
+lic,licence_seat,table,hard-delete,Seat of a licence allocated to a user; releasing sets released_at (history kept). Active seats per licence <= max_users (trg_licence_seat_limit),9
+lic,login_attempt,table,append-only,"[api-write] Login history: every attempt and its outcome, including device-limit rejections. Retention: 1 year",9
+lic,login_session,table,hard-delete,"[api-write] Login session on a device under a licence seat (RG9: device, start, last activity, end). Active = ended_at IS NULL AND expires_at > now(). Retention: 90 days after end",14
+lic,registered_device,table,hard-delete,Device a user has logged in from (owned by app_user); revoking sets revoked_at and ends its sessions (audited),12
+lic,session_revocation,table,append-only,[api-write] Revocation of a session by an admin or the user (who = created_by); also written to the audit trail,6
 org,account,table,soft-delete,"Commercial account (customer) that owns one or more organisations, their subscriptions and wallet",9
 org,account_administrator,table,hard-delete,User who administers a commercial account (owned by the account); at most one primary,8
 org,organisation,table,soft-delete,"Employer, client, consultancy or campus. Stub in Phase 1; extended by Organisation and account in M7-M10",16
@@ -67,7 +86,7 @@ profile,candidate_work_experience,table,hard-delete,Employment history entry (ow
 profile,course,table,hard-delete,Course catalogue entry,11
 profile,course_enrolment,table,hard-delete,Candidate enrolment in a course (owned by the candidate),11
 profile,profile_completion_score,table,hard-delete,"Current completion score of a profile (derived, one row per profile, recomputed on change)",9
-profile,profile_view_event,table,append-only,"Which employer or recruiter viewed which profile, and when (profile view history). Paid views link their ledger debit in M14",7
+profile,profile_view_event,table,append-only,"Which employer or recruiter viewed which profile, and when (profile view history). Paid views link their ledger debit in M14",8
 profile,referral,table,hard-delete,"Who referred whom, optionally for a job, and how far it progressed (referral tracking and events)",11
 profile,resume_template,table,hard-delete,Platform resume layout candidates build from,9
 profile,resume_version,table,soft-delete,"A saved resume, built from a template or uploaded (owned by the profile)",16
@@ -78,17 +97,21 @@ ref,application_source,table,hard-delete,"Lookup: how an application reached the
 ref,application_status,table,hard-delete,"Lookup: application pipeline status. Rows are deactivated (is_active), not deleted, once referenced.",11
 ref,assessment_type,table,hard-delete,"Lookup: kind of assessment. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,audit_action,table,hard-delete,"Lookup: sensitive action recorded in the audit trail. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,billing_cycle,table,hard-delete,"Lookup: plan billing cycle. Rows are deactivated (is_active), not deleted, once referenced.",10
 ref,bookmark_action,table,hard-delete,"Lookup: bookmark history action. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,city,table,hard-delete,"City or town; job locations, addresses and preferred locations",13
 ref,consent_purpose,table,hard-delete,"Lookup: purpose a user gives or withdraws consent for. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,consumption_purpose,table,hard-delete,"Lookup: what wallet credit was spent on. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,contact_type,table,hard-delete,"Lookup: kind of contact point. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,country,table,hard-delete,ISO 3166-1 country,13
 ref,currency,table,hard-delete,ISO 4217 currency; FK target of every money companion column,12
+ref,device_platform,table,hard-delete,"Lookup: platform of a registered device. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,disclosure,table,hard-delete,"Lookup: unknown vs not applicable for amounts (RG5): disclosed, not_disclosed, not_applicable. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,earning_kind,table,hard-delete,"Lookup: kind of earnings figure reported by the fulfilment system. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,employee_count_band,table,hard-delete,"Lookup: company size band. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,employment_type,table,hard-delete,"Lookup: employment type of a job or a past role. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,enrolment_status,table,hard-delete,"Lookup: state of a course enrolment. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,entitlement_type,table,hard-delete,"Lookup: what a plan entitles the account to. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,error_severity,table,hard-delete,"Lookup: severity of a logged system error. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,field_of_study,table,hard-delete,"Specialisation (Computer Science, Mechanical)",8
 ref,gender,table,hard-delete,"Lookup: self-described gender. Rows are deactivated (is_active), not deleted, once referenced.",9
@@ -103,17 +126,25 @@ ref,institution,table,hard-delete,"School, college or university (education reco
 ref,interview_mode,table,hard-delete,"Lookup: how an interview is held. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,interview_outcome,table,hard-delete,"Lookup: result of a completed interview. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,interview_status,table,hard-delete,"Lookup: scheduling state of an interview. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,invoice_status,table,hard-delete,"Lookup: invoice status. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,job_category,table,hard-delete,"Lookup: business category of a job requirement (docket Section 2). Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,job_function,table,hard-delete,"Department or function (Engineering, Sales, Operations)",9
 ref,job_requirement_status,table,hard-delete,"Lookup: job requirement lifecycle. Rows are deactivated (is_active), not deleted, once referenced.",10
 ref,job_role,table,hard-delete,"Standard role within a function (Backend Developer, Forklift Operator)",9
 ref,joining_status,table,hard-delete,"Lookup: state of a joining. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,language,table,hard-delete,"Lookup: languages for UI, profiles and user-entered content. Exactly one default (fallback) language.",13
+ref,ledger_entry_type,table,hard-delete,"Lookup: kind of wallet ledger entry. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,licence_status,table,hard-delete,"Lookup: licence status. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,login_outcome,table,hard-delete,"Lookup: outcome of a login attempt. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,notice_period,table,hard-delete,"Lookup: notice period a candidate must serve. Rows are deactivated (is_active), not deleted, once referenced.",10
 ref,offer_status,table,hard-delete,"Lookup: state of an offer. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,organisation_status,table,hard-delete,"Lookup: organisation account status. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,organisation_type,table,hard-delete,"Lookup: kind of organisation. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,outreach_channel,table,hard-delete,"Lookup: channel of a bulk outreach. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,outreach_recipient_status,table,hard-delete,"Lookup: delivery state of one outreach recipient. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,pay_period,table,hard-delete,"Lookup: period a salary, CTC or rate is quoted in. Rows are deactivated (is_active), not deleted, once referenced.",10
+ref,payment_gateway,table,hard-delete,"Lookup: payment gateway. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,payment_status,table,hard-delete,"Lookup: payment order status. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,pricing_model,table,hard-delete,"Lookup: how a gig is priced. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,proficiency_level,table,hard-delete,"Lookup: proficiency in a skill or language. Rows are deactivated (is_active), not deleted, once referenced.",10
 ref,project_kind,table,hard-delete,"Lookup: context a profile project was done in. Rows are deactivated (is_active), not deleted, once referenced.",9
@@ -123,11 +154,15 @@ ref,qualification_level,table,hard-delete,"Lookup: level of a qualification. Row
 ref,question_type,table,hard-delete,"Lookup: answer format of a screening question. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,rate_unit,table,hard-delete,"Lookup: unit a gig rate is charged per. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,referral_status,table,hard-delete,"Lookup: progress of a referral. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,refund_status,table,hard-delete,"Lookup: refund status. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,rejection_reason,table,hard-delete,"Lookup: why an application was rejected. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,session_end_reason,table,hard-delete,"Lookup: why a session ended. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,skill,table,hard-delete,"Canonical skill shared by profiles, jobs, assessments and courses (name is a proper noun, not translated)",8
 ref,skill_category,table,hard-delete,Hierarchical grouping of skills,10
+ref,sourcing_request_status,table,hard-delete,"Lookup: state of a consultant sourcing request. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,state,table,hard-delete,"First-level subdivision (state, province) of a country",9
 ref,study_mode,table,hard-delete,"Lookup: mode of study. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,subscription_status,table,hard-delete,"Lookup: subscription status. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,timezone,table,hard-delete,IANA time zone used to display UTC timestamps in local time (RG3 Timestamp),7
 ref,ui_label,table,hard-delete,"UI string key; one row per key, translations in ref.ui_translation",7
 ref,ui_translation,table,hard-delete,Translation of one UI label into one language (CASCADE: owned by the label),8
@@ -137,3 +172,7 @@ ref,verification_status,table,hard-delete,"Lookup: outcome of an external verifi
 ref,web_link_type,table,hard-delete,"Lookup: kind of external profile link. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,work_type,table,hard-delete,"Lookup: where the work happens. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,worker_list_kind,table,hard-delete,"Lookup: requester list a gig worker is on. Rows are deactivated (is_active), not deleted, once referenced.",9
+src,outreach_batch,table,hard-delete,"Bulk outreach by a recruiter, employer or consultant to existing candidates. Message bodies are not stored (template key only; docket Section 6)",13
+src,outreach_recipient,table,hard-delete,One candidate in an outreach batch and the delivery state (owned by the batch),11
+src,sourcing_request,table,hard-delete,Consultant request to source candidates for a job; the employer accepts or declines,14
+src,sourcing_shortlist,table,hard-delete,Links a sourcing request to the job shortlist the consultant fills (owned by the request); the shortlist itself lives in job.shortlist,8

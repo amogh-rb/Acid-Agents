@@ -131,7 +131,11 @@ BEGIN
   --    (external source of truth, docket Section 6); the application role can only read it.
   EXECUTE format('REVOKE ALL ON %s FROM PUBLIC', p_table);
   EXECUTE format('GRANT SELECT ON %s TO talentra_readonly', p_table);
-  IF v_comment LIKE '%[integration-write]%' THEN
+  IF v_comment LIKE '%[api-write]%' THEN
+    -- written only through SECURITY DEFINER functions in the app/billing API (locking + invariants live there)
+    EXECUTE format('REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON %s FROM talentra_app', p_table);
+    EXECUTE format('GRANT SELECT ON %s TO talentra_app', p_table);
+  ELSIF v_comment LIKE '%[integration-write]%' THEN
     EXECUTE format('REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON %s FROM talentra_app', p_table);
     EXECUTE format('GRANT SELECT ON %s TO talentra_app', p_table);
     EXECUTE format('GRANT SELECT, INSERT%s ON %s TO talentra_integration',

@@ -1,0 +1,18 @@
+erDiagram
+  %% Design ERD generated from docs/phase1/relationships.md by tools/design_docs.py.
+  %% Entity = <schema>__<table>. Actor FKs (created_by/updated_by -> app_user) and lookup label_key FKs omitted.
+  %% ||--o{ mandatory parent, |o--o{ optional parent, --o| one-to-one.
+  org__account ||--o{ lic__licence : "account_id"
+  admin__app_user ||--o{ lic__licence_seat : "app_user_id"
+  admin__app_user |o--o{ lic__login_attempt : "app_user_id"
+  admin__app_user ||--o{ lic__login_session : "app_user_id"
+  admin__app_user ||--o{ lic__registered_device : "app_user_id"
+  ref__device_platform ||--o{ lic__registered_device : "device_platform_code"
+  lic__licence ||--o{ lic__licence_seat : "licence_id"
+  lic__licence_seat ||--o{ lic__login_session : "licence_seat_id"
+  ref__licence_status ||--o{ lic__licence : "licence_status_code"
+  ref__login_outcome ||--o{ lic__login_attempt : "login_outcome_code"
+  lic__login_session ||--o{ lic__session_revocation : "login_session_id"
+  lic__registered_device |o--o{ lic__login_attempt : "registered_device_id"
+  lic__registered_device ||--o{ lic__login_session : "registered_device_id"
+  ref__session_end_reason |o--o{ lic__login_session : "session_end_reason_code"

@@ -16,10 +16,10 @@ A milestone is done only when it is **Defined** (deliverable committed), **Verif
 | M8 | B27-B29 | Relationships: Admin / Org / Gig | A / B / C | ✅ 13:44 | ☐ | ✅ gate M10 13:47 | `docs/phase2/*_relationships.md` (73 FKs), `docs/erd/phase2_*.mmd` |
 | M9 | B30-B32 | Columns: Admin / Org / Gig | A / B / C | ✅ 13:40 | ☐ | ✅ gate M10 13:47 | `ddl/40_admin.sql`, `45_org.sql`, `50_gig.sql`; dictionary 1,433 columns |
 | M10 | B33-B35 | Keys and constraints + tests: Admin / Org / Gig | A / B / C | ✅ 13:47 | ☐ | ✅ gate M10 13:47 (13/13 files; m10: 27 + 16 + 22 checks) | Tag `phase2`. Built by one agent on main (D21) |
-| M11 | B36-B38 | Entities: Licences / Sourcing / Subscriptions | A / B / C | ☐ | ☐ | ☐ | |
-| M12 | B39-B41 | Relationships | A / B / C | ☐ | ☐ | ☐ | |
-| M13 | B42-B44 | Columns | A / B / C | ☐ | ☐ | ☐ | |
-| M14 | B45-B47 | Keys and constraints + tests (incl. 20-login concurrency) | A / B / C | ☐ | ☐ | ☐ | Core gate, tag `core-v1` |
+| M11 | B36-B38 | Entities: Licences / Sourcing / Subscriptions | A / B / C | ✅ 14:03 | ☐ | ✅ gate M14 14:07 | `docs/phase3/{lic,src,billing}_entities.md` (40 entities) |
+| M12 | B39-B41 | Relationships | A / B / C | ✅ 14:03 | ☐ | ✅ gate M14 14:07 | `docs/phase3/*_relationships.md` (75 FKs), `docs/erd/phase3_*.mmd` |
+| M13 | B42-B44 | Columns | A / B / C | ✅ 14:00 | ☐ | ✅ gate M14 14:07 | `ddl/60_lic.sql`, `65_src.sql`, `70_billing.sql`; dictionary 1,827 columns |
+| M14 | B45-B47 | Keys and constraints + tests (incl. 20-login concurrency) | A / B / C | ✅ 14:07 | ☐ | ✅ gate M14 14:07 (19/19 files; m14: 23 + 15 + 24 checks, concurrency 5) | Core gate PASS, tag `core-v1` |
 | M15-M18 | B48-B59 | Shared access layer / Notifications / Analytics | A / B / C | ☐ | ☐ | ☐ | |
 | M19 | B60-B64 | Seed (tablespace on D:) | B | ☐ | ☐ | ☐ | |
 | M20 | B65-B69 | Query set + validation | C, B | ☐ | ☐ | ☐ | |

@@ -1,0 +1,294 @@
+erDiagram
+  billing__credit_consumption {
+    int8 id PK
+    int8 wallet_ledger_entry_id FK
+    d_code consumption_purpose_code FK
+    int8 job_requirement_id FK
+    int8 outreach_batch_id FK
+    int4 units
+  }
+  billing__invoice {
+    int8 id PK
+    int8 account_id FK
+    int8 payment_order_id FK
+    varchar invoice_number UK
+    d_code invoice_status_code FK
+    date issued_on
+    d_money net_amount
+    d_money tax_amount
+    d_money total_amount
+    d_currency_code currency_code FK
+  }
+  billing__payment_event {
+    int8 id PK
+    int8 payment_order_id FK
+    d_code payment_gateway_code FK
+    varchar gateway_event_id UK
+    d_code payment_status_code FK
+    d_money event_amount
+    d_currency_code event_currency_code FK
+    timestamptz received_at
+  }
+  billing__payment_order {
+    int8 id PK
+    int8 account_id FK
+    int8 subscription_id FK
+    int8 wallet_id FK
+    d_money order_amount
+    d_currency_code order_currency_code FK
+    d_code payment_gateway_code FK
+    varchar idempotency_key UK
+    varchar gateway_order_token UK
+    d_code payment_status_code FK
+  }
+  billing__plan {
+    int8 id PK
+    d_code code UK
+    varchar plan_name
+    varchar label_key FK
+    d_code billing_cycle_code FK
+    d_money price_amount
+    d_currency_code price_currency_code FK
+    int4 max_users
+    int4 max_devices_per_user
+    bool is_active
+  }
+  billing__plan_entitlement {
+    int8 id PK
+    int8 plan_id FK
+    d_code entitlement_type_code FK
+    int4 quantity_per_cycle
+  }
+  billing__profile_download_event {
+    int8 id PK
+    int8 candidate_profile_id FK
+    int8 downloader_app_user_id FK
+    int8 downloader_organisation_id FK
+    int8 wallet_ledger_entry_id FK
+    timestamptz downloaded_at
+  }
+  billing__refund {
+    int8 id PK
+    int8 payment_order_id FK
+    d_money refund_amount
+    d_currency_code refund_currency_code FK
+    d_code refund_status_code FK
+    varchar refund_reason
+    varchar gateway_refund_token UK
+    timestamptz requested_at
+    timestamptz processed_at
+  }
+  billing__subscription {
+    int8 id PK
+    int8 licence_id FK
+    int8 plan_id FK
+    d_code subscription_status_code FK
+    daterange subscription_period
+    d_money price_amount
+    d_currency_code price_currency_code FK
+    bool is_auto_renew
+  }
+  billing__subscription_cancellation {
+    int8 id PK
+    int8 subscription_id FK
+    varchar cancellation_reason
+    date effective_on
+    timestamptz cancelled_at
+  }
+  billing__subscription_renewal {
+    int8 id PK
+    int8 from_subscription_id FK
+    int8 to_subscription_id FK
+    bool is_automatic
+    timestamptz renewed_at
+  }
+  billing__wallet {
+    int8 id PK
+    int8 account_id FK
+    d_currency_code currency_code FK
+    d_money balance
+  }
+  billing__wallet_ledger_entry {
+    int8 id PK
+    int8 wallet_id FK
+    d_code ledger_entry_type_code FK
+    d_money amount
+    d_currency_code currency_code FK
+    d_money balance_after
+    int8 reverses_wallet_ledger_entry_id FK
+    int8 payment_order_id FK
+    int8 refund_id FK
+    varchar idempotency_key UK
+    timestamptz posted_at
+  }
+  lic__licence {
+    int8 id PK
+    int8 account_id FK
+    varchar licence_name
+    int4 max_users
+    int4 max_devices_per_user
+    int4 session_ttl_minutes
+    int4 idle_timeout_minutes
+    d_code licence_status_code FK
+  }
+  lic__licence_seat {
+    int8 id PK
+    int8 licence_id FK
+    int8 app_user_id FK
+    timestamptz assigned_at
+    timestamptz released_at
+  }
+  lic__login_attempt {
+    int8 id PK
+    int8 app_user_id FK
+    int8 registered_device_id FK
+    d_code login_outcome_code FK
+    timestamptz attempted_at
+    varchar client_ip_masked
+    jsonb attempt_detail
+  }
+  lic__login_session {
+    int8 id PK
+    int8 app_user_id FK
+    int8 registered_device_id FK
+    int8 licence_seat_id FK
+    bytea session_token_hash UK
+    timestamptz started_at
+    timestamptz last_activity_at
+    timestamptz expires_at
+    timestamptz ended_at
+    d_code session_end_reason_code FK
+  }
+  lic__registered_device {
+    int8 id PK
+    int8 app_user_id FK
+    bytea device_fingerprint_hash UK
+    d_code device_platform_code FK
+    varchar device_label
+    timestamptz first_seen_at
+    timestamptz last_seen_at
+    timestamptz revoked_at
+  }
+  lic__session_revocation {
+    int8 id PK
+    int8 login_session_id FK
+    varchar revocation_reason
+    timestamptz revoked_at
+  }
+  src__outreach_batch {
+    int8 id PK
+    int8 sender_app_user_id FK
+    int8 sender_organisation_id FK
+    int8 job_requirement_id FK
+    int8 sourcing_request_id FK
+    d_code outreach_channel_code FK
+    varchar message_template_key
+    varchar idempotency_key UK
+    timestamptz requested_at
+  }
+  src__outreach_recipient {
+    int8 id PK
+    int8 outreach_batch_id FK
+    int8 candidate_profile_id FK
+    d_code outreach_recipient_status_code FK
+    varchar provider_message_reference UK
+    timestamptz sent_at
+    timestamptz delivered_at
+  }
+  src__sourcing_request {
+    int8 id PK
+    int8 job_requirement_id FK
+    int8 consultant_app_user_id FK
+    int8 consultant_organisation_id FK
+    d_code sourcing_request_status_code FK
+    varchar request_note
+    timestamptz requested_at
+    int8 decided_by_app_user_id FK
+    timestamptz decided_at
+    varchar decline_reason
+  }
+  src__sourcing_shortlist {
+    int8 id PK
+    int8 sourcing_request_id FK
+    int8 shortlist_id FK
+    int8 job_requirement_id FK
+  }
+  admin__app_user |o--o{ lic__login_attempt : "fk_login_attempt_app_user_id"
+  admin__app_user |o--o{ src__sourcing_request : "fk_sourcing_request_decided_by_app_user_id"
+  admin__app_user ||--o{ billing__profile_download_event : "fk_profile_download_event_downloader_app_user_id"
+  admin__app_user ||--o{ lic__licence_seat : "fk_licence_seat_app_user_id"
+  admin__app_user ||--o{ lic__login_session : "fk_login_session_app_user_id"
+  admin__app_user ||--o{ lic__registered_device : "fk_registered_device_app_user_id"
+  admin__app_user ||--o{ src__outreach_batch : "fk_outreach_batch_sender_app_user_id"
+  admin__app_user ||--o{ src__sourcing_request : "fk_sourcing_request_consultant_app_user_id"
+  billing__payment_order |o--o{ billing__wallet_ledger_entry : "fk_wallet_ledger_entry_payment_order_id"
+  billing__payment_order ||--o{ billing__payment_event : "fk_payment_event_payment_order_id"
+  billing__payment_order ||--o{ billing__refund : "fk_refund_payment_order_id"
+  billing__payment_order ||--o| billing__invoice : "fk_invoice_payment_order_id"
+  billing__plan ||--o{ billing__plan_entitlement : "fk_plan_entitlement_plan_id"
+  billing__plan ||--o{ billing__subscription : "fk_subscription_plan_id"
+  billing__refund |o--o{ billing__wallet_ledger_entry : "fk_wallet_ledger_entry_refund_id"
+  billing__subscription |o--o{ billing__payment_order : "fk_payment_order_subscription_id"
+  billing__subscription ||--o| billing__subscription_cancellation : "fk_subscription_cancellation_subscription_id"
+  billing__subscription ||--o| billing__subscription_renewal : "fk_subscription_renewal_from_subscription_id"
+  billing__subscription ||--o| billing__subscription_renewal : "fk_subscription_renewal_to_subscription_id"
+  billing__wallet |o--o{ billing__payment_order : "fk_payment_order_wallet_id"
+  billing__wallet ||--o{ billing__wallet_ledger_entry : "fk_wallet_ledger_entry_wallet_id"
+  billing__wallet_ledger_entry |o--o| billing__wallet_ledger_entry : "fk_wallet_ledger_entry_reverses_wallet_ledger_entry_id"
+  billing__wallet_ledger_entry ||--o| billing__credit_consumption : "fk_credit_consumption_wallet_ledger_entry_id"
+  billing__wallet_ledger_entry ||--o| billing__profile_download_event : "fk_profile_download_event_wallet_ledger_entry_id"
+  job__job_requirement |o--o{ billing__credit_consumption : "fk_credit_consumption_job_requirement_id"
+  job__job_requirement |o--o{ src__outreach_batch : "fk_outreach_batch_job_requirement_id"
+  job__job_requirement ||--o{ src__sourcing_request : "fk_sourcing_request_job_requirement_id"
+  job__job_requirement ||--o{ src__sourcing_shortlist : "fk_sourcing_shortlist_job_requirement_id"
+  job__shortlist ||--o{ src__sourcing_shortlist : "fk_sourcing_shortlist_shortlist_id"
+  job__shortlist ||--o{ src__sourcing_shortlist : "fk_sourcing_shortlist_shortlist_job"
+  lic__licence ||--o{ billing__subscription : "fk_subscription_licence_id"
+  lic__licence ||--o{ lic__licence_seat : "fk_licence_seat_licence_id"
+  lic__licence_seat ||--o{ lic__login_session : "fk_login_session_licence_seat_id"
+  lic__licence_seat ||--o{ lic__login_session : "fk_login_session_seat"
+  lic__login_session ||--o| lic__session_revocation : "fk_session_revocation_login_session_id"
+  lic__registered_device |o--o{ lic__login_attempt : "fk_login_attempt_registered_device_id"
+  lic__registered_device ||--o{ lic__login_session : "fk_login_session_device"
+  lic__registered_device ||--o{ lic__login_session : "fk_login_session_registered_device_id"
+  org__account ||--o{ billing__invoice : "fk_invoice_account_id"
+  org__account ||--o{ billing__payment_order : "fk_payment_order_account_id"
+  org__account ||--o{ billing__wallet : "fk_wallet_account_id"
+  org__account ||--o{ lic__licence : "fk_licence_account_id"
+  org__organisation |o--o{ billing__profile_download_event : "fk_profile_download_event_downloader_organisation_id"
+  org__organisation |o--o{ src__outreach_batch : "fk_outreach_batch_sender_organisation_id"
+  org__organisation |o--o{ src__sourcing_request : "fk_sourcing_request_consultant_organisation_id"
+  profile__candidate_profile ||--o{ billing__profile_download_event : "fk_profile_download_event_candidate_profile_id"
+  profile__candidate_profile ||--o{ src__outreach_recipient : "fk_outreach_recipient_candidate_profile_id"
+  ref__billing_cycle ||--o{ billing__plan : "fk_plan_billing_cycle_code"
+  ref__consumption_purpose ||--o{ billing__credit_consumption : "fk_credit_consumption_consumption_purpose_code"
+  ref__currency |o--o{ billing__payment_event : "fk_payment_event_event_currency_code"
+  ref__currency ||--o{ billing__invoice : "fk_invoice_currency_code"
+  ref__currency ||--o{ billing__payment_order : "fk_payment_order_order_currency_code"
+  ref__currency ||--o{ billing__plan : "fk_plan_price_currency_code"
+  ref__currency ||--o{ billing__refund : "fk_refund_refund_currency_code"
+  ref__currency ||--o{ billing__subscription : "fk_subscription_price_currency_code"
+  ref__currency ||--o{ billing__wallet : "fk_wallet_currency_code"
+  ref__currency ||--o{ billing__wallet_ledger_entry : "fk_wallet_ledger_entry_currency_code"
+  ref__device_platform ||--o{ lic__registered_device : "fk_registered_device_device_platform_code"
+  ref__entitlement_type ||--o{ billing__plan_entitlement : "fk_plan_entitlement_entitlement_type_code"
+  ref__invoice_status ||--o{ billing__invoice : "fk_invoice_invoice_status_code"
+  ref__ledger_entry_type ||--o{ billing__wallet_ledger_entry : "fk_wallet_ledger_entry_ledger_entry_type_code"
+  ref__licence_status ||--o{ lic__licence : "fk_licence_licence_status_code"
+  ref__login_outcome ||--o{ lic__login_attempt : "fk_login_attempt_login_outcome_code"
+  ref__outreach_channel ||--o{ src__outreach_batch : "fk_outreach_batch_outreach_channel_code"
+  ref__outreach_recipient_status ||--o{ src__outreach_recipient : "fk_outreach_recipient_outreach_recipient_status_code"
+  ref__payment_gateway ||--o{ billing__payment_event : "fk_payment_event_payment_gateway_code"
+  ref__payment_gateway ||--o{ billing__payment_order : "fk_payment_order_payment_gateway_code"
+  ref__payment_status ||--o{ billing__payment_event : "fk_payment_event_payment_status_code"
+  ref__payment_status ||--o{ billing__payment_order : "fk_payment_order_payment_status_code"
+  ref__refund_status ||--o{ billing__refund : "fk_refund_refund_status_code"
+  ref__session_end_reason |o--o{ lic__login_session : "fk_login_session_session_end_reason_code"
+  ref__sourcing_request_status ||--o{ src__sourcing_request : "fk_sourcing_request_sourcing_request_status_code"
+  ref__subscription_status ||--o{ billing__subscription : "fk_subscription_subscription_status_code"
+  ref__ui_label ||--o{ billing__plan : "fk_plan_label_key"
+  src__outreach_batch |o--o{ billing__credit_consumption : "fk_credit_consumption_outreach_batch_id"
+  src__outreach_batch ||--o{ src__outreach_recipient : "fk_outreach_recipient_outreach_batch_id"
+  src__sourcing_request |o--o{ src__outreach_batch : "fk_outreach_batch_sourcing_request_id"
+  src__sourcing_request ||--o{ src__sourcing_shortlist : "fk_sourcing_shortlist_request_job"
+  src__sourcing_request ||--o{ src__sourcing_shortlist : "fk_sourcing_shortlist_sourcing_request_id"
