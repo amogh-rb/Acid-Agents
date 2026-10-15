@@ -8,7 +8,7 @@ erDiagram
   job__application {
     int8 id PK
     int8 job_requirement_id FK
-    int8 candidate_profile_id FK
+    int8 candidate_profile_id PK
     d_code application_status_code FK
     d_code application_source_code FK
     d_code rejection_reason_code FK
@@ -22,6 +22,7 @@ erDiagram
   job__application_answer {
     int8 id PK
     int8 application_id FK
+    int8 candidate_profile_id FK
     int8 questionnaire_question_id FK
     int8 question_option_id FK
     varchar answer_text
@@ -30,6 +31,7 @@ erDiagram
   job__application_status_history {
     int8 id PK
     int8 application_id FK
+    int8 candidate_profile_id FK
     d_code from_application_status_code FK
     d_code to_application_status_code FK
     timestamptz changed_at
@@ -44,7 +46,8 @@ erDiagram
   job__interview {
     int8 id PK
     int8 application_id FK
-    int2 round_number
+    int8 candidate_profile_id FK
+    int2 round_number UK
     d_code interview_mode_code FK
     d_code interview_status_code FK
     d_code interview_outcome_code FK
@@ -59,8 +62,9 @@ erDiagram
   job__job_position {
     int8 id PK
     int8 job_requirement_id FK
-    int2 position_number
+    int2 position_number UK
     int8 filled_by_application_id FK
+    int8 filled_by_candidate_profile_id FK
     date filled_on
   }
   job__job_requirement {
@@ -90,8 +94,8 @@ erDiagram
     d_pct consultant_fee_pct
     timestamptz published_at
     date application_deadline
-    varchar legacy_source_system
-    varchar legacy_source_id
+    varchar legacy_source_system UK
+    varchar legacy_source_id UK
     timestamptz deleted_at
   }
   job__job_requirement_location {
@@ -131,6 +135,7 @@ erDiagram
   job__joining {
     int8 id PK
     int8 application_id FK
+    int8 candidate_profile_id FK
     int8 offer_id FK
     d_code joining_status_code FK
     date expected_joining_date
@@ -139,6 +144,7 @@ erDiagram
   job__offer {
     int8 id PK
     int8 application_id FK
+    int8 candidate_profile_id FK
     d_code offer_status_code FK
     d_money ctc_amount
     d_currency_code ctc_currency_code FK
@@ -151,21 +157,21 @@ erDiagram
   job__question_option {
     int8 id PK
     int8 questionnaire_question_id FK
-    int2 option_order
+    int2 option_order UK
     varchar option_text
     bool is_knockout_answer
   }
   job__questionnaire {
     int8 id PK
     int8 organisation_id FK
-    varchar questionnaire_title
+    varchar questionnaire_title UK
     int8 language_id FK
     bool is_active
   }
   job__questionnaire_question {
     int8 id PK
     int8 questionnaire_id FK
-    int2 question_order
+    int2 question_order UK
     varchar question_text
     d_code question_type_code FK
     bool is_mandatory
@@ -174,7 +180,7 @@ erDiagram
   job__saved_search {
     int8 id PK
     int8 candidate_profile_id FK
-    varchar search_name
+    varchar search_name UK
     jsonb search_criteria
   }
   job__shortlist {
@@ -182,7 +188,7 @@ erDiagram
     int8 organisation_id FK
     int8 owner_app_user_id FK
     int8 job_requirement_id FK
-    varchar shortlist_name
+    varchar shortlist_name UK
   }
   job__shortlist_entry {
     int8 id PK
@@ -199,7 +205,7 @@ erDiagram
   }
   profile__assessment {
     int8 id PK
-    varchar assessment_name
+    varchar assessment_name UK
     d_code assessment_type_code FK
     int8 skill_id FK
     numeric max_score
@@ -258,7 +264,7 @@ erDiagram
     int8 id PK
     int8 candidate_profile_id FK
     d_code contact_type_code FK
-    d_email email
+    d_email email UK
     d_phone_e164 phone
     int8 phone_country_id FK
     bool is_primary
@@ -284,7 +290,7 @@ erDiagram
     int8 candidate_profile_id FK
     d_code identifier_type_code FK
     varchar verification_token
-    bytea identifier_hash
+    bytea identifier_hash UK
     varchar identifier_last4
     d_code verification_status_code FK
     timestamptz verified_at
@@ -330,8 +336,8 @@ erDiagram
     d_code pay_period_code FK
     d_code notice_period_code FK
     bool is_open_to_work
-    varchar legacy_source_system
-    varchar legacy_source_id
+    varchar legacy_source_system UK
+    varchar legacy_source_id UK
     timestamptz deleted_at
   }
   profile__candidate_project {
@@ -360,7 +366,7 @@ erDiagram
     int8 id PK
     int8 candidate_profile_id FK
     d_code web_link_type_code FK
-    varchar link_url
+    varchar link_url UK
   }
   profile__candidate_work_experience {
     int8 id PK
@@ -380,8 +386,8 @@ erDiagram
   }
   profile__course {
     int8 id PK
-    varchar course_title
-    varchar provider_name
+    varchar course_title UK
+    varchar provider_name UK
     int8 skill_id FK
     varchar course_url
     int2 duration_hours
@@ -421,7 +427,7 @@ erDiagram
   }
   profile__resume_template {
     int8 id PK
-    varchar template_name
+    varchar template_name UK
     int8 language_id FK
     jsonb layout_definition
     bool is_active
@@ -430,7 +436,7 @@ erDiagram
     int8 id PK
     int8 candidate_profile_id FK
     int8 resume_template_id FK
-    int4 version_number
+    int4 version_number UK
     varchar version_label
     text body
     int8 body_language_id FK
@@ -488,11 +494,11 @@ erDiagram
     int8 id PK
     int8 country_id FK
     int8 state_id FK
-    varchar city_name
+    varchar city_name UK
     int8 timezone_id FK
     d_lat latitude
     d_lng longitude
-    int8 geonames_id
+    int8 geonames_id UK
     bool is_active
   }
   ref__contact_type {
@@ -505,7 +511,7 @@ erDiagram
   ref__country {
     int8 id PK
     bpchar iso_alpha2 UK
-    bpchar iso_alpha3
+    bpchar iso_alpha3 UK
     varchar country_name
     varchar label_key FK
     varchar phone_prefix
@@ -546,7 +552,7 @@ erDiagram
   }
   ref__field_of_study {
     int8 id PK
-    varchar field_name
+    varchar field_name UK
     varchar label_key FK
     bool is_active
   }
@@ -570,7 +576,7 @@ erDiagram
   }
   ref__industry {
     int8 id PK
-    varchar industry_name
+    varchar industry_name UK
     int8 parent_industry_id FK
     varchar label_key FK
     bool is_active
@@ -578,7 +584,7 @@ erDiagram
   }
   ref__institution {
     int8 id PK
-    varchar institution_name
+    varchar institution_name UK
     int8 country_id FK
     int8 city_id FK
     bool is_campus_partner
@@ -614,7 +620,7 @@ erDiagram
   }
   ref__job_function {
     int8 id PK
-    varchar function_name
+    varchar function_name UK
     varchar label_key FK
     bool is_active
     int4 sort_order
@@ -629,7 +635,7 @@ erDiagram
   }
   ref__job_role {
     int8 id PK
-    varchar role_name
+    varchar role_name UK
     int8 job_function_id FK
     varchar label_key FK
     bool is_active
@@ -706,7 +712,7 @@ erDiagram
   }
   ref__qualification {
     int8 id PK
-    varchar qualification_name
+    varchar qualification_name UK
     varchar short_name
     d_code qualification_level_code FK
     varchar label_key FK
@@ -749,7 +755,7 @@ erDiagram
   }
   ref__skill_category {
     int8 id PK
-    varchar category_name
+    varchar category_name UK
     int8 parent_skill_category_id FK
     varchar label_key FK
     bool is_active
@@ -758,8 +764,8 @@ erDiagram
   ref__state {
     int8 id PK
     int8 country_id FK
-    varchar state_name
-    varchar iso_subdivision
+    varchar state_name UK
+    varchar iso_subdivision UK
     bool is_active
   }
   ref__study_mode {
@@ -817,15 +823,207 @@ erDiagram
   admin__app_user ||--o{ job__job_requirement : "fk_job_requirement_posted_by_app_user_id"
   admin__app_user ||--o{ job__shortlist : "fk_shortlist_owner_app_user_id"
   admin__app_user ||--o{ profile__candidate_bookmark_event : "fk_candidate_bookmark_event_actor_app_user_id"
-  admin__app_user ||--o{ profile__candidate_profile : "fk_candidate_profile_app_user_id"
   admin__app_user ||--o{ profile__profile_view_event : "fk_profile_view_event_viewer_app_user_id"
   admin__app_user ||--o{ profile__referral : "fk_referral_referrer_app_user_id"
-  job__application |o--o{ job__job_position : "fk_job_position_filled_by_application_id"
-  job__application ||--o{ job__application_answer : "fk_application_answer_application_id"
-  job__application ||--o{ job__application_status_history : "fk_application_status_history_application_id"
-  job__application ||--o{ job__interview : "fk_interview_application_id"
-  job__application ||--o{ job__joining : "fk_joining_application_id"
-  job__application ||--o{ job__offer : "fk_offer_application_id"
+  admin__app_user ||--o| profile__candidate_profile : "fk_candidate_profile_app_user_id"
+  job__application |o--o{ job__job_position : "fk_job_position_filled_by_application"
+  job__application ||--o{ job__application_answer : "fk_application_answer_application"
+  job__application ||--o{ job__application_status_history : "fk_application_status_history_application"
+  job__application ||--o{ job__interview : "fk_interview_application"
+  job__application ||--o{ job__joining : "fk_joining_application"
+  job__application ||--o{ job__offer : "fk_offer_application"
+  job__application_h00 |o--o{ job__job_position : "fk_job_position_filled_by_application_1"
+  job__application_h00 ||--o{ job__application_answer : "fk_application_answer_application_1"
+  job__application_h00 ||--o{ job__application_status_history : "fk_application_status_history_application_1"
+  job__application_h00 ||--o{ job__interview : "fk_interview_application_1"
+  job__application_h00 ||--o{ job__joining : "fk_joining_application_1"
+  job__application_h00 ||--o{ job__offer : "fk_offer_application_1"
+  job__application_h01 |o--o{ job__job_position : "fk_job_position_filled_by_application_2"
+  job__application_h01 ||--o{ job__application_answer : "fk_application_answer_application_2"
+  job__application_h01 ||--o{ job__application_status_history : "fk_application_status_history_application_2"
+  job__application_h01 ||--o{ job__interview : "fk_interview_application_2"
+  job__application_h01 ||--o{ job__joining : "fk_joining_application_2"
+  job__application_h01 ||--o{ job__offer : "fk_offer_application_2"
+  job__application_h02 |o--o{ job__job_position : "fk_job_position_filled_by_application_3"
+  job__application_h02 ||--o{ job__application_answer : "fk_application_answer_application_3"
+  job__application_h02 ||--o{ job__application_status_history : "fk_application_status_history_application_3"
+  job__application_h02 ||--o{ job__interview : "fk_interview_application_3"
+  job__application_h02 ||--o{ job__joining : "fk_joining_application_3"
+  job__application_h02 ||--o{ job__offer : "fk_offer_application_3"
+  job__application_h03 |o--o{ job__job_position : "fk_job_position_filled_by_application_4"
+  job__application_h03 ||--o{ job__application_answer : "fk_application_answer_application_4"
+  job__application_h03 ||--o{ job__application_status_history : "fk_application_status_history_application_4"
+  job__application_h03 ||--o{ job__interview : "fk_interview_application_4"
+  job__application_h03 ||--o{ job__joining : "fk_joining_application_4"
+  job__application_h03 ||--o{ job__offer : "fk_offer_application_4"
+  job__application_h04 |o--o{ job__job_position : "fk_job_position_filled_by_application_5"
+  job__application_h04 ||--o{ job__application_answer : "fk_application_answer_application_5"
+  job__application_h04 ||--o{ job__application_status_history : "fk_application_status_history_application_5"
+  job__application_h04 ||--o{ job__interview : "fk_interview_application_5"
+  job__application_h04 ||--o{ job__joining : "fk_joining_application_5"
+  job__application_h04 ||--o{ job__offer : "fk_offer_application_5"
+  job__application_h05 |o--o{ job__job_position : "fk_job_position_filled_by_application_6"
+  job__application_h05 ||--o{ job__application_answer : "fk_application_answer_application_6"
+  job__application_h05 ||--o{ job__application_status_history : "fk_application_status_history_application_6"
+  job__application_h05 ||--o{ job__interview : "fk_interview_application_6"
+  job__application_h05 ||--o{ job__joining : "fk_joining_application_6"
+  job__application_h05 ||--o{ job__offer : "fk_offer_application_6"
+  job__application_h06 |o--o{ job__job_position : "fk_job_position_filled_by_application_7"
+  job__application_h06 ||--o{ job__application_answer : "fk_application_answer_application_7"
+  job__application_h06 ||--o{ job__application_status_history : "fk_application_status_history_application_7"
+  job__application_h06 ||--o{ job__interview : "fk_interview_application_7"
+  job__application_h06 ||--o{ job__joining : "fk_joining_application_7"
+  job__application_h06 ||--o{ job__offer : "fk_offer_application_7"
+  job__application_h07 |o--o{ job__job_position : "fk_job_position_filled_by_application_8"
+  job__application_h07 ||--o{ job__application_answer : "fk_application_answer_application_8"
+  job__application_h07 ||--o{ job__application_status_history : "fk_application_status_history_application_8"
+  job__application_h07 ||--o{ job__interview : "fk_interview_application_8"
+  job__application_h07 ||--o{ job__joining : "fk_joining_application_8"
+  job__application_h07 ||--o{ job__offer : "fk_offer_application_8"
+  job__application_h08 |o--o{ job__job_position : "fk_job_position_filled_by_application_9"
+  job__application_h08 ||--o{ job__application_answer : "fk_application_answer_application_9"
+  job__application_h08 ||--o{ job__application_status_history : "fk_application_status_history_application_9"
+  job__application_h08 ||--o{ job__interview : "fk_interview_application_9"
+  job__application_h08 ||--o{ job__joining : "fk_joining_application_9"
+  job__application_h08 ||--o{ job__offer : "fk_offer_application_9"
+  job__application_h09 |o--o{ job__job_position : "fk_job_position_filled_by_application_10"
+  job__application_h09 ||--o{ job__application_answer : "fk_application_answer_application_10"
+  job__application_h09 ||--o{ job__application_status_history : "fk_application_status_history_application_10"
+  job__application_h09 ||--o{ job__interview : "fk_interview_application_10"
+  job__application_h09 ||--o{ job__joining : "fk_joining_application_10"
+  job__application_h09 ||--o{ job__offer : "fk_offer_application_10"
+  job__application_h10 |o--o{ job__job_position : "fk_job_position_filled_by_application_11"
+  job__application_h10 ||--o{ job__application_answer : "fk_application_answer_application_11"
+  job__application_h10 ||--o{ job__application_status_history : "fk_application_status_history_application_11"
+  job__application_h10 ||--o{ job__interview : "fk_interview_application_11"
+  job__application_h10 ||--o{ job__joining : "fk_joining_application_11"
+  job__application_h10 ||--o{ job__offer : "fk_offer_application_11"
+  job__application_h11 |o--o{ job__job_position : "fk_job_position_filled_by_application_12"
+  job__application_h11 ||--o{ job__application_answer : "fk_application_answer_application_12"
+  job__application_h11 ||--o{ job__application_status_history : "fk_application_status_history_application_12"
+  job__application_h11 ||--o{ job__interview : "fk_interview_application_12"
+  job__application_h11 ||--o{ job__joining : "fk_joining_application_12"
+  job__application_h11 ||--o{ job__offer : "fk_offer_application_12"
+  job__application_h12 |o--o{ job__job_position : "fk_job_position_filled_by_application_13"
+  job__application_h12 ||--o{ job__application_answer : "fk_application_answer_application_13"
+  job__application_h12 ||--o{ job__application_status_history : "fk_application_status_history_application_13"
+  job__application_h12 ||--o{ job__interview : "fk_interview_application_13"
+  job__application_h12 ||--o{ job__joining : "fk_joining_application_13"
+  job__application_h12 ||--o{ job__offer : "fk_offer_application_13"
+  job__application_h13 |o--o{ job__job_position : "fk_job_position_filled_by_application_14"
+  job__application_h13 ||--o{ job__application_answer : "fk_application_answer_application_14"
+  job__application_h13 ||--o{ job__application_status_history : "fk_application_status_history_application_14"
+  job__application_h13 ||--o{ job__interview : "fk_interview_application_14"
+  job__application_h13 ||--o{ job__joining : "fk_joining_application_14"
+  job__application_h13 ||--o{ job__offer : "fk_offer_application_14"
+  job__application_h14 |o--o{ job__job_position : "fk_job_position_filled_by_application_15"
+  job__application_h14 ||--o{ job__application_answer : "fk_application_answer_application_15"
+  job__application_h14 ||--o{ job__application_status_history : "fk_application_status_history_application_15"
+  job__application_h14 ||--o{ job__interview : "fk_interview_application_15"
+  job__application_h14 ||--o{ job__joining : "fk_joining_application_15"
+  job__application_h14 ||--o{ job__offer : "fk_offer_application_15"
+  job__application_h15 |o--o{ job__job_position : "fk_job_position_filled_by_application_16"
+  job__application_h15 ||--o{ job__application_answer : "fk_application_answer_application_16"
+  job__application_h15 ||--o{ job__application_status_history : "fk_application_status_history_application_16"
+  job__application_h15 ||--o{ job__interview : "fk_interview_application_16"
+  job__application_h15 ||--o{ job__joining : "fk_joining_application_16"
+  job__application_h15 ||--o{ job__offer : "fk_offer_application_16"
+  job__application_h16 |o--o{ job__job_position : "fk_job_position_filled_by_application_17"
+  job__application_h16 ||--o{ job__application_answer : "fk_application_answer_application_17"
+  job__application_h16 ||--o{ job__application_status_history : "fk_application_status_history_application_17"
+  job__application_h16 ||--o{ job__interview : "fk_interview_application_17"
+  job__application_h16 ||--o{ job__joining : "fk_joining_application_17"
+  job__application_h16 ||--o{ job__offer : "fk_offer_application_17"
+  job__application_h17 |o--o{ job__job_position : "fk_job_position_filled_by_application_18"
+  job__application_h17 ||--o{ job__application_answer : "fk_application_answer_application_18"
+  job__application_h17 ||--o{ job__application_status_history : "fk_application_status_history_application_18"
+  job__application_h17 ||--o{ job__interview : "fk_interview_application_18"
+  job__application_h17 ||--o{ job__joining : "fk_joining_application_18"
+  job__application_h17 ||--o{ job__offer : "fk_offer_application_18"
+  job__application_h18 |o--o{ job__job_position : "fk_job_position_filled_by_application_19"
+  job__application_h18 ||--o{ job__application_answer : "fk_application_answer_application_19"
+  job__application_h18 ||--o{ job__application_status_history : "fk_application_status_history_application_19"
+  job__application_h18 ||--o{ job__interview : "fk_interview_application_19"
+  job__application_h18 ||--o{ job__joining : "fk_joining_application_19"
+  job__application_h18 ||--o{ job__offer : "fk_offer_application_19"
+  job__application_h19 |o--o{ job__job_position : "fk_job_position_filled_by_application_20"
+  job__application_h19 ||--o{ job__application_answer : "fk_application_answer_application_20"
+  job__application_h19 ||--o{ job__application_status_history : "fk_application_status_history_application_20"
+  job__application_h19 ||--o{ job__interview : "fk_interview_application_20"
+  job__application_h19 ||--o{ job__joining : "fk_joining_application_20"
+  job__application_h19 ||--o{ job__offer : "fk_offer_application_20"
+  job__application_h20 |o--o{ job__job_position : "fk_job_position_filled_by_application_21"
+  job__application_h20 ||--o{ job__application_answer : "fk_application_answer_application_21"
+  job__application_h20 ||--o{ job__application_status_history : "fk_application_status_history_application_21"
+  job__application_h20 ||--o{ job__interview : "fk_interview_application_21"
+  job__application_h20 ||--o{ job__joining : "fk_joining_application_21"
+  job__application_h20 ||--o{ job__offer : "fk_offer_application_21"
+  job__application_h21 |o--o{ job__job_position : "fk_job_position_filled_by_application_22"
+  job__application_h21 ||--o{ job__application_answer : "fk_application_answer_application_22"
+  job__application_h21 ||--o{ job__application_status_history : "fk_application_status_history_application_22"
+  job__application_h21 ||--o{ job__interview : "fk_interview_application_22"
+  job__application_h21 ||--o{ job__joining : "fk_joining_application_22"
+  job__application_h21 ||--o{ job__offer : "fk_offer_application_22"
+  job__application_h22 |o--o{ job__job_position : "fk_job_position_filled_by_application_23"
+  job__application_h22 ||--o{ job__application_answer : "fk_application_answer_application_23"
+  job__application_h22 ||--o{ job__application_status_history : "fk_application_status_history_application_23"
+  job__application_h22 ||--o{ job__interview : "fk_interview_application_23"
+  job__application_h22 ||--o{ job__joining : "fk_joining_application_23"
+  job__application_h22 ||--o{ job__offer : "fk_offer_application_23"
+  job__application_h23 |o--o{ job__job_position : "fk_job_position_filled_by_application_24"
+  job__application_h23 ||--o{ job__application_answer : "fk_application_answer_application_24"
+  job__application_h23 ||--o{ job__application_status_history : "fk_application_status_history_application_24"
+  job__application_h23 ||--o{ job__interview : "fk_interview_application_24"
+  job__application_h23 ||--o{ job__joining : "fk_joining_application_24"
+  job__application_h23 ||--o{ job__offer : "fk_offer_application_24"
+  job__application_h24 |o--o{ job__job_position : "fk_job_position_filled_by_application_25"
+  job__application_h24 ||--o{ job__application_answer : "fk_application_answer_application_25"
+  job__application_h24 ||--o{ job__application_status_history : "fk_application_status_history_application_25"
+  job__application_h24 ||--o{ job__interview : "fk_interview_application_25"
+  job__application_h24 ||--o{ job__joining : "fk_joining_application_25"
+  job__application_h24 ||--o{ job__offer : "fk_offer_application_25"
+  job__application_h25 |o--o{ job__job_position : "fk_job_position_filled_by_application_26"
+  job__application_h25 ||--o{ job__application_answer : "fk_application_answer_application_26"
+  job__application_h25 ||--o{ job__application_status_history : "fk_application_status_history_application_26"
+  job__application_h25 ||--o{ job__interview : "fk_interview_application_26"
+  job__application_h25 ||--o{ job__joining : "fk_joining_application_26"
+  job__application_h25 ||--o{ job__offer : "fk_offer_application_26"
+  job__application_h26 |o--o{ job__job_position : "fk_job_position_filled_by_application_27"
+  job__application_h26 ||--o{ job__application_answer : "fk_application_answer_application_27"
+  job__application_h26 ||--o{ job__application_status_history : "fk_application_status_history_application_27"
+  job__application_h26 ||--o{ job__interview : "fk_interview_application_27"
+  job__application_h26 ||--o{ job__joining : "fk_joining_application_27"
+  job__application_h26 ||--o{ job__offer : "fk_offer_application_27"
+  job__application_h27 |o--o{ job__job_position : "fk_job_position_filled_by_application_28"
+  job__application_h27 ||--o{ job__application_answer : "fk_application_answer_application_28"
+  job__application_h27 ||--o{ job__application_status_history : "fk_application_status_history_application_28"
+  job__application_h27 ||--o{ job__interview : "fk_interview_application_28"
+  job__application_h27 ||--o{ job__joining : "fk_joining_application_28"
+  job__application_h27 ||--o{ job__offer : "fk_offer_application_28"
+  job__application_h28 |o--o{ job__job_position : "fk_job_position_filled_by_application_29"
+  job__application_h28 ||--o{ job__application_answer : "fk_application_answer_application_29"
+  job__application_h28 ||--o{ job__application_status_history : "fk_application_status_history_application_29"
+  job__application_h28 ||--o{ job__interview : "fk_interview_application_29"
+  job__application_h28 ||--o{ job__joining : "fk_joining_application_29"
+  job__application_h28 ||--o{ job__offer : "fk_offer_application_29"
+  job__application_h29 |o--o{ job__job_position : "fk_job_position_filled_by_application_30"
+  job__application_h29 ||--o{ job__application_answer : "fk_application_answer_application_30"
+  job__application_h29 ||--o{ job__application_status_history : "fk_application_status_history_application_30"
+  job__application_h29 ||--o{ job__interview : "fk_interview_application_30"
+  job__application_h29 ||--o{ job__joining : "fk_joining_application_30"
+  job__application_h29 ||--o{ job__offer : "fk_offer_application_30"
+  job__application_h30 |o--o{ job__job_position : "fk_job_position_filled_by_application_31"
+  job__application_h30 ||--o{ job__application_answer : "fk_application_answer_application_31"
+  job__application_h30 ||--o{ job__application_status_history : "fk_application_status_history_application_31"
+  job__application_h30 ||--o{ job__interview : "fk_interview_application_31"
+  job__application_h30 ||--o{ job__joining : "fk_joining_application_31"
+  job__application_h30 ||--o{ job__offer : "fk_offer_application_31"
+  job__application_h31 |o--o{ job__job_position : "fk_job_position_filled_by_application_32"
+  job__application_h31 ||--o{ job__application_answer : "fk_application_answer_application_32"
+  job__application_h31 ||--o{ job__application_status_history : "fk_application_status_history_application_32"
+  job__application_h31 ||--o{ job__interview : "fk_interview_application_32"
+  job__application_h31 ||--o{ job__joining : "fk_joining_application_32"
+  job__application_h31 ||--o{ job__offer : "fk_offer_application_32"
   job__job_requirement |o--o{ job__shortlist : "fk_shortlist_job_requirement_id"
   job__job_requirement |o--o{ profile__candidate_bookmark_event : "fk_candidate_bookmark_event_job_requirement_id"
   job__job_requirement |o--o{ profile__referral : "fk_referral_job_requirement_id"
@@ -835,7 +1033,8 @@ erDiagram
   job__job_requirement ||--o{ job__job_requirement_qualification : "fk_job_requirement_qualification_job_requirement_id"
   job__job_requirement ||--o{ job__job_requirement_questionnaire : "fk_job_requirement_questionnaire_job_requirement_id"
   job__job_requirement ||--o{ job__job_requirement_skill : "fk_job_requirement_skill_job_requirement_id"
-  job__offer ||--o{ job__joining : "fk_joining_offer_id"
+  job__offer ||--o{ job__joining : "fk_joining_offer_id_application_id"
+  job__offer ||--o| job__joining : "fk_joining_offer_id"
   job__question_option |o--o{ job__application_answer : "fk_application_answer_question_option_id"
   job__questionnaire ||--o{ job__job_requirement_questionnaire : "fk_job_requirement_questionnaire_questionnaire_id"
   job__questionnaire ||--o{ job__questionnaire_question : "fk_questionnaire_question_questionnaire_id"
@@ -850,6 +1049,7 @@ erDiagram
   org__organisation ||--o{ job__questionnaire : "fk_questionnaire_organisation_id"
   org__organisation ||--o{ job__shortlist : "fk_shortlist_organisation_id"
   profile__assessment ||--o{ profile__assessment_attempt : "fk_assessment_attempt_assessment_id"
+  profile__candidate_profile |o--o{ job__job_position : "fk_job_position_filled_by_candidate_profile_id"
   profile__candidate_profile |o--o{ job__job_search_event : "fk_job_search_event_candidate_profile_id"
   profile__candidate_profile |o--o{ profile__referral : "fk_referral_referred_candidate_profile_id"
   profile__candidate_profile ||--o{ job__application : "fk_application_candidate_profile_id"
@@ -871,9 +1071,9 @@ erDiagram
   profile__candidate_profile ||--o{ profile__candidate_web_link : "fk_candidate_web_link_candidate_profile_id"
   profile__candidate_profile ||--o{ profile__candidate_work_experience : "fk_candidate_work_experience_candidate_profile_id"
   profile__candidate_profile ||--o{ profile__course_enrolment : "fk_course_enrolment_candidate_profile_id"
-  profile__candidate_profile ||--o{ profile__profile_completion_score : "fk_profile_completion_score_candidate_profile_id"
   profile__candidate_profile ||--o{ profile__profile_view_event : "fk_profile_view_event_candidate_profile_id"
   profile__candidate_profile ||--o{ profile__resume_version : "fk_resume_version_candidate_profile_id"
+  profile__candidate_profile ||--o| profile__profile_completion_score : "fk_profile_completion_score_candidate_profile_id"
   profile__candidate_work_experience |o--o{ profile__candidate_project : "fk_candidate_project_candidate_work_experience_id"
   profile__course ||--o{ profile__course_enrolment : "fk_course_enrolment_course_id"
   profile__referral |o--o{ job__application : "fk_application_referral_id"

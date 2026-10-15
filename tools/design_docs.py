@@ -84,8 +84,12 @@ def load_relations(path, entities, problems):
             continue
         child, column = child_cell.split(".")
         parent_cell = clean(row.get("parent", ""))
+        ref_column = None
+        m = re.fullmatch(r"([a-z0-9_.]+)\(([a-z0-9_]+)\)", parent_cell)
+        if m:                                   # schema.table(column): composite FK onto a non-id column
+            parent_cell, ref_column = m.group(1), m.group(2)
         if parent_cell.count(".") != 1:
-            problems.append(f"{where}: parent must be schema.table")
+            problems.append(f"{where}: parent must be schema.table or schema.table(column)")
             continue
         parent_schema, parent = parent_cell.split(".")
         card = clean(row.get("cardinality", ""))
@@ -105,7 +109,10 @@ def load_relations(path, entities, problems):
             problems.append(f"{where}: optional? must be yes or no")
         if on_delete not in ON_DELETE:
             problems.append(f"{where}: ON DELETE '{on_delete}' not in {sorted(ON_DELETE)}")
-        if not re.fullmatch(rf"([a-z0-9_]+_)?{re.escape(parent)}_(id|code)", column):
+        if ref_column:
+            if not re.fullmatch(rf"([a-z0-9_]+_)?{re.escape(ref_column)}", column):
+                problems.append(f"{where}: FK column should be [role_]{ref_column} (it references {parent}.{ref_column})")
+        elif not re.fullmatch(rf"([a-z0-9_]+_)?{re.escape(parent)}_(id|code)", column):
             problems.append(f"{where}: FK column should be [role_]{parent}_id or [role_]{parent}_code (RG1)")
         if not reason:
             problems.append(f"{where}: reason is empty")

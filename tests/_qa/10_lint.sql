@@ -92,6 +92,21 @@ SELECT 'RG1 constraint name', t.nspname || '.' || t.relname || ' ' || k.conname,
    AND NOT (k.contype <> 'p' AND left(k.conname, length(p.prefix) + 1) = p.prefix || '_')
    AND length(p.prefix) < 62
 
+-- names at the 63-byte limit were silently truncated by PostgreSQL
+UNION ALL
+SELECT 'RG1 truncated name', t.nspname || '.' || t.relname || ' ' || k.conname, 'constraint name reached 63 bytes and was truncated; shorten it'
+  FROM pg_constraint k JOIN tbl t ON t.oid = k.conrelid
+ WHERE octet_length(k.conname) >= 63
+   AND k.contype IN ('p', 'f', 'u', 'c', 'x')   -- PG18 system-named NOT NULL constraints are outside the naming scheme
+UNION ALL
+SELECT 'RG1 truncated name', t.nspname || '.' || ic.relname, 'index name reached 63 bytes and was truncated; shorten it'
+  FROM pg_index i JOIN pg_class ic ON ic.oid = i.indexrelid JOIN tbl t ON t.oid = i.indrelid
+ WHERE octet_length(ic.relname) >= 63
+UNION ALL
+SELECT 'RG1 truncated name', t.nspname || '.' || t.relname || ' ' || tg.tgname, 'trigger name reached 63 bytes and was truncated; shorten it'
+  FROM pg_trigger tg JOIN tbl t ON t.oid = tg.tgrelid
+ WHERE NOT tg.tgisinternal AND octet_length(tg.tgname) >= 63
+
 -- index names not backing a constraint: idx_<table>_..., or uq_<table>_... for unique indexes
 UNION ALL
 SELECT 'RG1 index name', t.nspname || '.' || ic.relname, 'expected prefix idx_' || t.relname || '_'
@@ -269,12 +284,12 @@ UNION ALL
 SELECT 'RG8 physical name', nspname || '.' || relname, 'dim_/fact_/agg_ prefixes are reserved for the dw schema'
   FROM tbl WHERE nspname <> 'dw' AND relname ~ '^(dim|fact|agg)_'
 UNION ALL
-SELECT 'RG8 physical name', r.nspname || '.' || r.relname, 'partition must be named <parent>_pYYYY, <parent>_pYYYYMM or <parent>_default'
+SELECT 'RG8 physical name', r.nspname || '.' || r.relname, 'partition must be named <parent>_pYYYY, <parent>_pYYYYMM, <parent>_hNN (hash) or <parent>_default'
   FROM rel r
   JOIN pg_inherits i ON i.inhrelid = r.oid
   JOIN pg_class p ON p.oid = i.inhparent
  WHERE r.relispartition
-   AND r.relname !~ ('^' || p.relname || '_(p[0-9]{4}([0-9]{2})?|default)$')
+   AND r.relname !~ ('^' || p.relname || '_(p[0-9]{4}([0-9]{2})?|h[0-9]{2}|default)$')
 
 ORDER BY 1, 2
 $lint$;

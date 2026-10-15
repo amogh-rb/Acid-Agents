@@ -10,7 +10,7 @@
   .\run.ps1 lint                  # lint the current database without rebuilding it
   .\run.ps1 dict                  # export dictionary/columns.csv and dictionary/tables.csv from the catalog
   .\run.ps1 erd -Schemas ref,profile,job -Out docs/erd/phase1_generated.mmd
-  .\run.ps1 settings              # print the server settings recorded in docs/02_environment.md
+  .\run.ps1 settings              # print the server settings recorded in docs/04_environment.md
   .\run.ps1 psql                  # interactive psql on the database
 
   Connection settings come from .env (never committed; copy .env.example):

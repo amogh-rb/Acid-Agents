@@ -12,8 +12,8 @@ try {
   if ($LASTEXITCODE -ne 0) { exit 1 }
 
   $cols = Import-Csv (Join-Path $out 'columns.csv')
-  $expected = [int](& $psql -X -q -t -A -d $env:TALENTRA_DB -c "SELECT count(*) FROM information_schema.columns c JOIN information_schema.tables t USING (table_schema, table_name) WHERE t.table_type = 'BASE TABLE' AND c.table_schema NOT IN ('pg_catalog','information_schema','qa')")
-  if ($cols.Count -ne $expected) { Write-Output "FAIL  dictionary has $($cols.Count) rows, information_schema has $expected base-table columns"; exit 1 }
+  $expected = [int](& $psql -X -q -t -A -d $env:TALENTRA_DB -c "SELECT count(*) FROM information_schema.columns c JOIN information_schema.tables t USING (table_schema, table_name) JOIN pg_class k ON k.oid = format('%I.%I', t.table_schema, t.table_name)::regclass WHERE t.table_type = 'BASE TABLE' AND NOT k.relispartition AND c.table_schema NOT IN ('pg_catalog','information_schema','qa')")
+  if ($cols.Count -ne $expected) { Write-Output "FAIL  dictionary has $($cols.Count) rows, information_schema has $expected base-table columns (partitions excluded)"; exit 1 }
   Write-Output "PASS  dictionary rows = information_schema base-table columns ($expected)"
 
   $noClass = @($cols | Where-Object { -not $_.sensitive_class })

@@ -1,19 +1,19 @@
 schema_name,table_name,kind,delete_class,description,column_count
 admin,app_user,table,soft-delete,"Login identity (candidate, recruiter, consultant, admin, system). Stub in Phase 1; extended by Administration in M7-M10",8
-job,application,table,soft-delete,"Candidate application to a requirement: current status, source, resume, applied_at; one per candidate per job. Retention: anonymised with the profile",16
-job,application_answer,table,hard-delete,Candidate answer to a screening question (owned by the application),10
-job,application_status_history,table,append-only,"Every application status transition with actor (created_by), time and reason",8
+job,application,partitioned table,soft-delete,"Candidate application to a requirement: current status, source, resume, applied_at; one per candidate per job. Retention: anonymised with the profile",16
+job,application_answer,table,hard-delete,Candidate answer to a screening question (owned by the application),11
+job,application_status_history,table,append-only,"Every application status transition with actor (created_by), time and reason",9
 job,application_status_transition,table,hard-delete,"Legal (from, to) status moves read by trg_application_status_transition",8
-job,interview,table,hard-delete,Interview round of an application,17
-job,job_position,table,hard-delete,One opening within a requirement and its fill state (positions count = rows; owned by the requirement),9
+job,interview,table,hard-delete,Interview round of an application,18
+job,job_position,table,hard-delete,One opening within a requirement and its fill state (positions count = rows; owned by the requirement),10
 job,job_requirement,table,soft-delete,"Job posting (non-gig categories): owner and client, category, role, salary with disclosure, experience range, lifecycle, publish state, consultant openness",33
 job,job_requirement_location,table,hard-delete,"City a requirement is open in (junction, owned by the requirement)",7
 job,job_requirement_qualification,table,hard-delete,"Qualification accepted for a requirement (junction, owned by the requirement)",9
 job,job_requirement_questionnaire,table,hard-delete,"Questionnaire attached to a requirement (junction, owned by the requirement)",7
 job,job_requirement_skill,table,hard-delete,"Skill required by a requirement (junction, owned by the requirement)",10
 job,job_search_event,table,append-only,Each job search run by a candidate or guest (job search history),9
-job,joining,table,hard-delete,Joining against an accepted offer; one per application,10
-job,offer,table,hard-delete,Offer made on an application; a revised offer is a new row,14
+job,joining,table,hard-delete,Joining against an accepted offer; one per application,11
+job,offer,table,hard-delete,Offer made on an application; a revised offer is a new row,15
 job,question_option,table,hard-delete,Allowed answer of a choice question (owned by the question),9
 job,questionnaire,table,hard-delete,Reusable screening questionnaire owned by an organisation,9
 job,questionnaire_question,table,hard-delete,Ordered question in a questionnaire (owned by the questionnaire),11

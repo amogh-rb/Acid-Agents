@@ -9,6 +9,7 @@
 - **ON DELETE:** RESTRICT by default. CASCADE only for owned children, and the reason column justifies it. SET NULL only where the child must outlive the parent.
 - **ON UPDATE** is NO ACTION everywhere: ids are identity values, and lookup codes are stable and never renamed.
 - **Actor FKs:** every table's `created_by`/`updated_by` → `admin.app_user` (N:1, mandatory, RESTRICT). These are added to every table by `ddl/99_finalise.sql` and are not repeated below.
+- **Partitioned parent:** `job.application` is hash-partitioned on `candidate_profile_id` (D5), so every FK into it is composite `(application_id, candidate_profile_id)`. Rows with parent `job.application(candidate_profile_id)` document the second half.
 - **Soft-deleted parents** (candidate_profile, job_requirement, organisation, app_user, application, resume_version) are never physically deleted in normal operation. The CASCADE rules below therefore only fire in the retention purge (M22), where removing owned children with the parent is the intent.
 
 ## Stubs and master data
@@ -135,7 +136,8 @@
 | job_requirement.notice_period_code | ref.notice_period | N:1 | yes | RESTRICT | NULL: no notice-period requirement |
 | job_requirement.description_language_id | ref.language | N:1 | yes | RESTRICT | NULL: language not detected (RG7) |
 | job_position.job_requirement_id | job.job_requirement | N:1 | no | CASCADE | Owned child: openings exist only within the requirement |
-| job_position.filled_by_application_id | job.application | 1:1 | yes | RESTRICT | NULL: opening not yet filled; unique, so one hire fills one opening |
+| job_position.filled_by_application_id | job.application | 1:1 | yes | RESTRICT | NULL: opening not yet filled; unique, so one hire fills one opening. Composite FK (application, candidate, job) also proves the hire applied to this job |
+| job_position.filled_by_candidate_profile_id | profile.candidate_profile | N:1 | yes | RESTRICT | NULL: opening not yet filled; partition key of the filling application (D5) |
 | job_requirement_location.job_requirement_id | job.job_requirement | N:1 | no | CASCADE | Owned junction row |
 | job_requirement_location.city_id | ref.city | N:1 | no | RESTRICT | Master data |
 | job_requirement_skill.job_requirement_id | job.job_requirement | N:1 | no | CASCADE | Owned junction row |
@@ -159,9 +161,11 @@
 | application.resume_version_id | profile.resume_version | N:1 | yes | RESTRICT | NULL: applied with the profile only, no resume attached |
 | application.referral_id | profile.referral | N:1 | yes | RESTRICT | NULL: not a referral application |
 | application_answer.application_id | job.application | N:1 | no | CASCADE | Owned child |
+| application_answer.candidate_profile_id | job.application(candidate_profile_id) | N:1 | no | CASCADE | Owned child; partition key of application, half of the composite FK (application_id, candidate_profile_id) (D5) |
 | application_answer.questionnaire_question_id | job.questionnaire_question | N:1 | no | RESTRICT | Question answered |
 | application_answer.question_option_id | job.question_option | N:1 | yes | RESTRICT | NULL: free-text or numeric answer |
 | application_status_history.application_id | job.application | N:1 | no | RESTRICT | Append-only history |
+| application_status_history.candidate_profile_id | job.application(candidate_profile_id) | N:1 | no | RESTRICT | Partition key of application, half of the composite FK (application_id, candidate_profile_id) (D5) |
 | application_status_history.from_application_status_code | ref.application_status | N:1 | yes | RESTRICT | NULL: first entry (applied) has no previous status |
 | application_status_history.to_application_status_code | ref.application_status | N:1 | no | RESTRICT | New status |
 | application_status_transition.from_application_status_code | ref.application_status | N:1 | no | RESTRICT | Legal move source |
@@ -172,16 +176,19 @@
 | shortlist_entry.shortlist_id | job.shortlist | N:1 | no | CASCADE | Owned child |
 | shortlist_entry.candidate_profile_id | profile.candidate_profile | N:1 | no | RESTRICT | Candidate on the list |
 | interview.application_id | job.application | N:1 | no | RESTRICT | Pipeline history must survive |
+| interview.candidate_profile_id | job.application(candidate_profile_id) | N:1 | no | RESTRICT | Partition key of application, half of the composite FK (application_id, candidate_profile_id) (D5) |
 | interview.interview_mode_code | ref.interview_mode | N:1 | no | RESTRICT | Mode |
 | interview.interview_status_code | ref.interview_status | N:1 | no | RESTRICT | Scheduling state |
 | interview.interview_outcome_code | ref.interview_outcome | N:1 | yes | RESTRICT | NULL: not yet held (CHECK: set only when completed) |
 | interview.interviewer_app_user_id | admin.app_user | N:1 | yes | RESTRICT | NULL: panel not assigned yet |
 | interview.timezone_id | ref.timezone | N:1 | yes | RESTRICT | NULL: schedule shown in the viewer's zone; set when the source zone matters (RG3) |
 | offer.application_id | job.application | N:1 | no | RESTRICT | Offer history kept (a revised offer is a new row) |
+| offer.candidate_profile_id | job.application(candidate_profile_id) | N:1 | no | RESTRICT | Partition key of application, half of the composite FK (application_id, candidate_profile_id) (D5) |
 | offer.offer_status_code | ref.offer_status | N:1 | no | RESTRICT | State |
 | offer.ctc_currency_code | ref.currency | N:1 | no | RESTRICT | Money companion |
 | offer.ctc_pay_period_code | ref.pay_period | N:1 | no | RESTRICT | Period the CTC is quoted in |
 | joining.application_id | job.application | 1:1 | no | RESTRICT | One joining per application |
+| joining.candidate_profile_id | job.application(candidate_profile_id) | 1:1 | no | RESTRICT | Partition key of application, half of the composite FK (application_id, candidate_profile_id) (D5) |
 | joining.offer_id | job.offer | 1:1 | no | RESTRICT | Joining against the accepted offer |
 | joining.joining_status_code | ref.joining_status | N:1 | no | RESTRICT | Expected, joined, no_show, deferred |
 | saved_search.candidate_profile_id | profile.candidate_profile | N:1 | no | CASCADE | Owned by the candidate |

@@ -16,7 +16,7 @@ PostgreSQL 18.4 is installed on the team laptops. The docket's hardest rules map
 | Append-only audit and ledgers; Sensitive columns | `REVOKE UPDATE, DELETE` + trigger guard; `pgcrypto`; column grants | Possible, with fewer primitives |
 | Device limit under concurrent login (B45) | `SELECT ... FOR UPDATE` on the seat row inside one transaction | Also possible (InnoDB) |
 
-- **Extensions:** `btree_gist`, `pg_trgm`, `pgcrypto`. `pg_stat_statements` is installed automatically once it is preloaded (see `02_environment.md`).
+- **Extensions:** `btree_gist`, `pg_trgm`, `pgcrypto`. `pg_stat_statements` is installed automatically once it is preloaded (see `04_environment.md`).
 - **Database:** UTF8 encoding with ICU collation `und`, so multilingual names sort sensibly. Verified by `gate M1`.
 
 ## 2. Keys (RG2)
@@ -40,7 +40,7 @@ PostgreSQL 18.4 is installed on the team laptops. The docket's hardest rules map
 | Index | `idx_<table>_<cols>`; a unique index that can't be a constraint (for example partial) uses `uq_<table>_<cols>` |
 | Trigger | `trg_<table>_<purpose>` |
 | View / materialized view | `v_<name>` / `mv_<name>` |
-| Partition | `<table>_pYYYY`, `<table>_pYYYYMM`, `<table>_default` |
+| Partition | Range: `<table>_pYYYY`, `<table>_pYYYYMM`, `<table>_default`; hash: `<table>_hNN` (`job.application_h00..h31`) |
 | Analytics | schema `dw`; tables `dim_`, `fact_`, `agg_`, `etl_` (refresh watermarks). These prefixes are not allowed outside `dw` |
 | Domains | `d_<kind>` |
 
@@ -117,7 +117,7 @@ Every business table has `created_at`, `created_by`, `updated_at` and `updated_b
 |---|---|
 | Soft delete | candidate_profile, job_requirement, organisation, gig_request, resume_version, app_user |
 | Hard delete | junction rows (candidate_skill, job_requirement_skill, ...), lookups not yet referenced |
-| Append-only | audit_event, application_status_history, wallet_ledger_entry, payment_event, profile_view_event, profile_download_event, candidate_activity_event, candidate_bookmark_event, login_attempt, notification_delivery. The large ones are partitioned monthly |
+| Append-only | audit_event, application_status_history, wallet_ledger_entry, payment_event, profile_view_event, profile_download_event, candidate_activity_event, candidate_bookmark_event, login_attempt, notification_delivery. Not partitioned in Phase 1. They are leaf tables (no FK points at them), so monthly range partitioning can be added in M21 without rebuilding any FK; the decision rests on measurements |
 
 **Retention:**
 - Deletion on request anonymises Personal columns and sets `deleted_at`.
@@ -157,7 +157,7 @@ Every business table has `created_at`, `created_by`, `updated_at` and `updated_b
 | D2 | Email type | `varchar(254)` + lowercase CHECK (the Delivery Plan said `citext`) | The docket says "stored in lowercase". Once lowercase is stored, a normal unique index is already case-insensitive. citext would hide case instead of rejecting it |
 | D3 | Engine version | PostgreSQL 18 (the Delivery Plan said 16/17) | This version is installed; it is a superset for every feature used |
 | D4 | `updated_at`/`updated_by` on append-only tables | Omitted | Rows never change; the columns would always equal `created_*`. Documented in RG4 |
-| D5 | Partitioned `application` unique key | Decided in M6 | PostgreSQL requires the partition key in unique constraints on a partitioned table |
+| D5 | Partitioning `job.application` | **Decided in M6: HASH (candidate_profile_id), 32 partitions `application_h00..h31`.** PK `(id, candidate_profile_id)`; `uq_application_candidate_profile_id_job_requirement_id` still holds (it contains the key). Every FK into application is composite `(application_id, candidate_profile_id)`: application_answer, application_status_history, interview, offer, joining; job_position uses `(filled_by_application_id, filled_by_candidate_profile_id, job_requirement_id)` | Done now because six tables reference application and would all need rebuilding later.<br>**Why candidates, not jobs, as the key:** applications per job are Zipf-skewed (hot partitions), while applications per candidate are even.<br>**Why not range on applied_at:** the one-per-candidate-per-job key would then have to include applied_at and would stop being enforced.<br>**Cost:** recruiter queries by job probe all 32 partition indexes (`idx_application_job_requirement_id`). M21 measures this and states the 100M projection. At 100M rows each partition holds about 3.1M.<br>**Risk:** id is unique by the identity sequence, not by a constraint on id alone (GENERATED ALWAYS blocks manual ids). Unique violations report the partition index name; the harness maps it to the parent constraint |
 | D6 | Analytics tables (`dw`) | No audit columns; `[derived]` class | Rows are rebuilt from operational tables; lineage via `etl_` watermarks |
 | D7 | Milestone Plan references `Talentra_Merged_Build_Plan.md` | The Delivery Plan PDF is used as that document ("section 5 of the merged plan" = Delivery Plan section 4) | The merged file was not available |
 | D9 | Status FK column names | `application.application_status_code`, `from_application_status_code`, `to_application_status_code` (the Delivery Plan said `current_status_code`, `from_code`, `to_code`) | RG1: an FK is the referenced table name + `_id`/`_code`, optionally with a role prefix. `tools/design_docs.py` enforces it |
@@ -166,4 +166,6 @@ Every business table has `created_at`, `created_by`, `updated_at` and `updated_b
 | D12 | Money precision | `d_money` = numeric(14,2) for every currency; `ref.currency.minor_unit` records ISO decimals | All seeded currencies use 2 decimals. 3-decimal currencies (KWD, BHD) would need numeric(14,3); risk accepted for this market |
 | D13 | When keys are declared | PKs and FKs are declared with the columns in M4; M6 adds unique, check and exclusion constraints, triggers and indexes | The lint (RG2) rejects reference columns without an FK, so declaring FKs in M6 would leave M4/M5 red. The FK design was already fixed in M3 |
 | D14 | Lint heuristics refined | Money pairing accepts `<prefix>_currency_code` (ctc_amount + ctc_currency_code); `*_pct` columns are not money; `postal_code` carries `nofk:` | False positives found while building M4; the lint self-test still proves each rule fires |
+| D15 | Partition key on FK children | Children of `job.application` carry `candidate_profile_id` (NOT NULL) | It is the second half of the composite FK. It also lets M18 RLS give candidates their own interviews, offers and history without a join |
+| D16 | Compliance file numbering | `docs/02_compliance_table.md` (Milestone Plan name); the environment doc moved to `docs/04_environment.md` | Matches the core-gate checklist |
 | D8 | Docket Sections 8 (KPIs), 10 (performance method, RTO) and 12 | Referenced but not issued | Request them from the organisers before M15-M23; assumptions recorded where needed |

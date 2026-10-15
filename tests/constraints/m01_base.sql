@@ -178,7 +178,8 @@ CREATE TABLE lint_probe.widgets (
   latitude       numeric(9,6),
   match_pct      numeric(5,2),
   secret         varchar(50),
-  CONSTRAINT price_positive CHECK (price > 0)
+  CONSTRAINT price_positive CHECK (price > 0),
+  CONSTRAINT ck_widgets_this_check_constraint_name_is_far_too_long_to_survive_intact CHECK (id > 0)
 );
 COMMENT ON COLUMN lint_probe.widgets.secret IS '[Sensitive] stored in clear; null: probe';
 CREATE INDEX widgets_owner ON lint_probe.widgets (owner_id);
@@ -217,6 +218,7 @@ BEGIN
 
   FOREACH v_rule IN ARRAY ARRAY[
     'RG1 snake_case', 'RG1 singular', 'RG1 reserved word', 'RG1 constraint name', 'RG1 index name', 'RG1 trigger name',
+    'RG1 truncated name',
     'RG2 primary key', 'RG2 surrogate key', 'RG2 foreign key',
     'RG3 float', 'RG3 timestamp', 'RG3 money domain', 'RG3 money currency', 'RG3 unbounded text', 'RG3 email',
     'RG3 phone', 'RG3 person name', 'RG3 coordinates', 'RG3 percentage', 'RG3 boolean',

@@ -78,15 +78,18 @@ python tools/design_docs.py compare docs/phase1/entities.md docs/phase1/relation
 6. Commit `MNN: <summary>` with a green suite. Push when the user says so.
 
 ## Current state
-- **Done:** M1-M5 (gate M5 PASS, 7/7 files).
-- **Next:** M6, keys and constraints for Profile and Jobs (B20-B23). Append an `-- M6` section to `ddl/20_profile.sql` and `ddl/30_jobs.sql` (and `10_ref.sql` for ref uniques). PKs and FKs already exist (D13). Add:
-  - **Unique:** `uq_application_candidate_profile_id_job_requirement_id`; `uq_candidate_contact_email`; candidate_profile.app_user_id; junction pairs (candidate_skill, candidate_language, preferred location/role, job_requirement_skill/location/qualification/questionnaire, shortlist_entry where not deleted); joining.application_id and offer_id; job_position.filled_by_application_id; profile_completion_score.candidate_profile_id; resume_version (profile, version_number); skill name (lower); state (country_id, state_name); city (country_id, state_id, city_name) NULLS NOT DISTINCT; legacy (system, id) pairs.
-  - **Checks:** `ck_job_requirement_salary_range`, `ck_job_requirement_salary_disclosure` (amounts NULL unless disclosed; currency + pay period set iff disclosed), the same pattern on candidate_profile, `ck_candidate_education_date_range` and the other date ranges (experience, project, certification), experience min <= max, contact type <-> email/phone, institution_id XOR institution_name, organisation_id XOR employer_name, referral profile XOR email, rejection_reason iff rejected, interview outcome only when completed, scheduled_end > start, consultant_fee_pct iff open to consultants, job_search_event profile or session.
-  - **Trigger** `trg_application_status_transition`: rejects moves not in `job.application_status_transition` and writes `application_status_history` on insert and update.
-  - **Partial index** on open, published, non-deleted jobs; FK indexes on hot paths.
-  - **Tests:** `tests/constraints/m06_phase1.sql` with the 9 negative tests + the positive pipeline test (Milestone Plan section 3, M6). Then `docs/phase1/signoff.md`, then tag `phase1`.
-  - After DDL changes, rerun `run.ps1 dict`, because the m05 test fails if `dictionary/*.csv` is stale. If FKs or tables change, update `docs/phase1/relationships.md` / `entities.md` and re-render `docs/erd/phase1.mmd`.
-- **Open:** docket Sections 8, 10 and 12 are missing (ask the organisers); Verified ticks need reviewer initials; pg_stat_statements and memory settings are not yet applied (needs a service restart, see `docs/02_environment.md`).
+- **Done:** M1-M6, Phase 1 complete (gate M6 PASS, 8/8 files). Tag `phase1`. Reviewer C still has to sign `docs/phase1/signoff.md` and tick Verified on the board.
+- **Next:** Phase 2, M7-M10 (13:15-13:50). One module per member, each on its own branch (`m07-admin`, `m07-org`, `m07-gig`), merged after review. Per module:
+  - M7 entities and M8 relationships: new `docs/phase2/<module>_entities.md` and `_relationships.md` in the same table format as phase1. Check them with `tools/design_docs.py`, and add `tests/docs/m07_*.ps1` / `m08_*.ps1` like m02/m03.
+  - M9 columns and M10 keys: new DDL files `ddl/40_admin.sql` (A), `ddl/45_org.sql` (B), `ddl/50_gig.sql` (C). Extend the stubs with `ALTER TABLE admin.app_user` / `org.organisation`. Do not recreate them.
+  - Tests: `tests/constraints/m10_<module>.sql` with the Milestone Plan section 4 negative tests.
+  - The m05 comparison only covers the phase1 docs. Either add a phase2 call in a new `tests/docs/m10_design_vs_catalog.ps1`, or extend m05 to read every `docs/phase*/` pair.
+- **Rules learned:**
+  - Keep constraint and index names at 62 bytes or less; the lint flags truncation.
+  - FKs into `job.application` must be composite `(application_id, candidate_profile_id)`.
+  - After any DDL change, run `run.ps1 dict` and commit `dictionary/*.csv`.
+  - After FK changes, update `relationships.md` and re-render the ERD.
+- **Open:** docket Sections 8, 10 and 12 are missing (ask the organisers); Verified ticks need reviewer initials; pg_stat_statements and memory settings are not yet applied (needs a service restart, see `docs/04_environment.md`).
 
 ## Handoff log
 - **M1 (2026-10-15):**
@@ -100,3 +103,10 @@ python tools/design_docs.py compare docs/phase1/entities.md docs/phase1/relation
   - Built: `ddl/10_ref.sql` (32 lookups, geography, currency, skills, education, industry, roles, identifier types, seed rows), `20_profile.sql` (24 tables), `30_jobs.sql` (20 tables + transition seed); `ref.label_for()` helper; `dictionary/*.csv`; `docs/erd/phase1_generated.mmd`; `docs/phase1/design.md`.
   - Tests: `m04_columns.sql`, `m05_design_vs_catalog.ps1`. m05 proves the docs match the catalog both ways and that the committed dictionary is fresh.
   - Decisions D12-D14. FKs declared in M4. Cross-module links added later: profile_view_event -> ledger debit (M14), candidate_project -> gig assignment (M10).
+- **M6 (2026-10-15):**
+  - Built: the M6 sections of `ddl/10_ref.sql`, `20_profile.sql` and `30_jobs.sql`:
+    - unique and check constraints, composite FKs and indexes (partial index on open/published/live jobs, trigram, full text);
+    - `trg_application_status_transition` + `trg_application_status_history`;
+    - **`job.application` hash-partitioned on candidate_profile_id, 32 partitions (D5)**; children carry `candidate_profile_id` (D15).
+  - Tests: `m06_phase1.sql` (41 checks: Milestone Plan 1-9, 15+ extra rejections, full pipeline, partitioning). Docs: `docs/phase1/signoff.md`, `docs/02_compliance_table.md` (environment doc renamed to `04_environment.md`, D16).
+  - Harness and lint: `qa.expect_error` maps partition index names to parent constraints; new lint rule "RG1 truncated name"; dictionary `references_to` is deterministic.

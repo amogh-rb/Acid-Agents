@@ -120,7 +120,7 @@ Created in `ddl/15_stubs.sql` with only an id, a status, the audit columns and t
 | questionnaire_question | job | Jobs and Applications | Ordered question in a questionnaire, with type and mandatory flag | 1 | hard-delete | B |
 | question_option | job | Jobs and Applications | Allowed answer for a choice question | 1 | hard-delete | B |
 | job_requirement_questionnaire | job | Jobs and Applications | Attaches questionnaires to a requirement | 1 | hard-delete | B |
-| application | job | Jobs and Applications | Candidate applies to a requirement: current status, source, resume used, applied_at; one per candidate per job | 1 | soft-delete | B |
+| application | job | Jobs and Applications | Candidate applies to a requirement: current status, source, resume used, applied_at; one per candidate per job. Hash-partitioned on candidate_profile_id, 32 partitions (D5) | 1 | soft-delete | B |
 | application_answer | job | Jobs and Applications | Candidate answer to a screening question | 1 | hard-delete | B |
 | application_status_history | job | Jobs and Applications | Every status transition with actor, time and reason (application history) | 1 | append-only | B |
 | application_status_transition | job | Jobs and Applications | Legal (from, to) status moves; the transition trigger reads it | 1 | hard-delete | B |

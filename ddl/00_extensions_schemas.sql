@@ -5,7 +5,7 @@ CREATE EXTENSION IF NOT EXISTS btree_gist;  -- EXCLUDE constraints that mix = an
 CREATE EXTENSION IF NOT EXISTS pg_trgm;     -- fuzzy multilingual name / title search and candidate de-duplication
 CREATE EXTENSION IF NOT EXISTS pgcrypto;    -- digest() for lookup hashes, pgp_sym_encrypt() for Sensitive columns
 
--- pg_stat_statements only works when preloaded; create it when the server allows (see docs/02_environment.md).
+-- pg_stat_statements only works when preloaded; create it when the server allows (see docs/04_environment.md).
 DO $$
 BEGIN
   IF current_setting('shared_preload_libraries') ~ 'pg_stat_statements' THEN

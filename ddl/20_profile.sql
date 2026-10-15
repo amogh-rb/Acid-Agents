@@ -581,7 +581,8 @@ COMMENT ON COLUMN profile.profile_completion_score.missing_sections IS '[Interna
 COMMENT ON COLUMN profile.profile_completion_score.computed_at IS '[Internal] When the score was last computed';
 
 -- ---------------------------------------------------------------------------------------------------
--- Append-only history (RG10: actor, subject, timestamp). Partitioned monthly at full scale (M21).
+-- Append-only history (RG10: actor, subject, timestamp). Leaf tables (no FK points at them): monthly range partitioning
+-- can be added in M21 without rebuilding any FK (D5).
 CREATE TABLE profile.profile_view_event (
   id                      bigint GENERATED ALWAYS AS IDENTITY,
   candidate_profile_id    bigint      NOT NULL,
@@ -667,3 +668,139 @@ COMMENT ON COLUMN profile.referral.referred_email IS '[Personal] Invitee email; 
 COMMENT ON COLUMN profile.referral.job_requirement_id IS '[Internal] Job referred for; null: platform referral, not for a specific job (FK added in 30_jobs.sql)';
 COMMENT ON COLUMN profile.referral.referral_status_code IS '[Internal] invited, registered, applied, hired, expired; default invited';
 COMMENT ON COLUMN profile.referral.referred_at IS '[Internal] When the referral was made (UTC)';
+
+-- =====================================================================================================
+-- M6: unique and check constraints, indexes (profile)
+-- =====================================================================================================
+
+ALTER TABLE profile.candidate_profile
+  ADD CONSTRAINT uq_candidate_profile_app_user_id UNIQUE (app_user_id),
+  ADD CONSTRAINT uq_candidate_profile_legacy_source_system_legacy_source_id UNIQUE (legacy_source_system, legacy_source_id),
+  ADD CONSTRAINT ck_candidate_profile_legacy_source_pair CHECK ((legacy_source_system IS NULL) = (legacy_source_id IS NULL)),
+  -- RG5: an amount exists exactly when it is disclosed; never 0 or '' for "unknown"
+  ADD CONSTRAINT ck_candidate_profile_current_salary_disclosure
+    CHECK ((current_salary_disclosure_code = 'disclosed') = (current_salary_amount IS NOT NULL)),
+  ADD CONSTRAINT ck_candidate_profile_expected_salary_disclosure
+    CHECK ((expected_salary_disclosure_code = 'disclosed') = (expected_salary_amount IS NOT NULL)),
+  ADD CONSTRAINT ck_candidate_profile_salary_currency
+    CHECK ((currency_code IS NULL) = (pay_period_code IS NULL)
+           AND (currency_code IS NOT NULL) = (current_salary_amount IS NOT NULL OR expected_salary_amount IS NOT NULL)),
+  ADD CONSTRAINT ck_candidate_profile_salary_non_negative CHECK (current_salary_amount >= 0 AND expected_salary_amount >= 0),
+  ADD CONSTRAINT ck_candidate_profile_total_experience_months CHECK (total_experience_months BETWEEN 0 AND 840),
+  ADD CONSTRAINT ck_candidate_profile_date_of_birth CHECK (date_of_birth > DATE '1900-01-01'),
+  ADD CONSTRAINT ck_candidate_profile_headline_not_blank CHECK (btrim(headline) <> ''),
+  ADD CONSTRAINT ck_candidate_profile_summary_not_blank CHECK (btrim(summary) <> ''),
+  ADD CONSTRAINT ck_candidate_profile_summary_language CHECK (summary_language_id IS NULL OR summary IS NOT NULL);
+CREATE INDEX idx_candidate_profile_current_city_id ON profile.candidate_profile (current_city_id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_candidate_profile_full_name_trgm ON profile.candidate_profile USING gin (full_name gin_trgm_ops);
+
+ALTER TABLE profile.candidate_contact
+  ADD CONSTRAINT uq_candidate_contact_email UNIQUE (email),
+  ADD CONSTRAINT ck_candidate_contact_value_by_type CHECK (
+        (contact_type_code = 'email' AND email IS NOT NULL AND phone IS NULL AND phone_country_id IS NULL)
+     OR (contact_type_code IN ('phone', 'whatsapp') AND phone IS NOT NULL AND phone_country_id IS NOT NULL AND email IS NULL)),
+  ADD CONSTRAINT ck_candidate_contact_verified CHECK (is_verified = (verified_at IS NOT NULL));
+CREATE UNIQUE INDEX uq_candidate_contact_primary_per_type ON profile.candidate_contact (candidate_profile_id, contact_type_code) WHERE is_primary;
+CREATE INDEX idx_candidate_contact_candidate_profile_id ON profile.candidate_contact (candidate_profile_id);
+CREATE INDEX idx_candidate_contact_phone ON profile.candidate_contact (phone) WHERE phone IS NOT NULL;
+
+ALTER TABLE profile.candidate_address
+  ADD CONSTRAINT ck_candidate_address_coordinates_pair CHECK ((latitude IS NULL) = (longitude IS NULL)),
+  ADD CONSTRAINT ck_candidate_address_address_line1_not_blank CHECK (btrim(address_line1) <> '');
+CREATE INDEX idx_candidate_address_candidate_profile_id ON profile.candidate_address (candidate_profile_id);
+
+ALTER TABLE profile.candidate_identity_document
+  ADD CONSTRAINT uq_candidate_identity_document_type_hash UNIQUE (identifier_type_code, identifier_hash),
+  ADD CONSTRAINT uq_candidate_identity_document_profile_type UNIQUE (candidate_profile_id, identifier_type_code),
+  ADD CONSTRAINT ck_candidate_identity_document_last4_format CHECK (identifier_last4 ~ '^[A-Z0-9]{4}$'),
+  ADD CONSTRAINT ck_candidate_identity_document_hash_length CHECK (octet_length(identifier_hash) = 32),
+  ADD CONSTRAINT ck_candidate_identity_document_verified CHECK (verification_status_code <> 'verified' OR verified_at IS NOT NULL);
+
+ALTER TABLE profile.candidate_language
+  ADD CONSTRAINT uq_candidate_language_candidate_profile_id_language_id UNIQUE (candidate_profile_id, language_id),
+  ADD CONSTRAINT ck_candidate_language_some_ability CHECK (can_read OR can_write OR can_speak);
+
+ALTER TABLE profile.candidate_education
+  ADD CONSTRAINT ck_candidate_education_date_range CHECK (end_date IS NULL OR end_date >= start_date),
+  ADD CONSTRAINT ck_candidate_education_institution CHECK ((institution_id IS NULL) <> (institution_name IS NULL)),
+  ADD CONSTRAINT ck_candidate_education_single_score CHECK (score_pct IS NULL OR grade_text IS NULL),
+  ADD CONSTRAINT ck_candidate_education_institution_name_not_blank CHECK (btrim(institution_name) <> '');
+CREATE UNIQUE INDEX uq_candidate_education_one_highest ON profile.candidate_education (candidate_profile_id) WHERE is_highest;
+CREATE INDEX idx_candidate_education_candidate_profile_id ON profile.candidate_education (candidate_profile_id);
+
+ALTER TABLE profile.candidate_work_experience
+  ADD CONSTRAINT ck_candidate_work_experience_date_range CHECK (end_date IS NULL OR end_date >= start_date),
+  ADD CONSTRAINT ck_candidate_work_experience_employer CHECK ((organisation_id IS NULL) <> (employer_name IS NULL)),
+  ADD CONSTRAINT ck_candidate_work_experience_current CHECK (is_current = (end_date IS NULL)),
+  ADD CONSTRAINT ck_candidate_work_experience_description_language CHECK (description_language_id IS NULL OR description IS NOT NULL);
+CREATE INDEX idx_candidate_work_experience_candidate_profile_id ON profile.candidate_work_experience (candidate_profile_id);
+CREATE INDEX idx_candidate_work_experience_organisation_id ON profile.candidate_work_experience (organisation_id) WHERE organisation_id IS NOT NULL;
+
+ALTER TABLE profile.candidate_skill
+  ADD CONSTRAINT uq_candidate_skill_candidate_profile_id_skill_id UNIQUE (candidate_profile_id, skill_id),
+  ADD CONSTRAINT ck_candidate_skill_experience_months CHECK (experience_months >= 0),
+  ADD CONSTRAINT ck_candidate_skill_last_used_year CHECK (last_used_year BETWEEN 1950 AND 2100);
+CREATE INDEX idx_candidate_skill_skill_id ON profile.candidate_skill (skill_id);
+
+ALTER TABLE profile.candidate_certification
+  ADD CONSTRAINT ck_candidate_certification_date_range CHECK (expiry_date IS NULL OR expiry_date >= issue_date);
+CREATE INDEX idx_candidate_certification_candidate_profile_id ON profile.candidate_certification (candidate_profile_id);
+
+ALTER TABLE profile.candidate_project
+  ADD CONSTRAINT ck_candidate_project_date_range CHECK (end_date IS NULL OR end_date >= start_date),
+  ADD CONSTRAINT ck_candidate_project_description_language CHECK (description_language_id IS NULL OR description IS NOT NULL);
+CREATE INDEX idx_candidate_project_candidate_profile_id ON profile.candidate_project (candidate_profile_id);
+
+ALTER TABLE profile.candidate_preferred_location
+  ADD CONSTRAINT uq_candidate_preferred_location_candidate_profile_id_city_id UNIQUE (candidate_profile_id, city_id);
+ALTER TABLE profile.candidate_preferred_role
+  ADD CONSTRAINT uq_candidate_preferred_role_candidate_profile_id_job_role_id UNIQUE (candidate_profile_id, job_role_id);
+ALTER TABLE profile.candidate_web_link
+  ADD CONSTRAINT uq_candidate_web_link_candidate_profile_id_link_url UNIQUE (candidate_profile_id, link_url),
+  ADD CONSTRAINT ck_candidate_web_link_link_url_format CHECK (link_url ~* '^https?://');
+
+ALTER TABLE profile.resume_template ADD CONSTRAINT uq_resume_template_template_name UNIQUE (template_name);
+
+ALTER TABLE profile.resume_version
+  ADD CONSTRAINT uq_resume_version_candidate_profile_id_version_number UNIQUE (candidate_profile_id, version_number),
+  ADD CONSTRAINT ck_resume_version_version_number CHECK (version_number > 0),
+  ADD CONSTRAINT ck_resume_version_has_content CHECK (body IS NOT NULL OR file_storage_key IS NOT NULL),
+  ADD CONSTRAINT ck_resume_version_file_metadata CHECK ((file_storage_key IS NULL) = (file_mime_type IS NULL)
+                                                       AND (file_storage_key IS NULL) = (file_size_bytes IS NULL)),
+  ADD CONSTRAINT ck_resume_version_file_size_bytes CHECK (file_size_bytes > 0),
+  ADD CONSTRAINT ck_resume_version_body_language CHECK (body_language_id IS NULL OR body IS NOT NULL);
+CREATE UNIQUE INDEX uq_resume_version_one_default ON profile.resume_version (candidate_profile_id) WHERE is_default AND deleted_at IS NULL;
+
+ALTER TABLE profile.assessment
+  ADD CONSTRAINT uq_assessment_assessment_name UNIQUE (assessment_name),
+  ADD CONSTRAINT ck_assessment_max_score CHECK (max_score > 0),
+  ADD CONSTRAINT ck_assessment_duration_minutes CHECK (duration_minutes > 0);
+
+ALTER TABLE profile.assessment_attempt
+  ADD CONSTRAINT ck_assessment_attempt_time_range CHECK (submitted_at >= started_at),
+  ADD CONSTRAINT ck_assessment_attempt_raw_score CHECK (raw_score >= 0);
+CREATE INDEX idx_assessment_attempt_candidate_profile_id ON profile.assessment_attempt (candidate_profile_id, submitted_at);
+
+ALTER TABLE profile.course
+  ADD CONSTRAINT uq_course_course_title_provider_name UNIQUE (course_title, provider_name),
+  ADD CONSTRAINT ck_course_duration_hours CHECK (duration_hours > 0);
+
+ALTER TABLE profile.course_enrolment
+  ADD CONSTRAINT uq_course_enrolment_course_id_candidate_profile_id UNIQUE (course_id, candidate_profile_id),
+  ADD CONSTRAINT ck_course_enrolment_date_range CHECK (completed_on IS NULL OR completed_on >= enrolled_on),
+  ADD CONSTRAINT ck_course_enrolment_completed CHECK ((enrolment_status_code = 'completed') = (completed_on IS NOT NULL)),
+  ADD CONSTRAINT ck_course_enrolment_certificate CHECK (certificate_url IS NULL OR completed_on IS NOT NULL);
+CREATE INDEX idx_course_enrolment_candidate_profile_id ON profile.course_enrolment (candidate_profile_id);
+
+ALTER TABLE profile.profile_completion_score
+  ADD CONSTRAINT uq_profile_completion_score_candidate_profile_id UNIQUE (candidate_profile_id);
+
+CREATE INDEX idx_profile_view_event_candidate_profile_id ON profile.profile_view_event (candidate_profile_id, viewed_at);
+CREATE INDEX idx_profile_view_event_viewer_organisation_id ON profile.profile_view_event (viewer_organisation_id, viewed_at);
+CREATE INDEX idx_candidate_activity_event_candidate_profile_id ON profile.candidate_activity_event (candidate_profile_id, occurred_at);
+CREATE INDEX idx_candidate_bookmark_event_candidate_profile_id ON profile.candidate_bookmark_event (candidate_profile_id, occurred_at);
+CREATE INDEX idx_candidate_bookmark_event_actor_app_user_id ON profile.candidate_bookmark_event (actor_app_user_id, occurred_at);
+
+ALTER TABLE profile.referral
+  ADD CONSTRAINT ck_referral_referred_party CHECK ((referred_candidate_profile_id IS NULL) <> (referred_email IS NULL));
+CREATE INDEX idx_referral_referrer_app_user_id ON profile.referral (referrer_app_user_id);

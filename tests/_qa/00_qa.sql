@@ -12,16 +12,31 @@ LANGUAGE plpgsql AS
 $$
 DECLARE
   v_constraint text;
+  v_schema     text;
   v_message    text;
   v_state      text;
+  v_index      regclass;
 BEGIN
   BEGIN
     EXECUTE p_sql;
   EXCEPTION WHEN OTHERS THEN
-    GET STACKED DIAGNOSTICS v_constraint = CONSTRAINT_NAME, v_message = MESSAGE_TEXT, v_state = RETURNED_SQLSTATE;
+    GET STACKED DIAGNOSTICS v_constraint = CONSTRAINT_NAME, v_schema = SCHEMA_NAME,
+                            v_message = MESSAGE_TEXT, v_state = RETURNED_SQLSTATE;
     IF coalesce(v_constraint, '') = p_expected OR position(p_expected IN v_message) > 0 THEN
       RAISE NOTICE 'PASS  %: rejected by %', p_label, p_expected;
       RETURN;
+    END IF;
+    -- On a partitioned table PostgreSQL reports the partition's own index (application_h24_..._key);
+    -- accept it when that index is a partition of the expected constraint's index.
+    IF v_constraint <> '' AND v_schema <> '' THEN
+      v_index := to_regclass(quote_ident(v_schema) || '.' || quote_ident(v_constraint));
+      IF v_index IS NOT NULL AND EXISTS (
+           SELECT 1 FROM pg_partition_ancestors(v_index) a
+             JOIN pg_constraint c ON c.conindid = a.relid
+            WHERE c.conname = p_expected) THEN
+        RAISE NOTICE 'PASS  %: rejected by % (partition index %)', p_label, p_expected, v_constraint;
+        RETURN;
+      END IF;
     END IF;
     RAISE EXCEPTION 'FAIL  %: expected % but got [%] % (constraint: %)',
                     p_label, p_expected, v_state, v_message, coalesce(v_constraint, 'none');

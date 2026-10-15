@@ -687,3 +687,54 @@ SELECT v.code, ref.label_for('enum.identifier_type', v.label), v.ord, v.regex, v
                ('ein',      'EIN',      6, '^[0-9]{2}-[0-9]{7}$',                                 false, true,  'US'))
        v(code, label, ord, regex, person, org, iso2)
   LEFT JOIN ref.country c ON c.iso_alpha2 = v.iso2;
+
+-- =====================================================================================================
+-- M6: unique and check constraints, indexes (ref)
+-- =====================================================================================================
+
+ALTER TABLE ref.currency
+  ADD CONSTRAINT ck_currency_minor_unit CHECK (minor_unit BETWEEN 0 AND 4);
+
+ALTER TABLE ref.country
+  ADD CONSTRAINT uq_country_iso_alpha3 UNIQUE (iso_alpha3),
+  ADD CONSTRAINT ck_country_iso_alpha2_format CHECK (iso_alpha2 ~ '^[A-Z]{2}$'),
+  ADD CONSTRAINT ck_country_iso_alpha3_format CHECK (iso_alpha3 ~ '^[A-Z]{3}$'),
+  ADD CONSTRAINT ck_country_phone_prefix_format CHECK (phone_prefix ~ '^\+[1-9][0-9]{0,3}$');
+
+ALTER TABLE ref.state
+  ADD CONSTRAINT uq_state_country_id_state_name UNIQUE (country_id, state_name),
+  ADD CONSTRAINT uq_state_iso_subdivision UNIQUE (iso_subdivision),
+  ADD CONSTRAINT ck_state_iso_subdivision_format CHECK (iso_subdivision ~ '^[A-Z]{2}-[A-Z0-9]{1,3}$');
+
+ALTER TABLE ref.city
+  ADD CONSTRAINT uq_city_country_id_state_id_city_name UNIQUE NULLS NOT DISTINCT (country_id, state_id, city_name),
+  ADD CONSTRAINT uq_city_geonames_id UNIQUE (geonames_id),
+  ADD CONSTRAINT ck_city_coordinates_pair CHECK ((latitude IS NULL) = (longitude IS NULL));
+CREATE INDEX idx_city_state_id ON ref.city (state_id);
+CREATE INDEX idx_city_city_name_trgm ON ref.city USING gin (city_name gin_trgm_ops);
+
+ALTER TABLE ref.skill_category
+  ADD CONSTRAINT uq_skill_category_category_name UNIQUE (category_name),
+  ADD CONSTRAINT ck_skill_category_not_own_parent CHECK (parent_skill_category_id <> id);
+
+CREATE UNIQUE INDEX uq_skill_skill_name_lower ON ref.skill (lower(skill_name));
+CREATE INDEX idx_skill_skill_category_id ON ref.skill (skill_category_id);
+CREATE INDEX idx_skill_skill_name_trgm ON ref.skill USING gin (skill_name gin_trgm_ops);
+
+ALTER TABLE ref.qualification ADD CONSTRAINT uq_qualification_qualification_name UNIQUE (qualification_name);
+ALTER TABLE ref.field_of_study ADD CONSTRAINT uq_field_of_study_field_name UNIQUE (field_name);
+ALTER TABLE ref.institution ADD CONSTRAINT uq_institution_institution_name_country_id UNIQUE (institution_name, country_id);
+CREATE INDEX idx_institution_institution_name_trgm ON ref.institution USING gin (institution_name gin_trgm_ops);
+
+ALTER TABLE ref.industry
+  ADD CONSTRAINT uq_industry_industry_name UNIQUE (industry_name),
+  ADD CONSTRAINT ck_industry_not_own_parent CHECK (parent_industry_id <> id);
+ALTER TABLE ref.job_function ADD CONSTRAINT uq_job_function_function_name UNIQUE (function_name);
+ALTER TABLE ref.job_role ADD CONSTRAINT uq_job_role_job_function_id_role_name UNIQUE (job_function_id, role_name);
+
+ALTER TABLE ref.pay_period          ADD CONSTRAINT ck_pay_period_annual_multiplier CHECK (annual_multiplier > 0);
+ALTER TABLE ref.notice_period       ADD CONSTRAINT ck_notice_period_notice_days CHECK (notice_days >= 0);
+ALTER TABLE ref.proficiency_level   ADD CONSTRAINT ck_proficiency_level_level_rank CHECK (level_rank > 0);
+ALTER TABLE ref.qualification_level ADD CONSTRAINT ck_qualification_level_level_rank CHECK (level_rank > 0);
+ALTER TABLE ref.application_status  ADD CONSTRAINT ck_application_status_pipeline_rank CHECK (pipeline_rank > 0);
+ALTER TABLE ref.identifier_type     ADD CONSTRAINT ck_identifier_type_applies_to CHECK (applies_to_person OR applies_to_organisation);

@@ -49,7 +49,7 @@ SELECT schema_name,
        coalesce(substring(tcmt FROM '^\[([a-z-]+)\]'), '') AS delete_class,
        coalesce((SELECT string_agg(rn.nspname || '.' || rc.relname || '(' || ra.attname || ') ON DELETE ' ||
                                    CASE k.confdeltype WHEN 'a' THEN 'NO ACTION' WHEN 'r' THEN 'RESTRICT' WHEN 'c' THEN 'CASCADE'
-                                                      WHEN 'n' THEN 'SET NULL' WHEN 'd' THEN 'SET DEFAULT' END, ', ')
+                                                      WHEN 'n' THEN 'SET NULL' WHEN 'd' THEN 'SET DEFAULT' END, ', ' ORDER BY rn.nspname, rc.relname, ra.attname)
                    FROM pg_constraint k
                    JOIN pg_class rc ON rc.oid = k.confrelid
                    JOIN pg_namespace rn ON rn.oid = rc.relnamespace

@@ -1,4 +1,4 @@
--- Server settings recorded for the performance evidence (docs/02_environment.md). Run: .\run.ps1 settings
+-- Server settings recorded for the performance evidence (docs/04_environment.md). Run: .\run.ps1 settings
 SELECT version();
 SELECT name, setting, unit, source
   FROM pg_settings
