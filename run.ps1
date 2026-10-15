@@ -12,6 +12,9 @@
   .\run.ps1 erd -Schemas ref,profile,job -Out docs/erd/phase1_generated.mmd
   .\run.ps1 settings              # print the server settings recorded in docs/04_environment.md
   .\run.ps1 psql                  # interactive psql on the database
+  .\run.ps1 seed -Scale rehearsal # build talentra_seed (tablespace talentra_data on D:) and load the seed (M19)
+  .\run.ps1 seed -Scale laptop    # full laptop scale: 1M profiles, 100K jobs, 5M applications
+  -Database <name> runs any command against another database (default TALENTRA_DB, or talentra_seed for seed)
 
   Connection settings come from .env (never committed; copy .env.example):
   PGHOST, PGPORT, PGUSER, PGPASSWORD, PGBIN, TALENTRA_DB
@@ -19,13 +22,17 @@
 [CmdletBinding()]
 param(
   [Parameter(Position = 0)]
-  [ValidateSet('up', 'gate', 'test', 'lint', 'dict', 'erd', 'settings', 'psql')]
+  [ValidateSet('up', 'gate', 'test', 'lint', 'dict', 'erd', 'settings', 'psql', 'seed')]
   [string]$Command = 'test',
   [Parameter(Position = 1)]
   [string]$Milestone,
   [string[]]$Schemas,
   [string]$Out = 'docs/erd/generated.mmd',
-  [switch]$Evidence
+  [switch]$Evidence,
+  [string]$Database,
+  [ValidateSet('rehearsal', 'laptop')]
+  [string]$Scale = 'rehearsal',
+  [string]$Tablespace
 )
 
 $ErrorActionPreference = 'Stop'
@@ -46,6 +53,11 @@ if (-not $env:PGBIN)       { $env:PGBIN = 'C:\Program Files\PostgreSQL\18\bin' }
 if (-not $env:TALENTRA_DB) { $env:TALENTRA_DB = 'talentra' }
 $env:PGCLIENTENCODING = 'UTF8'
 $Db = $env:TALENTRA_DB
+if ($Command -eq 'seed') {
+  $Db = 'talentra_seed'
+  if (-not $Tablespace) { $Tablespace = 'talentra_data' }
+}
+if ($Database) { $Db = $Database }
 $Psql = Join-Path $env:PGBIN 'psql.exe'
 if (-not (Test-Path $Psql)) { throw "psql not found at $Psql. Set PGBIN in .env." }
 
@@ -102,7 +114,8 @@ function Assert-Ok($Result, [string]$What) {
 function Invoke-Up {
   $r = Invoke-Psql -Database 'postgres' -Arguments @(
     '-c', "DROP DATABASE IF EXISTS $Db WITH (FORCE)",
-    '-c', "CREATE DATABASE $Db TEMPLATE template0 ENCODING 'UTF8' LOCALE_PROVIDER icu ICU_LOCALE 'und' LOCALE 'C'")
+    '-c', ("CREATE DATABASE $Db TEMPLATE template0 ENCODING 'UTF8' LOCALE_PROVIDER icu ICU_LOCALE 'und' LOCALE 'C'" +
+           $(if ($Tablespace) { " TABLESPACE $Tablespace" } else { '' })))
   Assert-Ok $r "create database $Db"
   $files = @(Get-ChildItem 'ddl' -Filter '*.sql' | Sort-Object Name)
   foreach ($f in $files) {
@@ -217,6 +230,29 @@ try {
       Write-Host $r.Out
     }
     'psql' { & $Psql -X -d $Db }
+    'seed' {
+      # volumes per scale (docket Section 6: laptop scale = 1M profiles, 100K jobs, 5M applications)
+      $v = if ($Scale -eq 'laptop') {
+        @{ candidates = 1000000; jobs = 100000; applications = 5000000; organisations = 10000; gig_workers = 50000; gig_requests = 20000 }
+      } else {
+        @{ candidates = 10000; jobs = 1000; applications = 50000; organisations = 200; gig_workers = 500; gig_requests = 200 }
+      }
+      Say ("== seed {0} into {1} (tablespace {2}) ==" -f $Scale, $Db, $Tablespace) 'Cyan'
+      $t0 = Get-Date
+      Invoke-Up
+      $vars = @()
+      foreach ($k in $v.Keys) { $vars += @('-v', "$k=$($v[$k])") }
+      foreach ($f in (Get-ChildItem 'seed' -Filter '*.sql' | Where-Object { $_.Name -match '^[0-9]' } | Sort-Object Name)) {
+        $t = Get-Date
+        $r = Invoke-Psql -Arguments ($vars + @('-f', "seed/$($f.Name)"))
+        Assert-Ok $r "seed/$($f.Name)"
+        foreach ($l in (Get-Lines ($r.Out + "`n" + $r.Err))) { Say ("        " + $l) 'DarkGray' }
+        Say ("seed  {0,-34} {1,8:N1} s" -f $f.Name, ((Get-Date) - $t).TotalSeconds) 'Green'
+      }
+      Say ("== seed {0}: done in {1:N1} min ==" -f $Scale, ((Get-Date) - $t0).TotalMinutes) 'Green'
+      $script:Evidence = [System.Management.Automation.SwitchParameter]::new($true)
+      Save-Evidence ('seed_' + $Scale)
+    }
   }
 } catch {
   Say "ERROR $($_.Exception.Message)" 'Red'

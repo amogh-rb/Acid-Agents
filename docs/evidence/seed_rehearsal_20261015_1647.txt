@@ -1,0 +1,3 @@
+== seed rehearsal into talentra_seed (tablespace talentra_data) ==
+up    talentra_seed rebuilt from 18 ddl files
+== seed rehearsal: done in 0.3 min ==

@@ -1,0 +1,89 @@
+== seed rehearsal into talentra_seed (tablespace talentra_data) ==
+up    talentra_seed rebuilt from 18 ddl files
+        'seed params: candidates=10000 jobs=1000 applications=50000 organisations=200 recruiters=280 consultants=20 gig_workers=500 gig_requests=200 users=10826'
+seed  00_prep.sql                             0.2 s
+        organisations=200 users=10826
+seed  10_orgs_users.sql                       1.1 s
+        profiles=10000 legacy=967 near_duplicates=291
+seed  20_candidates.sql                       4.6 s
+        application plan rows: 50000
+        jobs=1000 applications=50000 history=98765
+seed  30_jobs_applications.sql                9.5 s
+        gig assignment attempts=93 inserted=93; explicit overlap attempts=26 rejected by exclusion constraint=26
+        gig_requests=200 gig_applications=940 assignments=93
+seed  40_gig.sql                              1.9 s
+        ledger=11372 downloads=9859 sessions=1508
+seed  50_lic_src_billing.sql                  0.7 s
+        delivery partitions created: 5
+        notification deliveries=15000 audit events=5012
+seed  60_notif_audit.sql                      0.9 s
+        dw refresh: {"rows_changed": 62140, "fact_gig_rows": 940, "fact_job_rows": 50000, "dim_organisation": 200, "dim_candidate_new_versions": 10000, "dim_job_requirement_new_versions": 1000}
+        fact_application=50940 dim_candidate=10000
+        NOTICE:  table "tmp_candidate" does not exist, skipping
+        NOTICE:  table "tmp_job" does not exist, skipping
+seed  70_dw.sql                               2.9 s
+         sequences_synced 
+        ------------------
+                      203
+        (1 row)
+seed  80_finish.sql                          11.1 s
+             area     |                              check_name                              |                expected                |               actual               | result 
+        --------------+----------------------------------------------------------------------+----------------------------------------+------------------------------------+--------
+         volume       | candidate profiles                                                   | 10000                                  | 10000                              | PASS
+         volume       | job requirements                                                     | 1000                                   | 1000                               | PASS
+         volume       | applications                                                         | 50000                                  | 50000                              | PASS
+         volume       | organisations                                                        | 200                                    | 200                                | PASS
+         foreign key  | all 817 foreign keys: no orphan rows                                 | 0 failing                              | 0 failing                          | PASS
+         pipeline     | history rows that are not a legal transition                         | 0                                      | 0                                  | PASS
+         pipeline     | applications without exactly one initial history row                 | 0                                      | 0                                  | PASS
+         pipeline     | applications whose status differs from the last history row          | 0                                      | 0                                  | PASS
+         pipeline     | applications to draft or unpublished-never jobs                      | 0                                      | 0                                  | PASS
+         distribution | share that reached interviewed                                       | 12.0% +-1.0                            | 12.11%                             | PASS
+         distribution | share that reached joined                                            | 3.0% +-1.0                             | 3.08%                              | PASS
+         distribution | share that reached offered                                           | 4.0% +-1.0                             | 4.05%                              | PASS
+         distribution | share that reached shortlisted                                       | 30.0% +-1.0                            | 30.23%                             | PASS
+         money        | wallets whose balance differs from the sum of their ledger           | 0                                      | 0                                  | PASS
+         money        | ledger entries whose running balance differs from the cumulative sum | 0                                      | 0                                  | PASS
+         money        | downloads without a consumption debit                                | 0                                      | 0                                  | PASS
+         money        | refunds above their payment                                          | 0                                      | 0                                  | PASS
+         licence      | licences using more seats than max_users                             | 0                                      | 0                                  | PASS
+         licence      | users with more active sessions than devices allowed                 | 0                                      | 0                                  | PASS
+         access       | sourcing requests on jobs not open to consultants                    | 0                                      | 0                                  | PASS
+         access       | outreach to candidates who blocked the sender                        | 0                                      | 0                                  | PASS
+         access       | interviewers outside the job organisation                            | 0                                      | 0                                  | PASS
+         access       | organisation hierarchy cycles (parent id is always lower)            | 0                                      | 0                                  | PASS
+         standards    | salary sentinels (0 or negative stored as an amount)                 | 0                                      | 0                                  | PASS
+         standards    | undisclosed salaries are NULL, not zero (candidate profiles)         | > 0 NULL with code not_disclosed       | 6371                               | PASS
+         standards    | emails stored in lowercase                                           | 0 violations                           | 0                                  | PASS
+         standards    | phone numbers in E.164 with a country                                | 0 violations                           | 0                                  | PASS
+         standards    | identifiers never stored in clear (org identifiers encrypted)        | 0 clear                                | 0                                  | PASS
+         standards    | multilingual names present (Devanagari, Tamil, Arabic, Han)          | all four scripts                       | dev=2434 tam=1410 ara=776 han=1182 | PASS
+         standards    | near-duplicate candidates (extra profiles sharing a phone number)    | 2% - 3% of profiles                    | 2.25%                              | PASS
+         standards    | application partitions evenly filled (max/min row ratio)             | < 1 + 8/sqrt(candidates per partition) | 1.269                              | PASS
+         gig          | overlapping assignment attempts rejected by the exclusion constraint | attempted = rejected                   | 26 attempted, 26 rejected          | PASS
+         warehouse    | fact rows equal job + gig applications                               | =                                      | 50940                              | PASS
+        (33 rows)
+        seed validation: 33 checks, 0 failed
+                     relation              | estimated_rows | total_size 
+        -----------------------------------+----------------+------------
+         job.application_status_history    |          98765 | 15 MB
+         dw.fact_application               |          50940 | 12 MB
+         profile.candidate_skill           |          28355 | 5144 kB
+         profile.candidate_contact         |          18005 | 4840 kB
+         profile.candidate_work_experience |          15442 | 3496 kB
+         admin.consent_record              |          15331 | 3336 kB
+         admin.user_role                   |          10945 | 3136 kB
+         billing.wallet_ledger_entry       |          11372 | 3016 kB
+         admin.app_user                    |          10826 | 2848 kB
+         admin.user_credential             |          10825 | 2672 kB
+         profile.candidate_language        |          14174 | 2360 kB
+         billing.credit_consumption        |          10950 | 1472 kB
+         notif.notification_delivery       |          15000 | 0 bytes
+         job.application                   |          50000 | 0 bytes
+        (14 rows)
+         database_size 
+        ---------------
+         176 MB
+        (1 row)
+seed  90_validate.sql                         9.0 s
+== seed rehearsal: done in 1.0 min ==

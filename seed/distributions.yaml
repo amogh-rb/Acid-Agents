@@ -1,0 +1,39 @@
+# Distributions used by seed/*.sql (M19). Everything is generated server-side in SQL with a deterministic hash-based
+# random function (seed.h), so the same parameters always give the same dataset.
+scales:
+  rehearsal: {candidates: 10000, jobs: 1000, applications: 50000, organisations: 200, gig_workers: 500, gig_requests: 200}
+  laptop:    {candidates: 1000000, jobs: 100000, applications: 5000000, organisations: 10000, gig_workers: 50000, gig_requests: 20000}
+candidates:
+  name_locale_mix: {en: 0.40, hi: 0.25, ta: 0.15, ar: 0.08, zh_hans: 0.12}   # native script names; zh is family-name first
+  near_duplicates: 0.035        # of profiles after the first 1000: same phone, transliterated Latin name, different login
+  phone_present: 0.80
+  date_of_birth_known: 0.70
+  gender_unknown: 0.15
+  salary_current_disclosed: 0.35
+  salary_expected_disclosed: 0.50
+  experience_months: power(u, 1.6) * 240
+  education_present: 0.85
+  skills_per_candidate: 3        # skewed to popular skills (power 1.4)
+  legacy_import: 0.10
+  resume_present: 0.70
+jobs:
+  organisation_skew: power(u, 1.5)             # large employers post most jobs
+  status: {open: 0.60, closed: 0.22, filled: 0.08, draft: 0.04, on_hold: 0.03, cancelled: 0.03}
+  salary_disclosed: 0.55
+  open_to_consultants: 0.20
+applications:
+  per_candidate: 5
+  job_popularity_skew: power(u, 2.5)           # Zipf-like: a few jobs receive most applications
+  funnel_reached: {shortlisted: 0.30, interviewed: 0.12, offered: 0.04, joined: 0.03}
+  exit_after_stage: {rejected: 0.45, withdrawn: 0.05, stay: 0.50}
+  source: {direct: 0.70, sourced: 0.10, referral: 0.05, campus: 0.05, consultant: 0.05, imported: 0.05}
+gig:
+  applications_per_request: 5
+  first_applicant_wins_completed_or_assigned: true
+  overlap_attempts_sampled: 300     # explicit conflicting bookings; all must be rejected by the exclusion constraint
+billing:
+  recharges_per_wallet: 3
+  recharge_amount_inr: 10000
+  consumptions_per_wallet: 60 + id % 40
+  consumption_amount_inr: 150
+  refund_wallets: 0.02
