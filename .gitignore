@@ -1,0 +1,19 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Node
+node_modules/
+
+# OS / logs
+.DS_Store
+*.log
+
+# Local database data and large seed/backup artifacts
+pgdata/
+*.dump
+*.sql.gz
