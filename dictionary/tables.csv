@@ -22,6 +22,13 @@ billing,subscription_cancellation,table,hard-delete,Cancellation of a subscripti
 billing,subscription_renewal,table,hard-delete,Renewal: links a subscription to the one that continues it (each renewed at most once),9
 billing,wallet,table,hard-delete,[api-write] Prepaid wallet of an account in one currency; balance changes only through billing.post_ledger_entry and always equals the sum of its ledger,8
 billing,wallet_ledger_entry,table,append-only,"[api-write] Wallet ledger: every recharge, consumption, refund, grant and correction (RG10). A correction reverses an earlier entry by a new row with the opposite amount",13
+dw,agg_daily_funnel,table,derived,"Daily hiring funnel per job category (applied, shortlisted, interviewed, offered, joined, time to hire), recomputed from fact_application",10
+dw,dim_candidate,table,derived,"Candidate dimension, SCD type 2: one version per change of city, experience band or highest qualification. No direct identifiers (name, contact) are copied to the warehouse",9
+dw,dim_date,table,derived,"Calendar dimension, one row per day 2024-2028",8
+dw,dim_job_requirement,table,derived,"Job requirement dimension, SCD type 2 on category, role, salary band and owner",10
+dw,dim_organisation,table,derived,"Organisation dimension, SCD type 1 (attributes overwritten in place)",7
+dw,etl_watermark,table,derived,Bookkeeping of each refresh process: when it last ran and how much changed,5
+dw,fact_application,table,derived,One row per application from the job pipeline and the gig subsystem (single pipeline view); grain = application,15
 gig,gig_application,table,hard-delete,Gig worker applies to a gig request; bids flow one way and only the requester decides,13
 gig,gig_assignment,table,hard-delete,Accepted gig application turned into work for a window; fulfilment itself runs in the external system,12
 gig,gig_availability,table,hard-delete,Time slot a gig worker is available; slots of one worker do not overlap (owned by the worker profile),8
@@ -59,6 +66,17 @@ lic,login_attempt,table,append-only,"[api-write] Login history: every attempt an
 lic,login_session,table,hard-delete,"[api-write] Login session on a device under a licence seat (RG9: device, start, last activity, end). Active = ended_at IS NULL AND expires_at > now(). Retention: 90 days after end",14
 lic,registered_device,table,hard-delete,Device a user has logged in from (owned by app_user); revoking sets revoked_at and ends its sessions (audited),12
 lic,session_revocation,table,append-only,[api-write] Revocation of a session by an admin or the user (who = created_by); also written to the audit trail,6
+notif,community_post,table,soft-delete,Community post by a user (moderation removes by soft delete),10
+notif,community_reaction,table,hard-delete,One user reaction to a post (owned by the post); one per user per post,8
+notif,delivery_provider_receipt,table,hard-delete,"[integration-write] Provider message id assigned to a delivery; globally unique per channel, so a duplicate provider callback is rejected (idempotency). Dropped with its delivery partition",10
+notif,faq,table,hard-delete,"FAQ entry; question and answer are UI labels, so they are translated like any other UI text (RG7)",10
+notif,job_alert,table,hard-delete,Job alert preference: send matches of a saved search at a frequency on a channel (owned by the candidate),11
+notif,notification,table,hard-delete,"Notification for a user: a translatable message key plus parameters, rendered per language at send time; no message bodies stored (owned by app_user). Retention: 180 days",10
+notif,notification_delivery,partitioned table,hard-delete,Delivery of a notification on one channel and its status (high-volume write path). Monthly RANGE partitions on queued_at; retention = detach and drop months older than 13 months,12
+notif,notification_preference,table,hard-delete,"Per-event, per-channel notification switch (owned by app_user); a missing row means enabled",9
+notif,support_ticket,table,hard-delete,Support ticket raised by a user. Retention: 2 years after resolution,12
+notif,support_ticket_message,table,hard-delete,Message in a support ticket thread (owned by the ticket; purged with it; never edited by the application),10
+notif,user_preference,table,hard-delete,"Language preference and privacy settings of a user (owned by app_user); a missing row means the defaults (default language, all employers)",11
 org,account,table,soft-delete,"Commercial account (customer) that owns one or more organisations, their subscriptions and wallet",9
 org,account_administrator,table,hard-delete,User who administers a commercial account (owned by the account); at most one primary,8
 org,organisation,table,soft-delete,"Employer, client, consultancy or campus. Stub in Phase 1; extended by Organisation and account in M7-M10",16
@@ -93,6 +111,7 @@ profile,resume_version,table,soft-delete,"A saved resume, built from a template 
 ref,account_status,table,hard-delete,"Lookup: commercial account status. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,activity_event_type,table,hard-delete,"Lookup: candidate activity log event. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,address_type,table,hard-delete,"Lookup: purpose of an address. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,alert_frequency,table,hard-delete,"Lookup: how often a job alert is sent. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,application_source,table,hard-delete,"Lookup: how an application reached the pipeline. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,application_status,table,hard-delete,"Lookup: application pipeline status. Rows are deactivated (is_active), not deleted, once referenced.",11
 ref,assessment_type,table,hard-delete,"Lookup: kind of assessment. Rows are deactivated (is_active), not deleted, once referenced.",9
@@ -105,6 +124,7 @@ ref,consumption_purpose,table,hard-delete,"Lookup: what wallet credit was spent 
 ref,contact_type,table,hard-delete,"Lookup: kind of contact point. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,country,table,hard-delete,ISO 3166-1 country,13
 ref,currency,table,hard-delete,ISO 4217 currency; FK target of every money companion column,12
+ref,delivery_status,table,hard-delete,"Lookup: delivery state of a notification on one channel. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,device_platform,table,hard-delete,"Lookup: platform of a registered device. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,disclosure,table,hard-delete,"Lookup: unknown vs not applicable for amounts (RG5): disclosed, not_disclosed, not_applicable. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,earning_kind,table,hard-delete,"Lookup: kind of earnings figure reported by the fulfilment system. Rows are deactivated (is_active), not deleted, once referenced.",9
@@ -137,6 +157,8 @@ ref,ledger_entry_type,table,hard-delete,"Lookup: kind of wallet ledger entry. Ro
 ref,licence_status,table,hard-delete,"Lookup: licence status. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,login_outcome,table,hard-delete,"Lookup: outcome of a login attempt. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,notice_period,table,hard-delete,"Lookup: notice period a candidate must serve. Rows are deactivated (is_active), not deleted, once referenced.",10
+ref,notification_channel,table,hard-delete,"Lookup: channel a notification is delivered on. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,notification_event_type,table,hard-delete,"Lookup: event that triggers a notification. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,offer_status,table,hard-delete,"Lookup: state of an offer. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,organisation_status,table,hard-delete,"Lookup: organisation account status. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,organisation_type,table,hard-delete,"Lookup: kind of organisation. Rows are deactivated (is_active), not deleted, once referenced.",9
@@ -147,12 +169,14 @@ ref,payment_gateway,table,hard-delete,"Lookup: payment gateway. Rows are deactiv
 ref,payment_status,table,hard-delete,"Lookup: payment order status. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,pricing_model,table,hard-delete,"Lookup: how a gig is priced. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,proficiency_level,table,hard-delete,"Lookup: proficiency in a skill or language. Rows are deactivated (is_active), not deleted, once referenced.",10
+ref,profile_visibility,table,hard-delete,"Lookup: who may find a candidate profile. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,project_kind,table,hard-delete,"Lookup: context a profile project was done in. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,publish_state,table,hard-delete,"Lookup: visibility of a job requirement. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,qualification,table,hard-delete,"Named qualification (B.Tech, ITI Fitter, MBA) at a level",10
 ref,qualification_level,table,hard-delete,"Lookup: level of a qualification. Rows are deactivated (is_active), not deleted, once referenced.",10
 ref,question_type,table,hard-delete,"Lookup: answer format of a screening question. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,rate_unit,table,hard-delete,"Lookup: unit a gig rate is charged per. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,reaction_type,table,hard-delete,"Lookup: reaction to a community post. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,referral_status,table,hard-delete,"Lookup: progress of a referral. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,refund_status,table,hard-delete,"Lookup: refund status. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,rejection_reason,table,hard-delete,"Lookup: why an application was rejected. Rows are deactivated (is_active), not deleted, once referenced.",9
@@ -163,6 +187,8 @@ ref,sourcing_request_status,table,hard-delete,"Lookup: state of a consultant sou
 ref,state,table,hard-delete,"First-level subdivision (state, province) of a country",9
 ref,study_mode,table,hard-delete,"Lookup: mode of study. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,subscription_status,table,hard-delete,"Lookup: subscription status. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,ticket_category,table,hard-delete,"Lookup: support ticket category. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,ticket_status,table,hard-delete,"Lookup: support ticket status. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,timezone,table,hard-delete,IANA time zone used to display UTC timestamps in local time (RG3 Timestamp),7
 ref,ui_label,table,hard-delete,"UI string key; one row per key, translations in ref.ui_translation",7
 ref,ui_translation,table,hard-delete,Translation of one UI label into one language (CASCADE: owned by the label),8

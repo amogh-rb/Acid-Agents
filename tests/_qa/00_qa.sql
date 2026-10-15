@@ -82,4 +82,17 @@ BEGIN
 END
 $$;
 
+-- Plan lines of a statement (EXPLAIN, no execution), for pruning and index-usage assertions.
+CREATE FUNCTION qa.explain_lines(p_sql text) RETURNS SETOF text
+LANGUAGE plpgsql AS
+$$
+DECLARE
+  r record;
+BEGIN
+  FOR r IN EXECUTE 'EXPLAIN (COSTS OFF) ' || p_sql LOOP
+    RETURN NEXT r."QUERY PLAN";
+  END LOOP;
+END
+$$;
+
 CREATE TABLE qa.mysql_reserved_word (word text PRIMARY KEY);

@@ -20,7 +20,7 @@ A milestone is done only when it is **Defined** (deliverable committed), **Verif
 | M12 | B39-B41 | Relationships | A / B / C | ✅ 14:03 | ☐ | ✅ gate M14 14:07 | `docs/phase3/*_relationships.md` (75 FKs), `docs/erd/phase3_*.mmd` |
 | M13 | B42-B44 | Columns | A / B / C | ✅ 14:00 | ☐ | ✅ gate M14 14:07 | `ddl/60_lic.sql`, `65_src.sql`, `70_billing.sql`; dictionary 1,827 columns |
 | M14 | B45-B47 | Keys and constraints + tests (incl. 20-login concurrency) | A / B / C | ✅ 14:07 | ☐ | ✅ gate M14 14:07 (19/19 files; m14: 23 + 15 + 24 checks, concurrency 5) | Core gate PASS, tag `core-v1` |
-| M15-M18 | B48-B59 | Shared access layer / Notifications / Analytics | A / B / C | ☐ | ☐ | ☐ | |
+| M15-M18 | B48-B59 | Shared access layer / Notifications / Analytics | A / B / C | ✅ 14:20 | ☐ | ✅ gate M18 14:21 (24/24 files; m18: access 23, notif 16, dw 14) | `ddl/80_notif.sql`, `85_access.sql`, `90_dw.sql`; `docs/phase4/*`; RLS (D26), monthly delivery partitions (D27), SCD2 marts (D28); F3 fixed; tag `phase4` |
 | M19 | B60-B64 | Seed (tablespace on D:) | B | ☐ | ☐ | ☐ | |
 | M20 | B65-B69 | Query set + validation | C, B | ☐ | ☐ | ☐ | |
 | M21 | B70-B74 | Performance + extrapolation | C | ☐ | ☐ | ☐ | |

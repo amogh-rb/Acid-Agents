@@ -1,16 +1,12 @@
 # 11 Coverage gap register (core gate, M14)
 
-Every Tier 1/2 element of docket Section 4 not yet built, with its reason and the milestone that closes it. Status as of `core-v1` (M1-M14).
+Every Tier 1/2 element of docket Section 4 not yet built, with its reason and the milestone that closes it. Status as of `phase4` (M1-M18).
+
+**Closed in M15-M18:** notifications and delivery status, all preferences (notification, job alert, language, privacy), RLS access layer, analytics star schema and KPI marts, community posts and reactions, support tickets, FAQs, review finding F3.
 
 ## Not built yet (planned)
 | Element | Tier | Module | Why not yet | Closes in |
 |---|---|---|---|---|
-| Notifications and delivery status | 1 | Notifications | Phase 4 by plan; monthly-partitioned `notif.notification_delivery` | M15-M18 |
-| Preferences: notification, language, job alert, privacy | 1 | Notifications | Phase 4 by plan | M15-M18 |
-| Row-level security (recruiter sees own company's jobs; consultant sees open jobs; blocked party cannot see the candidate) | 1 (Section 3) | Shared access layer | The data it reads exists (`org.recruiter_mapping`, `admin.block_list`, `admin.user_role`); policies come in M18 | M15-M18 |
-| Analytics star schema and KPI marts | 1 (Section 7) | Analytics | Phase 4 by plan; docket Section 8 (KPIs) has not been issued | M15-M18 |
-| Community posts and reactions | 2 | Notifications | Phase 4 by plan (thin) | M15-M18 |
-| Support tickets, FAQs | 2 | Notifications | Phase 4 by plan (thin) | M15-M18 |
 | Seed data (1M profiles, 100K jobs, 5M applications) | Section 6 | All | Phase 5 by plan; tablespace on D: | M19 |
 | Query set, performance, extrapolation | Section 6 | All | Phase 5 by plan | M20-M21 |
 | Security note, threat model, access tests, backup/restore | Section 7 | All | Phase 5 by plan | M22-M23 |
@@ -19,9 +15,10 @@ Every Tier 1/2 element of docket Section 4 not yet built, with its reason and th
 ## Built with known limitations
 | Item | Limitation | Plan |
 |---|---|---|
-| F3: an interviewer must belong to the job's organisation | Not enforced; recruiter mapping now exists | Trigger on `job.interview` using `org.current_recruiter_organisation` (M18) |
 | F4: a screening answer's question must be on a questionnaire attached to the job | Not enforced | Trigger on `job.application_answer` (M15+) |
-| Append-only event tables (views, activity, bookmarks, downloads, attempts, ledger, payment events) | Not partitioned yet | Leaf tables: monthly range partitioning decided with measurements (M21; D5) |
+| Append-only event tables (views, activity, bookmarks, downloads, attempts, ledger, payment events) | Not partitioned yet (notification deliveries are, D27) | Leaf tables: monthly range partitioning decided with measurements (M21; D5) |
+| KPIs | Docket Section 8 not issued; the marts serve assumed KPIs (D28) | Adjust `dw` when the KPI list arrives |
+| RLS on other Personal tables (address, education, experience, resume, identity documents) | Policies cover profile, contact, job, application | Same pattern (`EXISTS` on the RLS-filtered profile) in M22 |
 | d_money is numeric(14,2) | 3-decimal currencies would need numeric(14,3) | Accepted for the seeded currencies (D12) |
 | Phase 2 and 3 design docs | Drafted from the DDL comments by the same agent that wrote the DDL (D21) | Human review by the module owners |
 

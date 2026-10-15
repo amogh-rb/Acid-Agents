@@ -1,0 +1,235 @@
+erDiagram
+  dw__agg_daily_funnel {
+    int8 id PK
+    int8 dim_date_id FK
+    varchar job_category UK
+    int4 applied_count
+    int4 shortlisted_count
+    int4 interviewed_count
+    int4 offered_count
+    int4 joined_count
+    numeric avg_days_to_hire
+    timestamptz refreshed_at
+  }
+  dw__dim_candidate {
+    int8 id PK
+    int8 candidate_profile_id
+    varchar city_name
+    varchar experience_band
+    varchar highest_qualification_level
+    bytea row_hash
+    timestamptz valid_from
+    timestamptz valid_to
+    bool is_current
+  }
+  dw__dim_date {
+    int8 id PK
+    date calendar_date UK
+    int2 year_number
+    int2 quarter_number
+    int2 month_number
+    int2 iso_week
+    int2 day_of_week
+    bool is_weekend
+  }
+  dw__dim_job_requirement {
+    int8 id PK
+    int8 job_requirement_id
+    int8 dim_organisation_id FK
+    varchar job_category
+    varchar job_role_name
+    varchar salary_band
+    bytea row_hash
+    timestamptz valid_from
+    timestamptz valid_to
+    bool is_current
+  }
+  dw__dim_organisation {
+    int8 id PK
+    int8 organisation_id UK
+    varchar organisation_name
+    varchar organisation_type
+    varchar industry_name
+    bytea row_hash
+    timestamptz loaded_at
+  }
+  dw__etl_watermark {
+    int8 id PK
+    varchar process_name UK
+    timestamptz last_run_started_at
+    timestamptz last_run_ended_at
+    int8 rows_changed
+  }
+  dw__fact_application {
+    int8 id PK
+    varchar source_system UK
+    int8 source_application_id UK
+    int8 dim_candidate_id FK
+    int8 dim_job_requirement_id FK
+    int8 dim_organisation_id FK
+    int8 applied_dim_date_id FK
+    varchar job_category
+    varchar current_status
+    bool reached_shortlisted
+    bool reached_interviewed
+    bool reached_offered
+    bool is_joined
+    int4 days_to_hire
+    timestamptz loaded_at
+  }
+  notif__community_post {
+    int8 id PK
+    int8 author_app_user_id FK
+    varchar post_body
+    int8 post_body_language_id FK
+    timestamptz posted_at
+    timestamptz deleted_at
+  }
+  notif__community_reaction {
+    int8 id PK
+    int8 community_post_id FK
+    int8 app_user_id FK
+    d_code reaction_type_code FK
+  }
+  notif__delivery_provider_receipt {
+    int8 id PK
+    d_code notification_channel_code FK
+    varchar provider_message_reference UK
+    int8 notification_delivery_id FK
+    timestamptz delivery_queued_at FK
+    timestamptz received_at
+  }
+  notif__faq {
+    int8 id PK
+    varchar question_label_key FK
+    varchar answer_label_key FK
+    d_code ticket_category_code FK
+    bool is_published
+    int4 sort_order
+  }
+  notif__job_alert {
+    int8 id PK
+    int8 candidate_profile_id FK
+    int8 saved_search_id FK
+    d_code alert_frequency_code FK
+    d_code notification_channel_code FK
+    bool is_active
+    timestamptz last_sent_at
+  }
+  notif__notification {
+    int8 id PK
+    int8 recipient_app_user_id FK
+    d_code notification_event_type_code FK
+    varchar message_label_key FK
+    jsonb message_parameters
+    timestamptz read_at
+  }
+  notif__notification_delivery {
+    int8 id PK
+    int8 notification_id FK
+    d_code notification_channel_code FK
+    d_code delivery_status_code FK
+    timestamptz queued_at PK
+    timestamptz sent_at
+    timestamptz delivered_at
+    varchar failure_reason
+  }
+  notif__notification_preference {
+    int8 id PK
+    int8 app_user_id FK
+    d_code notification_event_type_code FK
+    d_code notification_channel_code FK
+    bool is_enabled
+  }
+  notif__support_ticket {
+    int8 id PK
+    int8 requester_app_user_id FK
+    int8 assignee_app_user_id FK
+    d_code ticket_category_code FK
+    d_code ticket_status_code FK
+    varchar ticket_subject
+    timestamptz opened_at
+    timestamptz resolved_at
+  }
+  notif__support_ticket_message {
+    int8 id PK
+    int8 support_ticket_id FK
+    int8 author_app_user_id FK
+    varchar message_body
+    int8 message_body_language_id FK
+    timestamptz posted_at
+  }
+  notif__user_preference {
+    int8 id PK
+    int8 app_user_id FK
+    int8 ui_language_id FK
+    int8 timezone_id FK
+    d_code profile_visibility_code FK
+    bool show_salary_to_recruiters
+    bool allow_recruiter_contact
+  }
+  admin__app_user |o--o{ notif__support_ticket : "fk_support_ticket_assignee_app_user_id"
+  admin__app_user ||--o{ notif__community_post : "fk_community_post_author_app_user_id"
+  admin__app_user ||--o{ notif__community_reaction : "fk_community_reaction_app_user_id"
+  admin__app_user ||--o{ notif__notification : "fk_notification_recipient_app_user_id"
+  admin__app_user ||--o{ notif__notification_preference : "fk_notification_preference_app_user_id"
+  admin__app_user ||--o{ notif__support_ticket : "fk_support_ticket_requester_app_user_id"
+  admin__app_user ||--o{ notif__support_ticket_message : "fk_support_ticket_message_author_app_user_id"
+  admin__app_user ||--o| notif__user_preference : "fk_user_preference_app_user_id"
+  dw__dim_candidate |o--o{ dw__fact_application : "fk_fact_application_dim_candidate_id"
+  dw__dim_date ||--o{ dw__agg_daily_funnel : "fk_agg_daily_funnel_dim_date_id"
+  dw__dim_date ||--o{ dw__fact_application : "fk_fact_application_applied_dim_date_id"
+  dw__dim_job_requirement |o--o{ dw__fact_application : "fk_fact_application_dim_job_requirement_id"
+  dw__dim_organisation |o--o{ dw__fact_application : "fk_fact_application_dim_organisation_id"
+  dw__dim_organisation ||--o{ dw__dim_job_requirement : "fk_dim_job_requirement_dim_organisation_id"
+  job__saved_search ||--o{ notif__job_alert : "fk_job_alert_saved_search_id"
+  notif__community_post ||--o{ notif__community_reaction : "fk_community_reaction_community_post_id"
+  notif__notification ||--o{ notif__notification_delivery : "fk_notification_delivery_notification_id"
+  notif__notification_delivery ||--o| notif__delivery_provider_receipt : "fk_delivery_provider_receipt_delivery"
+  notif__notification_delivery_default ||--o| notif__delivery_provider_receipt : "fk_delivery_provider_receipt_delivery_25"
+  notif__notification_delivery_p202601 ||--o| notif__delivery_provider_receipt : "fk_delivery_provider_receipt_delivery_1"
+  notif__notification_delivery_p202602 ||--o| notif__delivery_provider_receipt : "fk_delivery_provider_receipt_delivery_2"
+  notif__notification_delivery_p202603 ||--o| notif__delivery_provider_receipt : "fk_delivery_provider_receipt_delivery_3"
+  notif__notification_delivery_p202604 ||--o| notif__delivery_provider_receipt : "fk_delivery_provider_receipt_delivery_4"
+  notif__notification_delivery_p202605 ||--o| notif__delivery_provider_receipt : "fk_delivery_provider_receipt_delivery_5"
+  notif__notification_delivery_p202606 ||--o| notif__delivery_provider_receipt : "fk_delivery_provider_receipt_delivery_6"
+  notif__notification_delivery_p202607 ||--o| notif__delivery_provider_receipt : "fk_delivery_provider_receipt_delivery_7"
+  notif__notification_delivery_p202608 ||--o| notif__delivery_provider_receipt : "fk_delivery_provider_receipt_delivery_8"
+  notif__notification_delivery_p202609 ||--o| notif__delivery_provider_receipt : "fk_delivery_provider_receipt_delivery_9"
+  notif__notification_delivery_p202610 ||--o| notif__delivery_provider_receipt : "fk_delivery_provider_receipt_delivery_10"
+  notif__notification_delivery_p202611 ||--o| notif__delivery_provider_receipt : "fk_delivery_provider_receipt_delivery_11"
+  notif__notification_delivery_p202612 ||--o| notif__delivery_provider_receipt : "fk_delivery_provider_receipt_delivery_12"
+  notif__notification_delivery_p202701 ||--o| notif__delivery_provider_receipt : "fk_delivery_provider_receipt_delivery_13"
+  notif__notification_delivery_p202702 ||--o| notif__delivery_provider_receipt : "fk_delivery_provider_receipt_delivery_14"
+  notif__notification_delivery_p202703 ||--o| notif__delivery_provider_receipt : "fk_delivery_provider_receipt_delivery_15"
+  notif__notification_delivery_p202704 ||--o| notif__delivery_provider_receipt : "fk_delivery_provider_receipt_delivery_16"
+  notif__notification_delivery_p202705 ||--o| notif__delivery_provider_receipt : "fk_delivery_provider_receipt_delivery_17"
+  notif__notification_delivery_p202706 ||--o| notif__delivery_provider_receipt : "fk_delivery_provider_receipt_delivery_18"
+  notif__notification_delivery_p202707 ||--o| notif__delivery_provider_receipt : "fk_delivery_provider_receipt_delivery_19"
+  notif__notification_delivery_p202708 ||--o| notif__delivery_provider_receipt : "fk_delivery_provider_receipt_delivery_20"
+  notif__notification_delivery_p202709 ||--o| notif__delivery_provider_receipt : "fk_delivery_provider_receipt_delivery_21"
+  notif__notification_delivery_p202710 ||--o| notif__delivery_provider_receipt : "fk_delivery_provider_receipt_delivery_22"
+  notif__notification_delivery_p202711 ||--o| notif__delivery_provider_receipt : "fk_delivery_provider_receipt_delivery_23"
+  notif__notification_delivery_p202712 ||--o| notif__delivery_provider_receipt : "fk_delivery_provider_receipt_delivery_24"
+  notif__support_ticket ||--o{ notif__support_ticket_message : "fk_support_ticket_message_support_ticket_id"
+  profile__candidate_profile ||--o{ notif__job_alert : "fk_job_alert_candidate_profile_id"
+  ref__alert_frequency ||--o{ notif__job_alert : "fk_job_alert_alert_frequency_code"
+  ref__delivery_status ||--o{ notif__notification_delivery : "fk_notification_delivery_delivery_status_code"
+  ref__language |o--o{ notif__community_post : "fk_community_post_post_body_language_id"
+  ref__language |o--o{ notif__support_ticket_message : "fk_support_ticket_message_message_body_language_id"
+  ref__language ||--o{ notif__user_preference : "fk_user_preference_ui_language_id"
+  ref__notification_channel ||--o{ notif__delivery_provider_receipt : "fk_delivery_provider_receipt_notification_channel_code"
+  ref__notification_channel ||--o{ notif__job_alert : "fk_job_alert_notification_channel_code"
+  ref__notification_channel ||--o{ notif__notification_delivery : "fk_notification_delivery_notification_channel_code"
+  ref__notification_channel ||--o{ notif__notification_preference : "fk_notification_preference_notification_channel_code"
+  ref__notification_event_type ||--o{ notif__notification : "fk_notification_notification_event_type_code"
+  ref__notification_event_type ||--o{ notif__notification_preference : "fk_notification_preference_notification_event_type_code"
+  ref__profile_visibility ||--o{ notif__user_preference : "fk_user_preference_profile_visibility_code"
+  ref__reaction_type ||--o{ notif__community_reaction : "fk_community_reaction_reaction_type_code"
+  ref__ticket_category ||--o{ notif__faq : "fk_faq_ticket_category_code"
+  ref__ticket_category ||--o{ notif__support_ticket : "fk_support_ticket_ticket_category_code"
+  ref__ticket_status ||--o{ notif__support_ticket : "fk_support_ticket_ticket_status_code"
+  ref__timezone |o--o{ notif__user_preference : "fk_user_preference_timezone_id"
+  ref__ui_label ||--o{ notif__faq : "fk_faq_answer_label_key"
+  ref__ui_label ||--o{ notif__notification : "fk_notification_message_label_key"
+  ref__ui_label ||--o| notif__faq : "fk_faq_question_label_key"

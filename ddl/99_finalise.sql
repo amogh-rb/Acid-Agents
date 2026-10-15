@@ -25,3 +25,5 @@ END $$;
 GRANT USAGE ON SCHEMA ref, admin, org, profile, job, gig, lic, src, billing, notif, dw, audit, app
   TO talentra_app, talentra_readonly, talentra_integration;
 GRANT EXECUTE ON FUNCTION public.current_actor_id(), ref.ui_text(text, text) TO talentra_app, talentra_readonly;
+-- identity columns draw from sequences: the writing roles need USAGE to insert
+GRANT USAGE ON ALL SEQUENCES IN SCHEMA ref, admin, org, profile, job, gig, lic, src, billing, notif, audit TO talentra_app, talentra_integration;

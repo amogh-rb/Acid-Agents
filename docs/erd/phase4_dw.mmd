@@ -1,0 +1,10 @@
+erDiagram
+  %% Design ERD generated from docs/phase1/relationships.md by tools/design_docs.py.
+  %% Entity = <schema>__<table>. Actor FKs (created_by/updated_by -> app_user) and lookup label_key FKs omitted.
+  %% ||--o{ mandatory parent, |o--o{ optional parent, --o| one-to-one.
+  dw__dim_candidate |o--o{ dw__fact_application : "dim_candidate_id"
+  dw__dim_date ||--o{ dw__agg_daily_funnel : "dim_date_id"
+  dw__dim_date ||--o{ dw__fact_application : "applied_dim_date_id"
+  dw__dim_job_requirement |o--o{ dw__fact_application : "dim_job_requirement_id"
+  dw__dim_organisation ||--o{ dw__dim_job_requirement : "dim_organisation_id"
+  dw__dim_organisation |o--o{ dw__fact_application : "dim_organisation_id"
