@@ -1,4 +1,4 @@
-# 11 Coverage gap register (core gate, M14)
+# 11 Coverage gap register (updated at each phase gate; current: M18)
 
 Every Tier 1/2 element of docket Section 4 not yet built, with its reason and the milestone that closes it. Status as of `phase4` (M1-M18).
 
