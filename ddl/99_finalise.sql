@@ -23,5 +23,5 @@ BEGIN
 END $$;
 
 GRANT USAGE ON SCHEMA ref, admin, org, profile, job, gig, lic, src, billing, notif, dw, audit, app
-  TO talentra_app, talentra_readonly;
+  TO talentra_app, talentra_readonly, talentra_integration;
 GRANT EXECUTE ON FUNCTION public.current_actor_id(), ref.ui_text(text, text) TO talentra_app, talentra_readonly;

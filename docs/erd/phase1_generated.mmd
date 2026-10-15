@@ -1,9 +1,68 @@
 erDiagram
+  admin__app_role {
+    int8 id PK
+    d_code code UK
+    varchar label_key FK
+    bool is_active
+    int4 sort_order
+    bool is_organisation_scoped
+  }
+  admin__app_role_permission {
+    int8 id PK
+    d_code app_role_code FK
+    d_code permission_code FK
+  }
   admin__app_user {
     int8 id PK
     d_code user_status_code FK
     bool is_system_actor
     timestamptz deleted_at
+    d_email login_email UK
+    d_phone_e164 login_phone UK
+    int8 login_phone_country_id FK
+    d_person_name display_name
+    timestamptz last_login_at
+  }
+  admin__block_list {
+    int8 id PK
+    int8 blocker_app_user_id FK
+    int8 blocked_app_user_id FK
+    int8 blocked_organisation_id FK
+    varchar block_reason
+    timestamptz deleted_at
+  }
+  admin__consent_record {
+    int8 id PK
+    int8 app_user_id FK
+    d_code consent_purpose_code FK
+    bool is_granted
+    varchar policy_version
+    timestamptz recorded_at
+    varchar client_ip_masked
+  }
+  admin__permission {
+    int8 id PK
+    d_code code UK
+    varchar label_key FK
+    bool is_active
+    int4 sort_order
+  }
+  admin__user_credential {
+    int8 id PK
+    int8 app_user_id FK
+    varchar password_hash
+    d_code hash_algorithm_code FK
+    timestamptz password_changed_at
+    int2 failed_attempt_count
+    timestamptz locked_until
+    bool must_change_password
+  }
+  admin__user_role {
+    int8 id PK
+    int8 app_user_id FK
+    d_code app_role_code FK
+    int8 organisation_id FK
+    tstzrange valid_period
   }
   job__application {
     int8 id PK
@@ -197,11 +256,72 @@ erDiagram
     varchar entry_note
     timestamptz deleted_at
   }
+  org__account {
+    int8 id PK
+    varchar account_name
+    d_code account_status_code FK
+    d_email billing_email
+    timestamptz deleted_at
+  }
+  org__account_administrator {
+    int8 id PK
+    int8 account_id FK
+    int8 app_user_id FK
+    bool is_primary
+  }
   org__organisation {
     int8 id PK
     varchar organisation_name
     d_code organisation_status_code FK
     timestamptz deleted_at
+    varchar legal_name
+    d_code organisation_type_code FK
+    int8 account_id FK
+    int8 parent_organisation_id FK
+    int8 industry_id FK
+    d_code employee_count_band_code FK
+    varchar website_url
+    d_code verification_status_code FK
+  }
+  org__organisation_identifier {
+    int8 id PK
+    int8 organisation_id FK
+    d_code identifier_type_code FK
+    bytea value_encrypted
+    bytea value_hash UK
+    varchar value_last4
+    d_code verification_status_code FK
+    timestamptz verified_at
+  }
+  org__organisation_location {
+    int8 id PK
+    int8 organisation_id FK
+    varchar location_name UK
+    varchar address_line1
+    varchar address_line2
+    int8 city_id FK
+    varchar postal_code
+    d_lat latitude
+    d_lng longitude
+    bool is_headquarters
+  }
+  org__recruiter_mapping {
+    int8 id PK
+    int8 app_user_id FK
+    int8 organisation_id FK
+    daterange valid_period
+  }
+  org__verification {
+    int8 id PK
+    int8 organisation_id FK
+    d_code verification_kind_code FK
+    int8 organisation_identifier_id FK
+    d_code verification_status_code FK
+    varchar idempotency_key UK
+    varchar provider_reference UK
+    timestamptz requested_at
+    timestamptz completed_at
+    varchar outcome_note
   }
   profile__assessment {
     int8 id PK
@@ -446,6 +566,13 @@ erDiagram
     bool is_default
     timestamptz deleted_at
   }
+  ref__account_status {
+    int8 id PK
+    d_code code UK
+    varchar label_key FK
+    bool is_active
+    int4 sort_order
+  }
   ref__activity_event_type {
     int8 id PK
     d_code code UK
@@ -483,6 +610,13 @@ erDiagram
     bool is_active
     int4 sort_order
   }
+  ref__audit_action {
+    int8 id PK
+    d_code code UK
+    varchar label_key FK
+    bool is_active
+    int4 sort_order
+  }
   ref__bookmark_action {
     int8 id PK
     d_code code UK
@@ -500,6 +634,13 @@ erDiagram
     d_lng longitude
     int8 geonames_id UK
     bool is_active
+  }
+  ref__consent_purpose {
+    int8 id PK
+    d_code code UK
+    varchar label_key FK
+    bool is_active
+    int4 sort_order
   }
   ref__contact_type {
     int8 id PK
@@ -536,6 +677,20 @@ erDiagram
     bool is_active
     int4 sort_order
   }
+  ref__earning_kind {
+    int8 id PK
+    d_code code UK
+    varchar label_key FK
+    bool is_active
+    int4 sort_order
+  }
+  ref__employee_count_band {
+    int8 id PK
+    d_code code UK
+    varchar label_key FK
+    bool is_active
+    int4 sort_order
+  }
   ref__employment_type {
     int8 id PK
     d_code code UK
@@ -550,6 +705,13 @@ erDiagram
     bool is_active
     int4 sort_order
   }
+  ref__error_severity {
+    int8 id PK
+    d_code code UK
+    varchar label_key FK
+    bool is_active
+    int4 sort_order
+  }
   ref__field_of_study {
     int8 id PK
     varchar field_name UK
@@ -557,6 +719,41 @@ erDiagram
     bool is_active
   }
   ref__gender {
+    int8 id PK
+    d_code code UK
+    varchar label_key FK
+    bool is_active
+    int4 sort_order
+  }
+  ref__gig_application_status {
+    int8 id PK
+    d_code code UK
+    varchar label_key FK
+    bool is_active
+    int4 sort_order
+  }
+  ref__gig_assignment_status {
+    int8 id PK
+    d_code code UK
+    varchar label_key FK
+    bool is_active
+    int4 sort_order
+  }
+  ref__gig_request_status {
+    int8 id PK
+    d_code code UK
+    varchar label_key FK
+    bool is_active
+    int4 sort_order
+  }
+  ref__handoff_status {
+    int8 id PK
+    d_code code UK
+    varchar label_key FK
+    bool is_active
+    int4 sort_order
+  }
+  ref__hash_algorithm {
     int8 id PK
     d_code code UK
     varchar label_key FK
@@ -680,6 +877,13 @@ erDiagram
     bool is_active
     int4 sort_order
   }
+  ref__organisation_type {
+    int8 id PK
+    d_code code UK
+    varchar label_key FK
+    bool is_active
+    int4 sort_order
+  }
   ref__pay_period {
     int8 id PK
     d_code code UK
@@ -687,6 +891,13 @@ erDiagram
     bool is_active
     int4 sort_order
     numeric annual_multiplier
+  }
+  ref__pricing_model {
+    int8 id PK
+    d_code code UK
+    varchar label_key FK
+    bool is_active
+    int4 sort_order
   }
   ref__proficiency_level {
     int8 id PK
@@ -727,6 +938,13 @@ erDiagram
     int2 level_rank
   }
   ref__question_type {
+    int8 id PK
+    d_code code UK
+    varchar label_key FK
+    bool is_active
+    int4 sort_order
+  }
+  ref__rate_unit {
     int8 id PK
     d_code code UK
     varchar label_key FK
@@ -798,6 +1016,13 @@ erDiagram
     bool is_active
     int4 sort_order
   }
+  ref__verification_kind {
+    int8 id PK
+    d_code code UK
+    varchar label_key FK
+    bool is_active
+    int4 sort_order
+  }
   ref__verification_status {
     int8 id PK
     d_code code UK
@@ -819,13 +1044,30 @@ erDiagram
     bool is_active
     int4 sort_order
   }
+  ref__worker_list_kind {
+    int8 id PK
+    d_code code UK
+    varchar label_key FK
+    bool is_active
+    int4 sort_order
+  }
+  admin__app_role ||--o{ admin__app_role_permission : "fk_app_role_permission_app_role_code"
+  admin__app_role ||--o{ admin__user_role : "fk_user_role_app_role_code"
+  admin__app_user |o--o{ admin__block_list : "fk_block_list_blocked_app_user_id"
   admin__app_user |o--o{ job__interview : "fk_interview_interviewer_app_user_id"
+  admin__app_user ||--o{ admin__block_list : "fk_block_list_blocker_app_user_id"
+  admin__app_user ||--o{ admin__consent_record : "fk_consent_record_app_user_id"
+  admin__app_user ||--o{ admin__user_role : "fk_user_role_app_user_id"
   admin__app_user ||--o{ job__job_requirement : "fk_job_requirement_posted_by_app_user_id"
   admin__app_user ||--o{ job__shortlist : "fk_shortlist_owner_app_user_id"
+  admin__app_user ||--o{ org__account_administrator : "fk_account_administrator_app_user_id"
+  admin__app_user ||--o{ org__recruiter_mapping : "fk_recruiter_mapping_app_user_id"
   admin__app_user ||--o{ profile__candidate_bookmark_event : "fk_candidate_bookmark_event_actor_app_user_id"
   admin__app_user ||--o{ profile__profile_view_event : "fk_profile_view_event_viewer_app_user_id"
   admin__app_user ||--o{ profile__referral : "fk_referral_referrer_app_user_id"
+  admin__app_user ||--o| admin__user_credential : "fk_user_credential_app_user_id"
   admin__app_user ||--o| profile__candidate_profile : "fk_candidate_profile_app_user_id"
+  admin__permission ||--o{ admin__app_role_permission : "fk_app_role_permission_permission_code"
   job__application |o--o{ job__job_position : "fk_job_position_filled_by_application"
   job__application ||--o{ job__application_answer : "fk_application_answer_application"
   job__application ||--o{ job__application_status_history : "fk_application_status_history_application"
@@ -1041,13 +1283,23 @@ erDiagram
   job__questionnaire_question ||--o{ job__application_answer : "fk_application_answer_questionnaire_question_id"
   job__questionnaire_question ||--o{ job__question_option : "fk_question_option_questionnaire_question_id"
   job__shortlist ||--o{ job__shortlist_entry : "fk_shortlist_entry_shortlist_id"
+  org__account |o--o{ org__organisation : "fk_organisation_account_id"
+  org__account ||--o{ org__account_administrator : "fk_account_administrator_account_id"
+  org__organisation |o--o{ admin__block_list : "fk_block_list_blocked_organisation_id"
+  org__organisation |o--o{ admin__user_role : "fk_user_role_organisation_id"
   org__organisation |o--o{ job__job_requirement : "fk_job_requirement_client_organisation_id"
+  org__organisation |o--o{ org__organisation : "fk_organisation_parent_organisation_id"
   org__organisation |o--o{ profile__candidate_bookmark_event : "fk_candidate_bookmark_event_actor_organisation_id"
   org__organisation |o--o{ profile__candidate_work_experience : "fk_candidate_work_experience_organisation_id"
   org__organisation |o--o{ profile__profile_view_event : "fk_profile_view_event_viewer_organisation_id"
   org__organisation ||--o{ job__job_requirement : "fk_job_requirement_organisation_id"
   org__organisation ||--o{ job__questionnaire : "fk_questionnaire_organisation_id"
   org__organisation ||--o{ job__shortlist : "fk_shortlist_organisation_id"
+  org__organisation ||--o{ org__organisation_identifier : "fk_organisation_identifier_organisation_id"
+  org__organisation ||--o{ org__organisation_location : "fk_organisation_location_organisation_id"
+  org__organisation ||--o{ org__recruiter_mapping : "fk_recruiter_mapping_organisation_id"
+  org__organisation ||--o{ org__verification : "fk_verification_organisation_id"
+  org__organisation_identifier |o--o{ org__verification : "fk_verification_organisation_identifier_id"
   profile__assessment ||--o{ profile__assessment_attempt : "fk_assessment_attempt_assessment_id"
   profile__candidate_profile |o--o{ job__job_position : "fk_job_position_filled_by_candidate_profile_id"
   profile__candidate_profile |o--o{ job__job_search_event : "fk_job_search_event_candidate_profile_id"
@@ -1080,6 +1332,7 @@ erDiagram
   profile__resume_template |o--o{ profile__resume_version : "fk_resume_version_resume_template_id"
   profile__resume_version |o--o{ job__application : "fk_application_resume_version_id"
   profile__resume_version |o--o{ job__application : "fk_application_resume_version_owner"
+  ref__account_status ||--o{ org__account : "fk_account_account_status_code"
   ref__activity_event_type ||--o{ profile__candidate_activity_event : "fk_candidate_activity_event_activity_event_type_code"
   ref__address_type ||--o{ profile__candidate_address : "fk_candidate_address_address_type_code"
   ref__application_source ||--o{ job__application : "fk_application_application_source_code"
@@ -1094,9 +1347,12 @@ erDiagram
   ref__city |o--o{ profile__candidate_work_experience : "fk_candidate_work_experience_city_id"
   ref__city |o--o{ ref__institution : "fk_institution_city_id"
   ref__city ||--o{ job__job_requirement_location : "fk_job_requirement_location_city_id"
+  ref__city ||--o{ org__organisation_location : "fk_organisation_location_city_id"
   ref__city ||--o{ profile__candidate_address : "fk_candidate_address_city_id"
   ref__city ||--o{ profile__candidate_preferred_location : "fk_candidate_preferred_location_city_id"
+  ref__consent_purpose ||--o{ admin__consent_record : "fk_consent_record_consent_purpose_code"
   ref__contact_type ||--o{ profile__candidate_contact : "fk_candidate_contact_contact_type_code"
+  ref__country |o--o{ admin__app_user : "fk_app_user_login_phone_country_id"
   ref__country |o--o{ profile__candidate_contact : "fk_candidate_contact_phone_country_id"
   ref__country |o--o{ profile__candidate_profile : "fk_candidate_profile_nationality_country_id"
   ref__country |o--o{ ref__identifier_type : "fk_identifier_type_country_id"
@@ -1110,14 +1366,18 @@ erDiagram
   ref__disclosure ||--o{ job__job_requirement : "fk_job_requirement_salary_disclosure_code"
   ref__disclosure ||--o{ profile__candidate_profile : "fk_candidate_profile_current_salary_disclosure_code"
   ref__disclosure ||--o{ profile__candidate_profile : "fk_candidate_profile_expected_salary_disclosure_code"
+  ref__employee_count_band |o--o{ org__organisation : "fk_organisation_employee_count_band_code"
   ref__employment_type ||--o{ job__job_requirement : "fk_job_requirement_employment_type_code"
   ref__employment_type ||--o{ profile__candidate_work_experience : "fk_candidate_work_experience_employment_type_code"
   ref__enrolment_status ||--o{ profile__course_enrolment : "fk_course_enrolment_enrolment_status_code"
   ref__field_of_study |o--o{ job__job_requirement_qualification : "fk_job_requirement_qualification_field_of_study_id"
   ref__field_of_study |o--o{ profile__candidate_education : "fk_candidate_education_field_of_study_id"
   ref__gender |o--o{ profile__candidate_profile : "fk_candidate_profile_gender_code"
+  ref__hash_algorithm ||--o{ admin__user_credential : "fk_user_credential_hash_algorithm_code"
+  ref__identifier_type ||--o{ org__organisation_identifier : "fk_organisation_identifier_identifier_type_code"
   ref__identifier_type ||--o{ profile__candidate_identity_document : "fk_candidate_identity_document_identifier_type_code"
   ref__industry |o--o{ job__job_requirement : "fk_job_requirement_industry_id"
+  ref__industry |o--o{ org__organisation : "fk_organisation_industry_id"
   ref__industry |o--o{ profile__candidate_work_experience : "fk_candidate_work_experience_industry_id"
   ref__industry |o--o{ ref__industry : "fk_industry_parent_industry_id"
   ref__institution |o--o{ profile__candidate_education : "fk_candidate_education_institution_id"
@@ -1144,6 +1404,7 @@ erDiagram
   ref__notice_period |o--o{ profile__candidate_profile : "fk_candidate_profile_notice_period_code"
   ref__offer_status ||--o{ job__offer : "fk_offer_offer_status_code"
   ref__organisation_status ||--o{ org__organisation : "fk_organisation_organisation_status_code"
+  ref__organisation_type ||--o{ org__organisation : "fk_organisation_organisation_type_code"
   ref__pay_period |o--o{ job__job_requirement : "fk_job_requirement_pay_period_code"
   ref__pay_period |o--o{ profile__candidate_profile : "fk_candidate_profile_pay_period_code"
   ref__pay_period ||--o{ job__offer : "fk_offer_ctc_pay_period_code"
@@ -1169,20 +1430,33 @@ erDiagram
   ref__study_mode |o--o{ profile__candidate_education : "fk_candidate_education_study_mode_code"
   ref__timezone |o--o{ job__interview : "fk_interview_timezone_id"
   ref__timezone |o--o{ ref__city : "fk_city_timezone_id"
+  ref__ui_label ||--o{ admin__app_role : "fk_app_role_label_key"
+  ref__ui_label ||--o{ admin__permission : "fk_permission_label_key"
+  ref__ui_label ||--o{ ref__account_status : "fk_account_status_label_key"
   ref__ui_label ||--o{ ref__activity_event_type : "fk_activity_event_type_label_key"
   ref__ui_label ||--o{ ref__address_type : "fk_address_type_label_key"
   ref__ui_label ||--o{ ref__application_source : "fk_application_source_label_key"
   ref__ui_label ||--o{ ref__application_status : "fk_application_status_label_key"
   ref__ui_label ||--o{ ref__assessment_type : "fk_assessment_type_label_key"
+  ref__ui_label ||--o{ ref__audit_action : "fk_audit_action_label_key"
   ref__ui_label ||--o{ ref__bookmark_action : "fk_bookmark_action_label_key"
+  ref__ui_label ||--o{ ref__consent_purpose : "fk_consent_purpose_label_key"
   ref__ui_label ||--o{ ref__contact_type : "fk_contact_type_label_key"
   ref__ui_label ||--o{ ref__country : "fk_country_label_key"
   ref__ui_label ||--o{ ref__currency : "fk_currency_label_key"
   ref__ui_label ||--o{ ref__disclosure : "fk_disclosure_label_key"
+  ref__ui_label ||--o{ ref__earning_kind : "fk_earning_kind_label_key"
+  ref__ui_label ||--o{ ref__employee_count_band : "fk_employee_count_band_label_key"
   ref__ui_label ||--o{ ref__employment_type : "fk_employment_type_label_key"
   ref__ui_label ||--o{ ref__enrolment_status : "fk_enrolment_status_label_key"
+  ref__ui_label ||--o{ ref__error_severity : "fk_error_severity_label_key"
   ref__ui_label ||--o{ ref__field_of_study : "fk_field_of_study_label_key"
   ref__ui_label ||--o{ ref__gender : "fk_gender_label_key"
+  ref__ui_label ||--o{ ref__gig_application_status : "fk_gig_application_status_label_key"
+  ref__ui_label ||--o{ ref__gig_assignment_status : "fk_gig_assignment_status_label_key"
+  ref__ui_label ||--o{ ref__gig_request_status : "fk_gig_request_status_label_key"
+  ref__ui_label ||--o{ ref__handoff_status : "fk_handoff_status_label_key"
+  ref__ui_label ||--o{ ref__hash_algorithm : "fk_hash_algorithm_label_key"
   ref__ui_label ||--o{ ref__identifier_type : "fk_identifier_type_label_key"
   ref__ui_label ||--o{ ref__industry : "fk_industry_label_key"
   ref__ui_label ||--o{ ref__interview_mode : "fk_interview_mode_label_key"
@@ -1197,23 +1471,32 @@ erDiagram
   ref__ui_label ||--o{ ref__notice_period : "fk_notice_period_label_key"
   ref__ui_label ||--o{ ref__offer_status : "fk_offer_status_label_key"
   ref__ui_label ||--o{ ref__organisation_status : "fk_organisation_status_label_key"
+  ref__ui_label ||--o{ ref__organisation_type : "fk_organisation_type_label_key"
   ref__ui_label ||--o{ ref__pay_period : "fk_pay_period_label_key"
+  ref__ui_label ||--o{ ref__pricing_model : "fk_pricing_model_label_key"
   ref__ui_label ||--o{ ref__proficiency_level : "fk_proficiency_level_label_key"
   ref__ui_label ||--o{ ref__project_kind : "fk_project_kind_label_key"
   ref__ui_label ||--o{ ref__publish_state : "fk_publish_state_label_key"
   ref__ui_label ||--o{ ref__qualification : "fk_qualification_label_key"
   ref__ui_label ||--o{ ref__qualification_level : "fk_qualification_level_label_key"
   ref__ui_label ||--o{ ref__question_type : "fk_question_type_label_key"
+  ref__ui_label ||--o{ ref__rate_unit : "fk_rate_unit_label_key"
   ref__ui_label ||--o{ ref__referral_status : "fk_referral_status_label_key"
   ref__ui_label ||--o{ ref__rejection_reason : "fk_rejection_reason_label_key"
   ref__ui_label ||--o{ ref__skill_category : "fk_skill_category_label_key"
   ref__ui_label ||--o{ ref__study_mode : "fk_study_mode_label_key"
   ref__ui_label ||--o{ ref__ui_translation : "fk_ui_translation_ui_label_id"
   ref__ui_label ||--o{ ref__user_status : "fk_user_status_label_key"
+  ref__ui_label ||--o{ ref__verification_kind : "fk_verification_kind_label_key"
   ref__ui_label ||--o{ ref__verification_status : "fk_verification_status_label_key"
   ref__ui_label ||--o{ ref__web_link_type : "fk_web_link_type_label_key"
   ref__ui_label ||--o{ ref__work_type : "fk_work_type_label_key"
+  ref__ui_label ||--o{ ref__worker_list_kind : "fk_worker_list_kind_label_key"
   ref__user_status ||--o{ admin__app_user : "fk_app_user_user_status_code"
+  ref__verification_kind ||--o{ org__verification : "fk_verification_verification_kind_code"
+  ref__verification_status ||--o{ org__organisation : "fk_organisation_verification_status_code"
+  ref__verification_status ||--o{ org__organisation_identifier : "fk_organisation_identifier_verification_status_code"
+  ref__verification_status ||--o{ org__verification : "fk_verification_verification_status_code"
   ref__verification_status ||--o{ profile__candidate_identity_document : "fk_candidate_identity_document_verification_status_code"
   ref__web_link_type ||--o{ profile__candidate_web_link : "fk_candidate_web_link_web_link_type_code"
   ref__work_type ||--o{ job__job_requirement : "fk_job_requirement_work_type_code"

@@ -37,6 +37,10 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'talentra_readonly') THEN
     CREATE ROLE talentra_readonly NOLOGIN;
   END IF;
+  -- writes integration-boundary tables (gig earnings, provider callbacks); the application role only reads them
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'talentra_integration') THEN
+    CREATE ROLE talentra_integration NOLOGIN;
+  END IF;
 END $$;
 
 REVOKE CREATE ON SCHEMA public FROM PUBLIC;

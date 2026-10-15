@@ -1,0 +1,21 @@
+erDiagram
+  %% Design ERD generated from docs/phase1/relationships.md by tools/design_docs.py.
+  %% Entity = <schema>__<table>. Actor FKs (created_by/updated_by -> app_user) and lookup label_key FKs omitted.
+  %% ||--o{ mandatory parent, |o--o{ optional parent, --o| one-to-one.
+  admin__app_role ||--o{ admin__app_role_permission : "app_role_code"
+  admin__app_role ||--o{ admin__user_role : "app_role_code"
+  admin__app_user |o--o{ audit__audit_event : "actor_app_user_id"
+  admin__app_user |o--o{ admin__block_list : "blocked_app_user_id"
+  admin__app_user ||--o{ admin__block_list : "blocker_app_user_id"
+  admin__app_user ||--o{ admin__consent_record : "app_user_id"
+  admin__app_user |o--o{ audit__error_log : "app_user_id"
+  admin__app_user ||--o| admin__user_credential : "app_user_id"
+  admin__app_user ||--o{ admin__user_role : "app_user_id"
+  ref__audit_action ||--o{ audit__audit_event : "audit_action_code"
+  ref__consent_purpose ||--o{ admin__consent_record : "consent_purpose_code"
+  ref__country |o--o{ admin__app_user : "login_phone_country_id"
+  ref__error_severity ||--o{ audit__error_log : "error_severity_code"
+  ref__hash_algorithm ||--o{ admin__user_credential : "hash_algorithm_code"
+  org__organisation |o--o{ admin__block_list : "blocked_organisation_id"
+  org__organisation |o--o{ admin__user_role : "organisation_id"
+  admin__permission ||--o{ admin__app_role_permission : "permission_code"

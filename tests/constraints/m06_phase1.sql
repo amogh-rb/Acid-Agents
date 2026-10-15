@@ -24,9 +24,9 @@ DECLARE
 BEGIN
   -- ---------------- fixtures ----------------
   PERFORM set_config('app.current_user_id', '1', true);
-  INSERT INTO admin.app_user (user_status_code) VALUES ('active') RETURNING id INTO v_recruiter;
-  INSERT INTO admin.app_user (user_status_code) VALUES ('active') RETURNING id INTO v_cand_user;
-  INSERT INTO admin.app_user (user_status_code) VALUES ('active') RETURNING id INTO v_cand2_user;
+  INSERT INTO admin.app_user (user_status_code, login_email) VALUES ('active', 'recruiter@acme.example') RETURNING id INTO v_recruiter;
+  INSERT INTO admin.app_user (user_status_code, login_email) VALUES ('active', 'priya@example.com') RETURNING id INTO v_cand_user;
+  INSERT INTO admin.app_user (user_status_code, login_email) VALUES ('active', 'arun@example.com') RETURNING id INTO v_cand2_user;
   INSERT INTO org.organisation (organisation_name, organisation_status_code) VALUES ('Acme Staffing', 'active') RETURNING id INTO v_org;
   SELECT id INTO v_role FROM ref.job_role WHERE role_name = 'Backend Developer';
   v_job_vals := format('%s, %s, %L, %L, %L, %L, %L, %s', v_org, v_recruiter, 'Backend Developer',

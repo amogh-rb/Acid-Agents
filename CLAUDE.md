@@ -38,7 +38,7 @@ python tools/design_docs.py compare docs/phase1/entities.md docs/phase1/relation
 ## Layout
 - `ddl/NN_*.sql`: applied in order.
   - Already present: `00` extensions/schemas/roles, `05` domains, `06` base functions, `07` ui_label/language/ui_translation, `99_finalise` (always last).
-  - Planned slots: `10_ref`, `15_stubs`, `20_profile`, `30_jobs`, `40_admin`, `45_org`, `50_gig`, `60_lic`, `65_src`, `70_billing`, `80_notif`, `85_access`, `90_dw`.
+  - Built: `10_ref`, `15_stubs`, `20_profile`, `30_jobs`, `40_admin`, `45_org`, `50_gig`. Planned: `60_lic`, `65_src`, `70_billing`, `80_notif`, `85_access`, `90_dw`.
 - `tests/_qa/`: the harness (`qa.expect_error`, `qa.expect_ok`, `qa.assert`, `qa.assert_equals`, `qa.lint_violations()`).
 - `tests/<area>/mNN_*.sql`: each file runs inside BEGIN ... ROLLBACK. `mNN_*.ps1` is for concurrency tests.
 - `tools/`: dictionary/ERD export, reserved-word lists and checker, `pg_settings.sql`.
@@ -78,18 +78,33 @@ python tools/design_docs.py compare docs/phase1/entities.md docs/phase1/relation
 6. Commit `MNN: <summary>` with a green suite. Push when the user says so.
 
 ## Current state
-- **Done:** M1-M6, Phase 1 complete (gate M6 PASS, 8/8 files). Tag `phase1`. AI pre-review done (`docs/phase1/review.md`: F1 and F2 fixed; F3 interviewer-org check deferred to M10/M18; F4 answer-question-belongs-to-job deferred). Reviewer C must still confirm and sign `docs/phase1/signoff.md`.
-- **Next:** Phase 2, M7-M10 (13:15-13:50). One module per member, each on its own branch (`m07-admin`, `m07-org`, `m07-gig`), merged after review. Per module:
-  - M7 entities and M8 relationships: new `docs/phase2/<module>_entities.md` and `_relationships.md` in the same table format as phase1. Check them with `tools/design_docs.py`, and add `tests/docs/m07_*.ps1` / `m08_*.ps1` like m02/m03.
-  - M9 columns and M10 keys: new DDL files `ddl/40_admin.sql` (A), `ddl/45_org.sql` (B), `ddl/50_gig.sql` (C). Extend the stubs with `ALTER TABLE admin.app_user` / `org.organisation`. Do not recreate them.
-  - Tests: `tests/constraints/m10_<module>.sql` with the Milestone Plan section 4 negative tests.
-  - The m05 comparison only covers the phase1 docs. Either add a phase2 call in a new `tests/docs/m10_design_vs_catalog.ps1`, or extend m05 to read every `docs/phase*/` pair.
+- **Done:** M1-M10 (gate M10 PASS, 13/13 files). Tags `phase1`, `phase2` (local; nothing pushed yet). Phase 1 AI pre-review in `docs/phase1/review.md`; human reviewer C still has to sign `docs/phase1/signoff.md` and tick Verified for M1-M10.
+- **Next:** Phase 3, M11-M14 (core gate: `run.ps1 test` all green, then tag `core-v1`). Per module (Milestone Plan section 5):
+  - **Licences, seats, devices, sessions** (A): `ddl/60_lic.sql`, schemas `lic` + `app`.
+    - Tables: licence (max_users, max_devices_per_user CHECK > 0), licence_seat (unique licence/user), registered_device (unique user/fingerprint hash), login_session, login_attempt (append-only), session_revocation (append-only).
+    - `app.start_session` locks the seat row FOR UPDATE, counts active sessions (partial index `ended_at IS NULL`), then either inserts the session or writes login_attempt + `audit.log_event('device_limit_exceeded', ...)` and returns a rejection. Also `app.end_session`, `app.revoke_session` (audited, `session_revoked`) and `app.expire_idle_sessions`.
+    - Concurrency test `tests/concurrency/m14_device_limit.ps1`: 20 parallel psql logins with limit 3 -> exactly 3 active sessions, 17 audited rejections. Note: SQL tests roll back, so this one must commit its own data and clean up.
+  - **Sourcing** (B): `ddl/65_src.sql`, schema `src`.
+    - Tables: sourcing_request, sourcing_shortlist (references job.shortlist), outreach_batch, outreach_recipient.
+    - Rules: `trg_sourcing_request_consultant_open` (job.job_requirement.is_open_to_consultant); decision columns consistent with status; decline reason required; unique batch idempotency key; unique recipient per batch; trigger rejects recipients who blocked the sender (admin.block_list, user or organisation).
+  - **Subscriptions, wallet, payments, downloads** (C): `ddl/70_billing.sql`, schema `billing`.
+    - Tables: plan, plan_entitlement, subscription (`ex_subscription_licence_period` excluding cancelled), renewal, cancellation, payment_order, payment_event (unique gateway + event id), invoice, refund (<= paid), wallet (`ck_wallet_balance_non_negative`), wallet_ledger_entry (append-only, `reverses_entry_id`), credit_consumption, profile_download_event (references its ledger debit).
+    - `billing.post_ledger_entry()` locks the wallet row. Add `profile.profile_view_event` -> ledger debit FK (nullable, ALTER).
+  - **Docs:** `docs/phase3/<module>_entities.md` / `_relationships.md`. Draft them with `python tools/draft_design_docs.py ddl/60_lic.sql "Licences, seats, devices and sessions" A docs/phase3/lic` after `run.ps1 dict`, then review. Add `tests/docs/m11_*.ps1` / `m12_*.ps1` like m07/m08 (glob phase3). m05 already compares every phase.
+  - **Then the core gate:** `docs/02_compliance_table.md` rows 9-10, `docs/11_coverage_gap_register.md` (Tier 1/2 elements not built: notifications, community, tickets, FAQs, analytics come in M15-M18; review findings F3/F4), `run.ps1 test -Evidence`, tag `core-v1`.
 - **Rules learned:**
-  - Keep constraint and index names at 62 bytes or less; the lint flags truncation.
-  - FKs into `job.application` must be composite `(application_id, candidate_profile_id)`.
-  - After any DDL change, run `run.ps1 dict` and commit `dictionary/*.csv`.
-  - After FK changes, update `relationships.md` and re-render the ERD.
-- **Open:** docket Sections 8, 10 and 12 are missing (ask the organisers); Verified ticks need reviewer initials; pg_stat_statements and memory settings are not yet applied (needs a service restart, see `docs/04_environment.md`).
+  - Keep constraint and index names at 62 bytes or less (lint).
+  - FKs into `job.application` are composite `(application_id, candidate_profile_id)`.
+  - After DDL changes, run `run.ps1 dict` and commit `dictionary/*.csv`; also regenerate the phase ERDs.
+  - When two CHECKs can fire, PostgreSQL reports the first by name, so isolate the rule in negative tests.
+  - Active app_user rows need `login_email` or `login_phone` (tests must supply one).
+  - Tables written by an external system: tag the comment `[integration-write]`.
+  - Long scripted edits: write the Python to the scratchpad and run it; inline Bash heredocs with mixed quotes have failed.
+- **Open:**
+  - Docket Sections 8, 10 and 12 are missing (ask the organisers).
+  - Reviewer C signatures.
+  - pg_stat_statements and memory settings not yet applied (needs a service restart, see `docs/04_environment.md`).
+  - Review findings F3 (interviewer belongs to the job's organisation; recruiter mapping now exists, so this can be a trigger) and F4.
 
 ## Handoff log
 - **M1 (2026-10-15):**
@@ -111,3 +126,10 @@ python tools/design_docs.py compare docs/phase1/entities.md docs/phase1/relation
   - Tests: `m06_phase1.sql` (41 checks: Milestone Plan 1-9, 15+ extra rejections, full pipeline, partitioning). Docs: `docs/phase1/signoff.md`, `docs/02_compliance_table.md` (environment doc renamed to `04_environment.md`, D16).
   - Harness and lint: `qa.expect_error` maps partition index names to parent constraints; new lint rule "RG1 truncated name"; dictionary `references_to` is deterministic.
 - **Phase 1 AI pre-review (13:07):** the catalog review found that an application could attach another candidate's resume (fixed with a composite FK) and 15 unindexed FKs on large tables (fixed). Open: F3, F4.
+- **M7-M10 (2026-10-15):**
+  - Built:
+    - `ddl/40_admin.sql`: credentials, roles/permissions, effective-dated user_role, consent, block_list, audit trail + `audit.log_event`, audit triggers.
+    - `45_org.sql`: account, organisation extension, hierarchy cycle guard, locations, encrypted identifiers via `org.add_identifier`, verification, account admins, recruiter_mapping + `org.current_recruiter_organisation`.
+    - `50_gig.sql`: worker profile, offerings, rates, availability, requests, applications with one-way decisions and blacklist, assignments with B35 exclusion, handoff, integration-only earnings, lists, ratings.
+  - Docs: `docs/phase2/*`, `docs/erd/phase2_*.mmd`, `phase2_generated.mmd`. Tools: `tools/draft_design_docs.py`; `design_docs.py` takes comma-separated entity lists.
+  - Tests: m07/m08 docs, m10 admin/org/gig (65 checks). Decisions D17-D21.

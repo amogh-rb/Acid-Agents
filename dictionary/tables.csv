@@ -1,5 +1,25 @@
 schema_name,table_name,kind,delete_class,description,column_count
-admin,app_user,table,soft-delete,"Login identity (candidate, recruiter, consultant, admin, system). Stub in Phase 1; extended by Administration in M7-M10",8
+admin,app_role,table,hard-delete,"Lookup: actor role (docket Section 3). Rows are deactivated (is_active), not deleted, once referenced.",10
+admin,app_role_permission,table,hard-delete,"Permission granted to a role (junction, owned by both sides)",7
+admin,app_user,table,soft-delete,"Login identity (candidate, recruiter, consultant, admin, system). Stub in Phase 1; extended by Administration in M7-M10",13
+admin,block_list,table,soft-delete,A user (usually a candidate) blocks one user or one organisation; unblocking sets deleted_at so history is kept. RLS in M18 hides the blocker from the blocked party,10
+admin,consent_record,table,append-only,Consent given or withdrawn; the latest row per user and purpose is the current state (withdrawal is a new row),9
+admin,permission,table,hard-delete,"Lookup: action a role may perform. Rows are deactivated (is_active), not deleted, once referenced.",9
+admin,user_credential,table,hard-delete,"Password credential of a login identity: hash only, one per user (owned by app_user). Restricted grants in M18",12
+admin,user_role,table,hard-delete,"Role held by a user, optionally scoped to an organisation, over an effective period; revocation closes the period (history kept)",9
+audit,audit_event,table,append-only,Audit trail of sensitive actions (RG4); application users cannot update or delete it (trigger + revoked grants). Retention: 7 years,10
+audit,error_log,table,append-only,System errors (application and integration). Retention: 90 days,9
+gig,gig_application,table,hard-delete,Gig worker applies to a gig request; bids flow one way and only the requester decides,13
+gig,gig_assignment,table,hard-delete,Accepted gig application turned into work for a window; fulfilment itself runs in the external system,12
+gig,gig_availability,table,hard-delete,Time slot a gig worker is available; slots of one worker do not overlap (owned by the worker profile),8
+gig,gig_charge_rate,table,hard-delete,Effective-dated charge rate of a service offering; one rate per unit at a time (owned by the offering),10
+gig,gig_earning_reference,table,append-only,"[integration-write] Estimated, projected and total earnings reported by the fulfilment system (source of truth); a newer figure is a new row. The application can only read it",11
+gig,gig_fulfilment_handoff,table,hard-delete,"Handoff of an assignment to the external fulfilment system (integration boundary): idempotent send, external reference, status",12
+gig,gig_rating,table,hard-delete,"Requester rating of a completed gig, one per assignment",9
+gig,gig_request,table,soft-delete,Short project-based request with a time window and a fixed or rate-based price,21
+gig,gig_requester_worker_list,table,hard-delete,Requester favourite or blacklist entry for a worker; a worker is on at most one list per requester (owned by both sides),9
+gig,gig_service_offering,table,hard-delete,"Service a gig worker offers, one per skill (owned by the worker profile)",9
+gig,gig_worker_profile,table,soft-delete,"Gig worker profile, separate from candidate profiles (docket Section 2); 1:1 with app_user",12
 job,application,partitioned table,soft-delete,"Candidate application to a requirement: current status, source, resume, applied_at; one per candidate per job. Retention: anonymised with the profile",16
 job,application_answer,table,hard-delete,Candidate answer to a screening question (owned by the application),11
 job,application_status_history,table,append-only,"Every application status transition with actor (created_by), time and reason",9
@@ -20,7 +40,13 @@ job,questionnaire_question,table,hard-delete,Ordered question in a questionnaire
 job,saved_search,table,hard-delete,Candidate saved job search (owned by the candidate); job alerts on it live in Notifications,8
 job,shortlist,table,hard-delete,Named shortlist owned by an organisation (Sourcing references it),9
 job,shortlist_entry,table,soft-delete,"Candidate on a shortlist; removal sets deleted_at so shortlist history (who added, when removed) is kept",9
-org,organisation,table,soft-delete,"Employer, client, consultancy or campus. Stub in Phase 1; extended by Organisation and account in M7-M10",8
+org,account,table,soft-delete,"Commercial account (customer) that owns one or more organisations, their subscriptions and wallet",9
+org,account_administrator,table,hard-delete,User who administers a commercial account (owned by the account); at most one primary,8
+org,organisation,table,soft-delete,"Employer, client, consultancy or campus. Stub in Phase 1; extended by Organisation and account in M7-M10",16
+org,organisation_identifier,table,hard-delete,"Tax or registration identifier (GSTIN, PAN, CIN, EIN) of an organisation; written through org.add_identifier, never in clear",12
+org,organisation_location,table,hard-delete,Office or site of an organisation (owned by the organisation),14
+org,recruiter_mapping,table,hard-delete,"Which organisation a recruiter works for, over which dates; periods for one recruiter never overlap (history kept by closing the period)",8
+org,verification,table,hard-delete,"One verification request to the company registration / tax service and its outcome (integration boundary, docket Section 6)",14
 profile,assessment,table,hard-delete,Assessment catalogue entry,11
 profile,assessment_attempt,table,append-only,One submitted assessment attempt with its score; abandoned attempts are not recorded,10
 profile,candidate_activity_event,table,append-only,"Candidate activity log: login, profile update, resume download ...",7
@@ -45,21 +71,32 @@ profile,profile_view_event,table,append-only,"Which employer or recruiter viewed
 profile,referral,table,hard-delete,"Who referred whom, optionally for a job, and how far it progressed (referral tracking and events)",11
 profile,resume_template,table,hard-delete,Platform resume layout candidates build from,9
 profile,resume_version,table,soft-delete,"A saved resume, built from a template or uploaded (owned by the profile)",16
+ref,account_status,table,hard-delete,"Lookup: commercial account status. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,activity_event_type,table,hard-delete,"Lookup: candidate activity log event. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,address_type,table,hard-delete,"Lookup: purpose of an address. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,application_source,table,hard-delete,"Lookup: how an application reached the pipeline. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,application_status,table,hard-delete,"Lookup: application pipeline status. Rows are deactivated (is_active), not deleted, once referenced.",11
 ref,assessment_type,table,hard-delete,"Lookup: kind of assessment. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,audit_action,table,hard-delete,"Lookup: sensitive action recorded in the audit trail. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,bookmark_action,table,hard-delete,"Lookup: bookmark history action. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,city,table,hard-delete,"City or town; job locations, addresses and preferred locations",13
+ref,consent_purpose,table,hard-delete,"Lookup: purpose a user gives or withdraws consent for. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,contact_type,table,hard-delete,"Lookup: kind of contact point. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,country,table,hard-delete,ISO 3166-1 country,13
 ref,currency,table,hard-delete,ISO 4217 currency; FK target of every money companion column,12
 ref,disclosure,table,hard-delete,"Lookup: unknown vs not applicable for amounts (RG5): disclosed, not_disclosed, not_applicable. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,earning_kind,table,hard-delete,"Lookup: kind of earnings figure reported by the fulfilment system. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,employee_count_band,table,hard-delete,"Lookup: company size band. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,employment_type,table,hard-delete,"Lookup: employment type of a job or a past role. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,enrolment_status,table,hard-delete,"Lookup: state of a course enrolment. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,error_severity,table,hard-delete,"Lookup: severity of a logged system error. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,field_of_study,table,hard-delete,"Specialisation (Computer Science, Mechanical)",8
 ref,gender,table,hard-delete,"Lookup: self-described gender. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,gig_application_status,table,hard-delete,"Lookup: state of a gig application. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,gig_assignment_status,table,hard-delete,"Lookup: state of a gig assignment. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,gig_request_status,table,hard-delete,"Lookup: gig request lifecycle. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,handoff_status,table,hard-delete,"Lookup: state of a handoff to the external fulfilment system. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,hash_algorithm,table,hard-delete,"Lookup: password hashing algorithm of a stored credential. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,identifier_type,table,hard-delete,"Lookup: national and tax identifier types with validation rules. Rows are deactivated (is_active), not deleted, once referenced.",13
 ref,industry,table,hard-delete,Hierarchical industry classification,10
 ref,institution,table,hard-delete,"School, college or university (education records, campus hiring)",10
@@ -75,13 +112,16 @@ ref,language,table,hard-delete,"Lookup: languages for UI, profiles and user-ente
 ref,notice_period,table,hard-delete,"Lookup: notice period a candidate must serve. Rows are deactivated (is_active), not deleted, once referenced.",10
 ref,offer_status,table,hard-delete,"Lookup: state of an offer. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,organisation_status,table,hard-delete,"Lookup: organisation account status. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,organisation_type,table,hard-delete,"Lookup: kind of organisation. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,pay_period,table,hard-delete,"Lookup: period a salary, CTC or rate is quoted in. Rows are deactivated (is_active), not deleted, once referenced.",10
+ref,pricing_model,table,hard-delete,"Lookup: how a gig is priced. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,proficiency_level,table,hard-delete,"Lookup: proficiency in a skill or language. Rows are deactivated (is_active), not deleted, once referenced.",10
 ref,project_kind,table,hard-delete,"Lookup: context a profile project was done in. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,publish_state,table,hard-delete,"Lookup: visibility of a job requirement. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,qualification,table,hard-delete,"Named qualification (B.Tech, ITI Fitter, MBA) at a level",10
 ref,qualification_level,table,hard-delete,"Lookup: level of a qualification. Rows are deactivated (is_active), not deleted, once referenced.",10
 ref,question_type,table,hard-delete,"Lookup: answer format of a screening question. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,rate_unit,table,hard-delete,"Lookup: unit a gig rate is charged per. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,referral_status,table,hard-delete,"Lookup: progress of a referral. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,rejection_reason,table,hard-delete,"Lookup: why an application was rejected. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,skill,table,hard-delete,"Canonical skill shared by profiles, jobs, assessments and courses (name is a proper noun, not translated)",8
@@ -92,6 +132,8 @@ ref,timezone,table,hard-delete,IANA time zone used to display UTC timestamps in 
 ref,ui_label,table,hard-delete,"UI string key; one row per key, translations in ref.ui_translation",7
 ref,ui_translation,table,hard-delete,Translation of one UI label into one language (CASCADE: owned by the label),8
 ref,user_status,table,hard-delete,"Lookup: app_user account status. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,verification_kind,table,hard-delete,"Lookup: what an organisation verification checks. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,verification_status,table,hard-delete,"Lookup: outcome of an external verification (identity, company, tax). Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,web_link_type,table,hard-delete,"Lookup: kind of external profile link. Rows are deactivated (is_active), not deleted, once referenced.",9
 ref,work_type,table,hard-delete,"Lookup: where the work happens. Rows are deactivated (is_active), not deleted, once referenced.",9
+ref,worker_list_kind,table,hard-delete,"Lookup: requester list a gig worker is on. Rows are deactivated (is_active), not deleted, once referenced.",9

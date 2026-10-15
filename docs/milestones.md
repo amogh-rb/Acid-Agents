@@ -12,10 +12,10 @@ A milestone is done only when it is **Defined** (deliverable committed), **Verif
 | M4 | B12-B15 | Columns + comments + lookup seed | A, B | ✅ 12:42 | AI pre-review 13:07 (C to confirm) | ✅ gate M4 12:46 | `ddl/10_ref.sql`, `20_profile.sql`, `30_jobs.sql`: 96 tables, PKs + FKs declared now (D13), 0 lint violations |
 | M5 | B16-B19 | Dictionary + generated ERD + design note | C | ✅ 12:45 | AI pre-review 13:07 (C to confirm) | ✅ gate M5 12:46 (7/7 files) | `dictionary/*.csv` (994 columns), `docs/erd/phase1_generated.mmd`, `docs/phase1/design.md`; design vs catalog proven by test |
 | M6 | B20-B23 | Keys, constraints, transition trigger, Phase 1 sign-off | A, B | ✅ 12:58 | AI pre-review 13:07; C signs `docs/phase1/signoff.md` | ✅ gate M6 12:58 (8/8 files, 43 M6 checks) | `job.application` hash-partitioned (D5); compliance table `docs/02_compliance_table.md`; tag `phase1` |
-| M7 | B24-B26 | Entities: Admin / Org / Gig | A / B / C | ☐ | ☐ | ☐ | |
-| M8 | B27-B29 | Relationships: Admin / Org / Gig | A / B / C | ☐ | ☐ | ☐ | |
-| M9 | B30-B32 | Columns: Admin / Org / Gig | A / B / C | ☐ | ☐ | ☐ | |
-| M10 | B33-B35 | Keys and constraints + tests: Admin / Org / Gig | A / B / C | ☐ | ☐ | ☐ | Tag `phase2` |
+| M7 | B24-B26 | Entities: Admin / Org / Gig | A / B / C | ✅ 13:44 | ☐ | ✅ gate M10 13:47 | `docs/phase2/{admin,org,gig}_entities.md` (44 entities) |
+| M8 | B27-B29 | Relationships: Admin / Org / Gig | A / B / C | ✅ 13:44 | ☐ | ✅ gate M10 13:47 | `docs/phase2/*_relationships.md` (73 FKs), `docs/erd/phase2_*.mmd` |
+| M9 | B30-B32 | Columns: Admin / Org / Gig | A / B / C | ✅ 13:40 | ☐ | ✅ gate M10 13:47 | `ddl/40_admin.sql`, `45_org.sql`, `50_gig.sql`; dictionary 1,433 columns |
+| M10 | B33-B35 | Keys and constraints + tests: Admin / Org / Gig | A / B / C | ✅ 13:47 | ☐ | ✅ gate M10 13:47 (13/13 files; m10: 27 + 16 + 22 checks) | Tag `phase2`. Built by one agent on main (D21) |
 | M11 | B36-B38 | Entities: Licences / Sourcing / Subscriptions | A / B / C | ☐ | ☐ | ☐ | |
 | M12 | B39-B41 | Relationships | A / B / C | ☐ | ☐ | ☐ | |
 | M13 | B42-B44 | Columns | A / B / C | ☐ | ☐ | ☐ | |

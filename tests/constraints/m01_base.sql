@@ -90,8 +90,8 @@ DECLARE
 BEGIN
   IF to_regclass('admin.app_user') IS NOT NULL THEN
     PERFORM set_config('app.current_user_id', '1', true);
-    EXECUTE 'INSERT INTO admin.app_user (user_status_code) VALUES (''active'') RETURNING id' INTO v_a;
-    EXECUTE 'INSERT INTO admin.app_user (user_status_code) VALUES (''active'') RETURNING id' INTO v_b;
+    EXECUTE 'INSERT INTO admin.app_user (user_status_code) VALUES (''pending_verification'') RETURNING id' INTO v_a;
+    EXECUTE 'INSERT INTO admin.app_user (user_status_code) VALUES (''pending_verification'') RETURNING id' INTO v_b;
   END IF;
   PERFORM set_config('app.current_user_id', v_a::text, true);
   PERFORM qa.assert_equals('current_actor_id reads app.current_user_id', public.current_actor_id(), v_a);

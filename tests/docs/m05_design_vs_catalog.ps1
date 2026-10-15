@@ -2,7 +2,7 @@
 #  1. Export the dictionary from the fresh database into a temp folder.
 #  2. Row count equals information_schema column count; every row has a class; every NULL row has a reason.
 #  3. The committed dictionary/*.csv equals the fresh export (regenerate with .\run.ps1 dict).
-#  4. entities.md / relationships.md match the catalog (tables, delete classes, FKs, ON DELETE, nullability).
+#  4. every docs/phase*/ entity and relationship file matches the catalog (tables, delete classes, FKs, ON DELETE, nullability).
 $ErrorActionPreference = 'Stop'
 $psql = Join-Path $env:PGBIN 'psql.exe'
 $out = Join-Path $env:TEMP ('talentra_dict_' + [guid]::NewGuid().ToString('N'))
@@ -32,7 +32,10 @@ try {
   }
   Write-Output 'PASS  committed dictionary/*.csv equals the fresh catalog export'
 
-  python tools/design_docs.py compare docs/phase1/entities.md docs/phase1/relationships.md (Join-Path $out 'columns.csv') (Join-Path $out 'tables.csv')
+  # every phase's docs together: a Phase 2 table or FK missing from its module doc fails here
+  $ents = (Get-ChildItem docs -Recurse -Filter '*entities.md' | Where-Object { $_.DirectoryName -match 'phase' } | Sort-Object FullName | ForEach-Object { Resolve-Path -Relative $_.FullName }) -join ','
+  $rels = (Get-ChildItem docs -Recurse -Filter '*relationships.md' | Where-Object { $_.DirectoryName -match 'phase' } | Sort-Object FullName | ForEach-Object { Resolve-Path -Relative $_.FullName }) -join ','
+  python tools/design_docs.py compare $ents $rels (Join-Path $out 'columns.csv') (Join-Path $out 'tables.csv')
   if ($LASTEXITCODE -ne 0) { exit 1 }
 } finally {
   Remove-Item -Recurse -Force $out -ErrorAction SilentlyContinue

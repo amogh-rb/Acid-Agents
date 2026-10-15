@@ -3,7 +3,9 @@
   python tools/design_docs.py entities  ENTITIES.md
   python tools/design_docs.py relations ENTITIES.md RELATIONSHIPS.md
   python tools/design_docs.py erd       ENTITIES.md RELATIONSHIPS.md OUT.mmd [--check]
-  python tools/design_docs.py compare   ENTITIES.md RELATIONSHIPS.md dictionary/columns.csv dictionary/tables.csv
+  python tools/design_docs.py compare   ENTITIES.md[,...] RELATIONSHIPS.md[,...] dictionary/columns.csv dictionary/tables.csv
+ENTITIES may be a comma-separated list (all phases); a name may repeat across files with the same schema and
+delete class (Phase 1 stubs extended in Phase 2).
 
 entities:   unique names, schema, delete class, tier and owner are valid.
 relations:  every child and parent is a known entity; parent schema matches; cardinality,
@@ -70,6 +72,21 @@ def load_entities(path, problems):
     return entities
 
 
+def load_entity_set(paths, problems):
+    """Entities from several files (comma-separated list). A name may repeat across files only with the
+    same schema and delete class (a Phase 1 stub extended by its Phase 2 owner)."""
+    merged, classes = {}, {}
+    for path in paths.split(","):
+        found = load_entities(path, problems)
+        for _, row in read_tables(path):
+            if "entity" in row and "delete class" in row:
+                name, cls = clean(row["entity"]), clean(row["delete class"])
+                if name in merged and (merged[name], classes[name]) != (found[name], cls):
+                    problems.append(f"{path}: {name} differs from an earlier file ({merged[name]}/{classes[name]} vs {found[name]}/{cls})")
+                merged[name], classes[name] = found[name], cls
+    return merged, classes
+
+
 def load_relations(path, entities, problems):
     relations = []
     for lineno, row in read_tables(path):
@@ -122,7 +139,7 @@ def load_relations(path, entities, problems):
             problems.append(f"{where}: CASCADE is only for owned children; say so in the reason")
         if on_delete == "SET NULL" and optional != "yes":
             problems.append(f"{where}: SET NULL needs an optional FK")
-        relations.append((child, column, parent_schema, parent, card, optional))
+        relations.append((child, column, parent_schema, parent, card, optional, on_delete))
     return relations
 
 
@@ -131,7 +148,7 @@ def render_erd(entities, relations):
              "  %% Design ERD generated from docs/phase1/relationships.md by tools/design_docs.py.",
              "  %% Entity = <schema>__<table>. Actor FKs (created_by/updated_by -> app_user) and lookup label_key FKs omitted.",
              "  %% ||--o{ mandatory parent, |o--o{ optional parent, --o| one-to-one."]
-    for child, column, parent_schema, parent, card, optional in sorted(relations, key=lambda r: (r[3], r[0], r[1])):
+    for child, column, parent_schema, parent, card, optional, _ in sorted(relations, key=lambda r: (r[3], r[0], r[1])):
         left = "||" if optional == "no" else "|o"
         right = "o|" if card == "1:1" else "o{"
         child_ent = f"{entities.get(child, '?')}__{child}"
@@ -151,10 +168,10 @@ def read_csv(path):
 
 def compare_catalog(entities_path, relations_path, columns_csv, tables_csv, problems):
     """Design docs vs the built catalog (dictionary export), both directions."""
-    entities = load_entities(entities_path, problems)
-    delete_class = {clean(r["entity"]): clean(r["delete class"])
-                    for _, r in read_tables(entities_path) if "entity" in r and "delete class" in r}
-    relations = load_relations(relations_path, entities, problems)
+    entities, delete_class = load_entity_set(entities_path, problems)
+    relations = []
+    for rel_path in relations_path.split(","):
+        relations += load_relations(rel_path, entities, problems)
     schemas = set(entities.values())
 
     tables = {(r["schema_name"], r["table_name"]): r for r in read_csv(tables_csv) if r["schema_name"] in schemas}
@@ -174,7 +191,7 @@ def compare_catalog(entities_path, relations_path, columns_csv, tables_csv, prob
 
     # relationship rows -> FKs
     documented = set()
-    for child, column, parent_schema, parent, card, optional in relations:
+    for child, column, parent_schema, parent, card, optional, expected in relations:
         schema = entities.get(child)
         documented.add((schema, child, column))
         col = columns.get((schema, child, column))
@@ -187,8 +204,6 @@ def compare_catalog(entities_path, relations_path, columns_csv, tables_csv, prob
         if not match:
             problems.append(f"{where}: no FK to {parent_schema}.{parent} in the database (found: {col['references_to'] or 'none'})")
         else:
-            expected = next(clean(r.get("on delete", "")) for _, r in read_tables(relations_path)
-                            if clean(r.get("child.column", "")) == f"{child}.{column}")
             if match[0][3] != expected.upper():
                 problems.append(f"{where}: ON DELETE {match[0][3]} in the database, {expected} in relationships.md")
         if (col["nullability"] == "NULL") != (optional == "yes"):
@@ -220,9 +235,12 @@ def main(argv):
         n_ent, n_rel = compare_catalog(argv[1], argv[2], argv[3], argv[4], problems)
         return report(problems, f"design matches the database: {n_ent} entities (tables, delete classes) and "
                                 f"{n_rel} relationships (FK target, ON DELETE, nullability); no undocumented tables or FKs")
-    entities = load_entities(argv[1], problems)
     if command == "entities":
+        entities, _ = load_entity_set(argv[1], problems)
         return report(problems, f"{len(entities)} entities: unique, schema, delete class, tier and owner valid")
+    # relations / erd: argv[1] may list every phase's entity files (parents can live in other modules);
+    # argv[2] is the relationship file being checked or drawn
+    entities, _ = load_entity_set(argv[1], problems)
     relations = load_relations(argv[2], entities, problems)
     if command == "relations":
         return report(problems, f"{len(relations)} relationships: known entities, naming, cardinality, ON DELETE and reasons valid")

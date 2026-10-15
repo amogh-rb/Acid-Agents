@@ -127,10 +127,16 @@ BEGIN
     EXECUTE format('GRANT SELECT ON %I.%I TO talentra_app, talentra_readonly', v_schema, 'v_' || v_table);
   END IF;
 
-  -- 7. Grants.
+  -- 7. Grants. A table tagged [integration-write] in its comment is written only by talentra_integration
+  --    (external source of truth, docket Section 6); the application role can only read it.
   EXECUTE format('REVOKE ALL ON %s FROM PUBLIC', p_table);
   EXECUTE format('GRANT SELECT ON %s TO talentra_readonly', p_table);
-  IF v_schema = 'dw' THEN
+  IF v_comment LIKE '%[integration-write]%' THEN
+    EXECUTE format('REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON %s FROM talentra_app', p_table);
+    EXECUTE format('GRANT SELECT ON %s TO talentra_app', p_table);
+    EXECUTE format('GRANT SELECT, INSERT%s ON %s TO talentra_integration',
+                   CASE WHEN v_append THEN '' ELSE ', UPDATE' END, p_table);
+  ELSIF v_schema = 'dw' THEN
     EXECUTE format('GRANT SELECT ON %s TO talentra_app', p_table);
   ELSIF v_append THEN
     EXECUTE format('GRANT SELECT, INSERT ON %s TO talentra_app', p_table);

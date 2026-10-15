@@ -1,0 +1,335 @@
+erDiagram
+  admin__app_role {
+    int8 id PK
+    d_code code UK
+    varchar label_key FK
+    bool is_active
+    int4 sort_order
+    bool is_organisation_scoped
+  }
+  admin__app_role_permission {
+    int8 id PK
+    d_code app_role_code FK
+    d_code permission_code FK
+  }
+  admin__app_user {
+    int8 id PK
+    d_code user_status_code FK
+    bool is_system_actor
+    timestamptz deleted_at
+    d_email login_email UK
+    d_phone_e164 login_phone UK
+    int8 login_phone_country_id FK
+    d_person_name display_name
+    timestamptz last_login_at
+  }
+  admin__block_list {
+    int8 id PK
+    int8 blocker_app_user_id FK
+    int8 blocked_app_user_id FK
+    int8 blocked_organisation_id FK
+    varchar block_reason
+    timestamptz deleted_at
+  }
+  admin__consent_record {
+    int8 id PK
+    int8 app_user_id FK
+    d_code consent_purpose_code FK
+    bool is_granted
+    varchar policy_version
+    timestamptz recorded_at
+    varchar client_ip_masked
+  }
+  admin__permission {
+    int8 id PK
+    d_code code UK
+    varchar label_key FK
+    bool is_active
+    int4 sort_order
+  }
+  admin__user_credential {
+    int8 id PK
+    int8 app_user_id FK
+    varchar password_hash
+    d_code hash_algorithm_code FK
+    timestamptz password_changed_at
+    int2 failed_attempt_count
+    timestamptz locked_until
+    bool must_change_password
+  }
+  admin__user_role {
+    int8 id PK
+    int8 app_user_id FK
+    d_code app_role_code FK
+    int8 organisation_id FK
+    tstzrange valid_period
+  }
+  audit__audit_event {
+    int8 id PK
+    int8 actor_app_user_id FK
+    d_code audit_action_code FK
+    varchar subject_table
+    int8 subject_id
+    jsonb event_detail
+    varchar client_ip_masked
+    timestamptz occurred_at
+  }
+  audit__error_log {
+    int8 id PK
+    d_code error_severity_code FK
+    varchar error_code
+    varchar error_message
+    varchar error_context
+    int8 app_user_id FK
+    timestamptz occurred_at
+  }
+  gig__gig_application {
+    int8 id PK
+    int8 gig_request_id FK
+    int8 gig_worker_profile_id FK
+    d_code gig_application_status_code FK
+    d_money proposed_amount
+    d_currency_code proposed_currency_code FK
+    varchar cover_note
+    timestamptz applied_at
+    timestamptz decided_at
+  }
+  gig__gig_assignment {
+    int8 id PK
+    int8 gig_application_id FK
+    int8 gig_request_id FK
+    int8 gig_worker_profile_id FK
+    timestamptz window_start
+    timestamptz window_end
+    d_code gig_assignment_status_code FK
+    timestamptz completed_at
+  }
+  gig__gig_availability {
+    int8 id PK
+    int8 gig_worker_profile_id FK
+    timestamptz available_from
+    timestamptz available_to
+  }
+  gig__gig_charge_rate {
+    int8 id PK
+    int8 gig_service_offering_id FK
+    d_code rate_unit_code FK
+    d_money rate_amount
+    d_currency_code rate_currency_code FK
+    daterange valid_period
+  }
+  gig__gig_earning_reference {
+    int8 id PK
+    int8 gig_assignment_id FK
+    d_code earning_kind_code FK
+    d_money earning_amount
+    d_currency_code currency_code FK
+    varchar source_system UK
+    varchar source_reference UK
+    timestamptz as_of
+    timestamptz reconciled_at
+  }
+  gig__gig_fulfilment_handoff {
+    int8 id PK
+    int8 gig_assignment_id FK
+    varchar idempotency_key UK
+    varchar external_reference UK
+    d_code handoff_status_code FK
+    timestamptz sent_at
+    timestamptz acknowledged_at
+    varchar last_error
+  }
+  gig__gig_rating {
+    int8 id PK
+    int8 gig_assignment_id FK
+    int2 rating_score
+    varchar review_text
+    int8 review_language_id FK
+  }
+  gig__gig_request {
+    int8 id PK
+    int8 requester_app_user_id FK
+    int8 requester_organisation_id FK
+    varchar gig_title
+    varchar gig_description
+    int8 gig_description_language_id FK
+    int8 skill_id FK
+    int8 city_id FK
+    timestamptz window_start
+    timestamptz window_end
+    d_code pricing_model_code FK
+    d_money fixed_price_amount
+    d_money rate_amount
+    d_code rate_unit_code FK
+    d_currency_code currency_code FK
+    d_code gig_request_status_code FK
+    timestamptz deleted_at
+  }
+  gig__gig_requester_worker_list {
+    int8 id PK
+    int8 requester_app_user_id FK
+    int8 gig_worker_profile_id FK
+    d_code worker_list_kind_code FK
+    varchar list_note
+  }
+  gig__gig_service_offering {
+    int8 id PK
+    int8 gig_worker_profile_id FK
+    int8 skill_id FK
+    varchar offering_title
+    varchar offering_description
+  }
+  gig__gig_worker_profile {
+    int8 id PK
+    int8 app_user_id FK
+    varchar headline
+    varchar bio
+    int8 bio_language_id FK
+    int8 base_city_id FK
+    bool is_available
+    timestamptz deleted_at
+  }
+  org__account {
+    int8 id PK
+    varchar account_name
+    d_code account_status_code FK
+    d_email billing_email
+    timestamptz deleted_at
+  }
+  org__account_administrator {
+    int8 id PK
+    int8 account_id FK
+    int8 app_user_id FK
+    bool is_primary
+  }
+  org__organisation {
+    int8 id PK
+    varchar organisation_name
+    d_code organisation_status_code FK
+    timestamptz deleted_at
+    varchar legal_name
+    d_code organisation_type_code FK
+    int8 account_id FK
+    int8 parent_organisation_id FK
+    int8 industry_id FK
+    d_code employee_count_band_code FK
+    varchar website_url
+    d_code verification_status_code FK
+  }
+  org__organisation_identifier {
+    int8 id PK
+    int8 organisation_id FK
+    d_code identifier_type_code FK
+    bytea value_encrypted
+    bytea value_hash UK
+    varchar value_last4
+    d_code verification_status_code FK
+    timestamptz verified_at
+  }
+  org__organisation_location {
+    int8 id PK
+    int8 organisation_id FK
+    varchar location_name UK
+    varchar address_line1
+    varchar address_line2
+    int8 city_id FK
+    varchar postal_code
+    d_lat latitude
+    d_lng longitude
+    bool is_headquarters
+  }
+  org__recruiter_mapping {
+    int8 id PK
+    int8 app_user_id FK
+    int8 organisation_id FK
+    daterange valid_period
+  }
+  org__verification {
+    int8 id PK
+    int8 organisation_id FK
+    d_code verification_kind_code FK
+    int8 organisation_identifier_id FK
+    d_code verification_status_code FK
+    varchar idempotency_key UK
+    varchar provider_reference UK
+    timestamptz requested_at
+    timestamptz completed_at
+    varchar outcome_note
+  }
+  admin__app_role ||--o{ admin__app_role_permission : "fk_app_role_permission_app_role_code"
+  admin__app_role ||--o{ admin__user_role : "fk_user_role_app_role_code"
+  admin__app_user |o--o{ admin__block_list : "fk_block_list_blocked_app_user_id"
+  admin__app_user |o--o{ audit__audit_event : "fk_audit_event_actor_app_user_id"
+  admin__app_user |o--o{ audit__error_log : "fk_error_log_app_user_id"
+  admin__app_user ||--o{ admin__block_list : "fk_block_list_blocker_app_user_id"
+  admin__app_user ||--o{ admin__consent_record : "fk_consent_record_app_user_id"
+  admin__app_user ||--o{ admin__user_role : "fk_user_role_app_user_id"
+  admin__app_user ||--o{ gig__gig_request : "fk_gig_request_requester_app_user_id"
+  admin__app_user ||--o{ gig__gig_requester_worker_list : "fk_gig_requester_worker_list_requester_app_user_id"
+  admin__app_user ||--o{ org__account_administrator : "fk_account_administrator_app_user_id"
+  admin__app_user ||--o{ org__recruiter_mapping : "fk_recruiter_mapping_app_user_id"
+  admin__app_user ||--o| admin__user_credential : "fk_user_credential_app_user_id"
+  admin__app_user ||--o| gig__gig_worker_profile : "fk_gig_worker_profile_app_user_id"
+  admin__permission ||--o{ admin__app_role_permission : "fk_app_role_permission_permission_code"
+  gig__gig_application ||--o{ gig__gig_assignment : "fk_gig_assignment_application"
+  gig__gig_assignment ||--o{ gig__gig_earning_reference : "fk_gig_earning_reference_gig_assignment_id"
+  gig__gig_assignment ||--o| gig__gig_fulfilment_handoff : "fk_gig_fulfilment_handoff_gig_assignment_id"
+  gig__gig_assignment ||--o| gig__gig_rating : "fk_gig_rating_gig_assignment_id"
+  gig__gig_request ||--o{ gig__gig_application : "fk_gig_application_gig_request_id"
+  gig__gig_request ||--o{ gig__gig_assignment : "fk_gig_assignment_gig_request_id"
+  gig__gig_service_offering ||--o{ gig__gig_charge_rate : "fk_gig_charge_rate_gig_service_offering_id"
+  gig__gig_worker_profile ||--o{ gig__gig_application : "fk_gig_application_gig_worker_profile_id"
+  gig__gig_worker_profile ||--o{ gig__gig_assignment : "fk_gig_assignment_gig_worker_profile_id"
+  gig__gig_worker_profile ||--o{ gig__gig_availability : "fk_gig_availability_gig_worker_profile_id"
+  gig__gig_worker_profile ||--o{ gig__gig_requester_worker_list : "fk_gig_requester_worker_list_gig_worker_profile_id"
+  gig__gig_worker_profile ||--o{ gig__gig_service_offering : "fk_gig_service_offering_gig_worker_profile_id"
+  org__account |o--o{ org__organisation : "fk_organisation_account_id"
+  org__account ||--o{ org__account_administrator : "fk_account_administrator_account_id"
+  org__organisation |o--o{ admin__block_list : "fk_block_list_blocked_organisation_id"
+  org__organisation |o--o{ admin__user_role : "fk_user_role_organisation_id"
+  org__organisation |o--o{ gig__gig_request : "fk_gig_request_requester_organisation_id"
+  org__organisation |o--o{ org__organisation : "fk_organisation_parent_organisation_id"
+  org__organisation ||--o{ org__organisation_identifier : "fk_organisation_identifier_organisation_id"
+  org__organisation ||--o{ org__organisation_location : "fk_organisation_location_organisation_id"
+  org__organisation ||--o{ org__recruiter_mapping : "fk_recruiter_mapping_organisation_id"
+  org__organisation ||--o{ org__verification : "fk_verification_organisation_id"
+  org__organisation_identifier |o--o{ org__verification : "fk_verification_organisation_identifier_id"
+  ref__account_status ||--o{ org__account : "fk_account_account_status_code"
+  ref__audit_action ||--o{ audit__audit_event : "fk_audit_event_audit_action_code"
+  ref__city |o--o{ gig__gig_request : "fk_gig_request_city_id"
+  ref__city |o--o{ gig__gig_worker_profile : "fk_gig_worker_profile_base_city_id"
+  ref__city ||--o{ org__organisation_location : "fk_organisation_location_city_id"
+  ref__consent_purpose ||--o{ admin__consent_record : "fk_consent_record_consent_purpose_code"
+  ref__country |o--o{ admin__app_user : "fk_app_user_login_phone_country_id"
+  ref__currency |o--o{ gig__gig_application : "fk_gig_application_proposed_currency_code"
+  ref__currency ||--o{ gig__gig_charge_rate : "fk_gig_charge_rate_rate_currency_code"
+  ref__currency ||--o{ gig__gig_earning_reference : "fk_gig_earning_reference_currency_code"
+  ref__currency ||--o{ gig__gig_request : "fk_gig_request_currency_code"
+  ref__earning_kind ||--o{ gig__gig_earning_reference : "fk_gig_earning_reference_earning_kind_code"
+  ref__employee_count_band |o--o{ org__organisation : "fk_organisation_employee_count_band_code"
+  ref__error_severity ||--o{ audit__error_log : "fk_error_log_error_severity_code"
+  ref__gig_application_status ||--o{ gig__gig_application : "fk_gig_application_gig_application_status_code"
+  ref__gig_assignment_status ||--o{ gig__gig_assignment : "fk_gig_assignment_gig_assignment_status_code"
+  ref__gig_request_status ||--o{ gig__gig_request : "fk_gig_request_gig_request_status_code"
+  ref__handoff_status ||--o{ gig__gig_fulfilment_handoff : "fk_gig_fulfilment_handoff_handoff_status_code"
+  ref__hash_algorithm ||--o{ admin__user_credential : "fk_user_credential_hash_algorithm_code"
+  ref__identifier_type ||--o{ org__organisation_identifier : "fk_organisation_identifier_identifier_type_code"
+  ref__industry |o--o{ org__organisation : "fk_organisation_industry_id"
+  ref__language |o--o{ gig__gig_rating : "fk_gig_rating_review_language_id"
+  ref__language |o--o{ gig__gig_request : "fk_gig_request_gig_description_language_id"
+  ref__language |o--o{ gig__gig_worker_profile : "fk_gig_worker_profile_bio_language_id"
+  ref__organisation_status ||--o{ org__organisation : "fk_organisation_organisation_status_code"
+  ref__organisation_type ||--o{ org__organisation : "fk_organisation_organisation_type_code"
+  ref__pricing_model ||--o{ gig__gig_request : "fk_gig_request_pricing_model_code"
+  ref__rate_unit |o--o{ gig__gig_request : "fk_gig_request_rate_unit_code"
+  ref__rate_unit ||--o{ gig__gig_charge_rate : "fk_gig_charge_rate_rate_unit_code"
+  ref__skill ||--o{ gig__gig_request : "fk_gig_request_skill_id"
+  ref__skill ||--o{ gig__gig_service_offering : "fk_gig_service_offering_skill_id"
+  ref__ui_label ||--o{ admin__app_role : "fk_app_role_label_key"
+  ref__ui_label ||--o{ admin__permission : "fk_permission_label_key"
+  ref__user_status ||--o{ admin__app_user : "fk_app_user_user_status_code"
+  ref__verification_kind ||--o{ org__verification : "fk_verification_verification_kind_code"
+  ref__verification_status ||--o{ org__organisation : "fk_organisation_verification_status_code"
+  ref__verification_status ||--o{ org__organisation_identifier : "fk_organisation_identifier_verification_status_code"
+  ref__verification_status ||--o{ org__verification : "fk_verification_verification_status_code"
+  ref__worker_list_kind ||--o{ gig__gig_requester_worker_list : "fk_gig_requester_worker_list_worker_list_kind_code"

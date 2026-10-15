@@ -1,0 +1,24 @@
+erDiagram
+  %% Design ERD generated from docs/phase1/relationships.md by tools/design_docs.py.
+  %% Entity = <schema>__<table>. Actor FKs (created_by/updated_by -> app_user) and lookup label_key FKs omitted.
+  %% ||--o{ mandatory parent, |o--o{ optional parent, --o| one-to-one.
+  org__account ||--o{ org__account_administrator : "account_id"
+  org__account |o--o{ org__organisation : "account_id"
+  ref__account_status ||--o{ org__account : "account_status_code"
+  admin__app_user ||--o{ org__account_administrator : "app_user_id"
+  admin__app_user ||--o{ org__recruiter_mapping : "app_user_id"
+  ref__city ||--o{ org__organisation_location : "city_id"
+  ref__employee_count_band |o--o{ org__organisation : "employee_count_band_code"
+  ref__identifier_type ||--o{ org__organisation_identifier : "identifier_type_code"
+  ref__industry |o--o{ org__organisation : "industry_id"
+  org__organisation |o--o{ org__organisation : "parent_organisation_id"
+  org__organisation ||--o{ org__organisation_identifier : "organisation_id"
+  org__organisation ||--o{ org__organisation_location : "organisation_id"
+  org__organisation ||--o{ org__recruiter_mapping : "organisation_id"
+  org__organisation ||--o{ org__verification : "organisation_id"
+  org__organisation_identifier |o--o{ org__verification : "organisation_identifier_id"
+  ref__organisation_type ||--o{ org__organisation : "organisation_type_code"
+  ref__verification_kind ||--o{ org__verification : "verification_kind_code"
+  ref__verification_status ||--o{ org__organisation : "verification_status_code"
+  ref__verification_status ||--o{ org__organisation_identifier : "verification_status_code"
+  ref__verification_status ||--o{ org__verification : "verification_status_code"
