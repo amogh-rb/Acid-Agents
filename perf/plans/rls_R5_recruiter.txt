@@ -1,0 +1,20 @@
+﻿Aggregate  (cost=308794.08..308794.09 rows=1 width=8) (actual rows=1.00 loops=1)
+  Buffers: shared hit=4884003
+  InitPlan 1
+    ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual rows=1.00 loops=1)
+          Buffers: shared hit=5
+  InitPlan 2
+    ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual rows=1.00 loops=1)
+          Buffers: shared hit=5
+  InitPlan 3
+    ->  Result  (cost=0.00..0.26 rows=1 width=32) (actual rows=1.00 loops=1)
+          Buffers: shared hit=9
+  InitPlan 4
+    ->  Result  (cost=0.00..0.26 rows=1 width=32) (actual rows=1.00 loops=1)
+          Buffers: shared hit=22
+  ->  Seq Scan on candidate_profile  (cost=0.00..308781.38 rows=4666 width=0) (actual rows=22142.00 loops=1)
+        Filter: ((deleted_at IS NULL) AND ((app_user_id = (NULLIF(current_setting('app.current_user_id'::text, true), ''::text))::bigint) OR (InitPlan 1).col1 OR ((InitPlan 2).col1 AND (deleted_at IS NULL) AND app.candidate_visible_to_actor(id, app_user_id, (InitPlan 3).col1, (InitPlan 4).col1))) AND ((full_name)::text ~~* '%Iyer%'::text))
+        Rows Removed by Filter: 977858
+        Buffers: shared hit=4884003
+Planning Time: 0.233 ms
+Execution Time: 92153.506 ms

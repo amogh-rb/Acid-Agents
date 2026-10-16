@@ -1,0 +1,19 @@
+﻿Nested Loop Left Join  (cost=1.28..6.91 rows=3 width=37) (actual rows=3.00 loops=1)
+  Buffers: shared hit=12
+  ->  Nested Loop Left Join  (cost=0.85..5.29 rows=1 width=37) (actual rows=1.00 loops=1)
+        Buffers: shared hit=8
+        ->  Index Scan using pk_candidate_profile on candidate_profile p  (cost=0.42..2.64 rows=1 width=29) (actual rows=1.00 loops=1)
+              Index Cond: (id = 600001)
+              Index Searches: 1
+              Buffers: shared hit=4
+        ->  Index Scan using idx_candidate_education_candidate_profile_id on candidate_education e  (cost=0.42..2.64 rows=1 width=16) (actual rows=1.00 loops=1)
+              Index Cond: (candidate_profile_id = 600001)
+              Index Searches: 1
+              Buffers: shared hit=4
+  ->  Index Only Scan using uq_candidate_skill_candidate_profile_id_skill_id on candidate_skill s  (cost=0.43..1.58 rows=3 width=16) (actual rows=3.00 loops=1)
+        Index Cond: (candidate_profile_id = 600001)
+        Heap Fetches: 0
+        Index Searches: 1
+        Buffers: shared hit=4
+Planning Time: 0.124 ms
+Execution Time: 0.044 ms

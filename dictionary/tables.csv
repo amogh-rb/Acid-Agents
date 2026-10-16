@@ -1,7 +1,7 @@
 schema_name,table_name,kind,delete_class,description,column_count
 admin,app_role,table,hard-delete,"Lookup: actor role (docket Section 3). Rows are deactivated (is_active), not deleted, once referenced.",10
 admin,app_role_permission,table,hard-delete,"Permission granted to a role (junction, owned by both sides)",7
-admin,app_user,table,soft-delete,"Login identity (candidate, recruiter, consultant, admin, system). Stub in Phase 1; extended by Administration in M7-M10",13
+admin,app_user,table,soft-delete,"Login identity (candidate, recruiter, consultant, admin, system). Stub in Phase 1; extended by Administration in M7-M10",14
 admin,block_list,table,soft-delete,A user (usually a candidate) blocks one user or one organisation; unblocking sets deleted_at so history is kept. RLS in M18 hides the blocker from the blocked party,10
 admin,consent_record,table,append-only,Consent given or withdrawn; the latest row per user and purpose is the current state (withdrawal is a new row),9
 admin,permission,table,hard-delete,"Lookup: action a role may perform. Rows are deactivated (is_active), not deleted, once referenced.",9

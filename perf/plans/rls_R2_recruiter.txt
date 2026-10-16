@@ -1,0 +1,64 @@
+﻿Nested Loop Left Join  (cost=4.92..12.80 rows=2 width=37) (actual rows=3.00 loops=1)
+  Buffers: shared hit=192
+  InitPlan 1
+    ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual rows=1.00 loops=1)
+          Buffers: shared hit=5
+  InitPlan 2
+    ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual rows=1.00 loops=1)
+          Buffers: shared hit=5
+  InitPlan 3
+    ->  Result  (cost=0.00..0.26 rows=1 width=32) (actual rows=1.00 loops=1)
+          Buffers: shared hit=9
+  InitPlan 4
+    ->  Result  (cost=0.00..0.26 rows=1 width=32) (actual rows=1.00 loops=1)
+          Buffers: shared hit=22
+  InitPlan 5
+    ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual rows=1.00 loops=1)
+          Buffers: shared hit=5
+  InitPlan 6
+    ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual rows=1.00 loops=1)
+          Buffers: shared hit=5
+  InitPlan 7
+    ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual rows=1.00 loops=1)
+          Buffers: shared hit=5
+  InitPlan 8
+    ->  Result  (cost=0.00..0.26 rows=1 width=32) (actual rows=1.00 loops=1)
+          Buffers: shared hit=9
+  InitPlan 9
+    ->  Result  (cost=0.00..0.26 rows=1 width=32) (actual rows=1.00 loops=1)
+          Buffers: shared hit=22
+  InitPlan 10
+    ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual rows=1.00 loops=1)
+          Buffers: shared hit=5
+  InitPlan 11
+    ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual rows=1.00 loops=1)
+          Buffers: shared hit=5
+  InitPlan 12
+    ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual rows=1.00 loops=1)
+          Buffers: shared hit=5
+  InitPlan 13
+    ->  Result  (cost=0.00..0.26 rows=1 width=32) (actual rows=1.00 loops=1)
+          Buffers: shared hit=9
+  InitPlan 14
+    ->  Result  (cost=0.00..0.26 rows=1 width=32) (actual rows=1.00 loops=1)
+          Buffers: shared hit=22
+  ->  Nested Loop Left Join  (cost=0.85..6.06 rows=1 width=37) (actual rows=1.00 loops=1)
+        Buffers: shared hit=109
+        ->  Index Scan using pk_candidate_profile on candidate_profile p  (cost=0.42..2.91 rows=1 width=29) (actual rows=1.00 loops=1)
+              Index Cond: (id = 600001)
+              Filter: ((app_user_id = (NULLIF(current_setting('app.current_user_id'::text, true), ''::text))::bigint) OR (InitPlan 1).col1 OR ((InitPlan 2).col1 AND (deleted_at IS NULL) AND app.candidate_visible_to_actor(id, app_user_id, (InitPlan 3).col1, (InitPlan 4).col1)))
+              Index Searches: 1
+              Buffers: shared hit=48
+        ->  Index Scan using idx_candidate_education_candidate_profile_id on candidate_education e  (cost=0.42..3.14 rows=1 width=16) (actual rows=1.00 loops=1)
+              Index Cond: (candidate_profile_id = 600001)
+              Filter: ((InitPlan 10).col1 OR app.actor_owns_candidate_profile(candidate_profile_id) OR app.candidate_profile_visible(candidate_profile_id, (InitPlan 11).col1, (InitPlan 12).col1, (InitPlan 13).col1, (InitPlan 14).col1))
+              Index Searches: 1
+              Buffers: shared hit=61
+  ->  Index Only Scan using uq_candidate_skill_candidate_profile_id_skill_id on candidate_skill s  (cost=0.43..3.08 rows=2 width=16) (actual rows=3.00 loops=1)
+        Index Cond: (candidate_profile_id = 600001)
+        Filter: ((InitPlan 5).col1 OR app.actor_owns_candidate_profile(candidate_profile_id) OR app.candidate_profile_visible(candidate_profile_id, (InitPlan 6).col1, (InitPlan 7).col1, (InitPlan 8).col1, (InitPlan 9).col1))
+        Heap Fetches: 0
+        Index Searches: 1
+        Buffers: shared hit=83
+Planning Time: 0.212 ms
+Execution Time: 1.021 ms

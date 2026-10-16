@@ -1,0 +1,19 @@
+﻿Limit  (cost=0.85..59.95 rows=50 width=29) (actual rows=50.00 loops=1)
+  Buffers: shared hit=43
+  ->  Merge Join  (cost=0.85..93226.11 rows=78883 width=29) (actual rows=50.00 loops=1)
+        Merge Cond: (s.candidate_profile_id = p.id)
+        Buffers: shared hit=43
+        ->  Index Only Scan using uq_candidate_skill_candidate_profile_id_skill_id on candidate_skill s  (cost=0.43..38379.85 rows=99099 width=8) (actual rows=62.00 loops=1)
+              Index Cond: (skill_id = 20)
+              Heap Fetches: 0
+              Index Searches: 1
+              Buffers: shared hit=10
+        ->  Index Scan using pk_candidate_profile on candidate_profile p  (cost=0.42..51821.00 rows=795940 width=29) (actual rows=490.00 loops=1)
+              Filter: (is_open_to_work AND (deleted_at IS NULL))
+              Rows Removed by Filter: 128
+              Index Searches: 1
+              Buffers: shared hit=33
+Planning:
+  Buffers: shared hit=16
+Planning Time: 0.212 ms
+Execution Time: 0.241 ms

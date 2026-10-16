@@ -1,0 +1,48 @@
+﻿Limit  (cost=3.19..258.12 rows=50 width=29) (actual rows=50.00 loops=1)
+  Buffers: shared hit=1439
+  InitPlan 1
+    ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual rows=1.00 loops=1)
+          Buffers: shared hit=5
+  InitPlan 2
+    ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual rows=1.00 loops=1)
+          Buffers: shared hit=5
+  InitPlan 3
+    ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual rows=1.00 loops=1)
+          Buffers: shared hit=5
+  InitPlan 4
+    ->  Result  (cost=0.00..0.26 rows=1 width=32) (actual rows=1.00 loops=1)
+          Buffers: shared hit=9
+  InitPlan 5
+    ->  Result  (cost=0.00..0.26 rows=1 width=32) (actual rows=1.00 loops=1)
+          Buffers: shared hit=22
+  InitPlan 6
+    ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual rows=1.00 loops=1)
+          Buffers: shared hit=5
+  InitPlan 7
+    ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual rows=1.00 loops=1)
+          Buffers: shared hit=5
+  InitPlan 8
+    ->  Result  (cost=0.00..0.26 rows=1 width=32) (actual rows=1.00 loops=1)
+          Buffers: shared hit=9
+  InitPlan 9
+    ->  Result  (cost=0.00..0.26 rows=1 width=32) (actual rows=1.00 loops=1)
+          Buffers: shared hit=22
+  ->  Nested Loop  (cost=0.85..182470.34 rows=35789 width=29) (actual rows=50.00 loops=1)
+        Buffers: shared hit=1439
+        ->  Index Only Scan using uq_candidate_skill_candidate_profile_id_skill_id on candidate_skill s  (cost=0.43..87929.35 rows=77077 width=8) (actual rows=62.00 loops=1)
+              Index Cond: (skill_id = 20)
+              Filter: ((InitPlan 1).col1 OR app.actor_owns_candidate_profile(candidate_profile_id) OR app.candidate_profile_visible(candidate_profile_id, (InitPlan 2).col1, (InitPlan 3).col1, (InitPlan 4).col1, (InitPlan 5).col1))
+              Rows Removed by Filter: 10
+              Heap Fetches: 0
+              Index Searches: 1
+              Buffers: shared hit=989
+        ->  Index Scan using pk_candidate_profile on candidate_profile p  (cost=0.42..1.23 rows=1 width=29) (actual rows=0.81 loops=62)
+              Index Cond: (id = s.candidate_profile_id)
+              Filter: (is_open_to_work AND (deleted_at IS NULL) AND ((app_user_id = (NULLIF(current_setting('app.current_user_id'::text, true), ''::text))::bigint) OR (InitPlan 6).col1 OR ((InitPlan 7).col1 AND (deleted_at IS NULL) AND app.candidate_visible_to_actor(id, app_user_id, (InitPlan 8).col1, (InitPlan 9).col1))))
+              Rows Removed by Filter: 0
+              Index Searches: 62
+              Buffers: shared hit=450
+Planning:
+  Buffers: shared hit=16
+Planning Time: 0.406 ms
+Execution Time: 4.117 ms

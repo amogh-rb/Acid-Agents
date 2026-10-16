@@ -1,0 +1,21 @@
+﻿Limit  (cost=1.47..3396.24 rows=50 width=29) (actual rows=50.00 loops=1)
+  Buffers: shared hit=12118
+  InitPlan 1
+    ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual rows=1.00 loops=1)
+          Buffers: shared hit=5
+  InitPlan 2
+    ->  Result  (cost=0.00..0.26 rows=1 width=1) (actual rows=1.00 loops=1)
+          Buffers: shared hit=5
+  InitPlan 3
+    ->  Result  (cost=0.00..0.26 rows=1 width=32) (actual rows=1.00 loops=1)
+          Buffers: shared hit=9
+  InitPlan 4
+    ->  Result  (cost=0.00..0.26 rows=1 width=32) (actual rows=1.00 loops=1)
+          Buffers: shared hit=22
+  ->  Index Scan using pk_candidate_profile on candidate_profile  (cost=0.42..316801.13 rows=4666 width=29) (actual rows=50.00 loops=1)
+        Filter: ((deleted_at IS NULL) AND ((app_user_id = (NULLIF(current_setting('app.current_user_id'::text, true), ''::text))::bigint) OR (InitPlan 1).col1 OR ((InitPlan 2).col1 AND (deleted_at IS NULL) AND app.candidate_visible_to_actor(id, app_user_id, (InitPlan 3).col1, (InitPlan 4).col1))) AND ((full_name)::text ~~* '%Iyer%'::text))
+        Rows Removed by Filter: 2376
+        Index Searches: 1
+        Buffers: shared hit=12118
+Planning Time: 0.127 ms
+Execution Time: 57.191 ms

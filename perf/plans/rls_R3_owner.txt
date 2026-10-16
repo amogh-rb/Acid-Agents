@@ -1,0 +1,11 @@
+﻿Limit  (cost=0.42..52.04 rows=50 width=29) (actual rows=50.00 loops=1)
+  Buffers: shared hit=92
+  ->  Index Scan using pk_candidate_profile on candidate_profile  (cost=0.42..54320.81 rows=52625 width=29) (actual rows=50.00 loops=1)
+        Filter: ((deleted_at IS NULL) AND ((full_name)::text ~~* '%Iyer%'::text))
+        Rows Removed by Filter: 2074
+        Index Searches: 1
+        Buffers: shared hit=92
+Planning:
+  Buffers: shared hit=1
+Planning Time: 0.221 ms
+Execution Time: 1.930 ms

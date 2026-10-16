@@ -26,10 +26,16 @@ $$;
 
 -- Append-only guard. Attached as BEFORE UPDATE OR DELETE (row) and BEFORE TRUNCATE (statement).
 -- Grants are also revoked, so this is the second line of defence (it also stops the table owner).
+-- One exception (M22, D35): the retention job admin.run_retention() deletes rows past their stated retention window.
+-- It sets app.retention_purge = 'on' for its own transaction only. Only DELETE is let through, never UPDATE or
+-- TRUNCATE; the application role holds no DELETE grant on append-only tables, so it cannot use the flag.
 CREATE FUNCTION audit.forbid_update_delete() RETURNS trigger
 LANGUAGE plpgsql AS
 $$
 BEGIN
+  IF TG_OP = 'DELETE' AND TG_LEVEL = 'ROW' AND current_setting('app.retention_purge', true) = 'on' THEN
+    RETURN OLD;
+  END IF;
   RAISE EXCEPTION 'forbid_update_delete: % on %.% is not allowed; the table is append-only',
                   TG_OP, TG_TABLE_SCHEMA, TG_TABLE_NAME
     USING HINT = 'Record a correction as a new row that references the original.';

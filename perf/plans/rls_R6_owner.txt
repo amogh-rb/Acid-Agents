@@ -1,0 +1,4 @@
+﻿Function Scan on search_candidates_by_name  (cost=0.25..10.25 rows=1000 width=48) (actual rows=0.00 loops=1)
+  Buffers: shared hit=8
+Planning Time: 0.014 ms
+Execution Time: 0.650 ms

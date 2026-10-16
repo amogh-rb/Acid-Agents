@@ -29,6 +29,7 @@ admin,app_user,10,login_phone,character varying(16),d_phone_e164,NULL,Personal,e
 admin,app_user,11,login_phone_country_id,bigint,,NULL,Personal,no login phone,soft-delete,ref.country(id) ON DELETE RESTRICT,,Country of login_phone,,
 admin,app_user,12,display_name,character varying(150),d_person_name,NULL,Personal,system actor or not provided (profiles hold the full name),soft-delete,,,Name shown in the UI,,
 admin,app_user,13,last_login_at,timestamp with time zone,,NULL,Internal,never logged in,soft-delete,,,Last successful login (UTC),,
+admin,app_user,14,anonymised_at,timestamp with time zone,,NULL,Internal,not anonymised,soft-delete,,,When the identity and its candidate profile were anonymised (deletion request or inactivity),,
 admin,block_list,1,id,bigint,,NOT NULL,Internal,,soft-delete,,GENERATED ALWAYS AS IDENTITY,Surrogate primary key (bigint identity),,
 admin,block_list,2,blocker_app_user_id,bigint,,NOT NULL,Internal,,soft-delete,admin.app_user(id) ON DELETE RESTRICT,,User who blocked,,
 admin,block_list,3,blocked_app_user_id,bigint,,NULL,Internal,an organisation is blocked instead,soft-delete,admin.app_user(id) ON DELETE RESTRICT,,"Blocked recruiter, consultant or employer user",,
