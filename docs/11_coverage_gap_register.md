@@ -1,6 +1,8 @@
-# 11 Coverage gap register (updated at each phase gate; current: M22)
+# 11 Coverage gap register (updated at each phase gate; current: M23 / Gate 2)
 
 Every Tier 1/2 element of docket Section 4 not yet built, with its reason and the milestone that closes it. Status as of `phase4` (M1-M18).
+
+**Closed in M20-M23:** query set and validation report, performance baseline and extrapolation, security note and threat model, backup/restore drill (D38).
 
 **Closed in M22:** retention job and anonymisation (D35, D37), RLS on every Personal table of the profile, RLS performance at 1M profiles (D36).
 
@@ -11,8 +13,6 @@ Every Tier 1/2 element of docket Section 4 not yet built, with its reason and th
 ## Not built yet (planned)
 | Element | Tier | Module | Why not yet | Closes in |
 |---|---|---|---|---|
-| Query set, performance, extrapolation | Section 6 | All | Phase 5 by plan | M20-M21 |
-| Security note, threat model, access tests, backup/restore | Section 7 | All | Phase 5 by plan | M22-M23 |
 
 ## Built with known limitations
 | Item | Limitation | Plan |
@@ -25,6 +25,8 @@ Every Tier 1/2 element of docket Section 4 not yet built, with its reason and th
 
 | Personal tables outside RLS (application answers, interview feedback, offers, gig worker data, tickets, referrals) | Grants only | Same `candidate_profile_visible` pattern when exposed directly (M22 open item) |
 | Actor identity is set by the application (`app.current_user_id`) | Not verified by the database (threat T3) | Session-token-verified actor function (M22 open item) |
+
+| Point-in-time recovery | Logical dump only (D38) | Base backups + WAL archiving before production |
 
 ## Docket gaps (not ours)
 - Sections 8 (KPIs), 10 (performance method, RTO) and 12 are referenced but were not issued. Ask the organisers before M15 (KPIs) and M21 (RTO).

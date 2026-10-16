@@ -25,7 +25,7 @@ A milestone is done only when it is **Defined** (deliverable committed), **Verif
 | M20 | B65-B69 | Query set + validation | C, B | ✅ 2026-10-16 | ☐ | ✅ gate M20 11:11 (25/25 files) | `queries/Q01-Q13`, `perf/run_queries.ps1`, baseline p50/p95/p99 (30 runs) in `perf/results/baseline_laptop.csv`, plans in `perf/plans/`; report `docs/phase5/m20_queries.md` incl. seed validation 33/33 |
 | M21 | B70-B74 | Performance + extrapolation | C | ✅ 2026-10-16 | ☐ | ✅ gate M21 11:20 (26/26 files) | baseline p50/p95/p99 at 1% and 100%; 11 index before/after experiments (10 modules justified, 20x-2290x; idx_notification_unread x1.1, D34); partitioning note D33; extrapolation: Q05 name substring degrades first (62 ms -> ~0.74 s at 10x, ~8.7 s at 100x); report `docs/phase5/m21_performance.md` |
 | M22 | B75-B79 | Security | A | ✅ 2026-10-16 | ☐ | ✅ gate M22 12:35 (27/27 files; m22_privacy 36 checks) | `ddl/87_privacy.sql` (RLS on 15 more Personal tables, `anonymise_user`, `run_retention`), RLS performance fixes in `85_access.sql` (D36: skill search 80 s → 3.4 ms), `app.search_candidates_by_name`; security note + threat model `docs/phase5/m22_security.md`; D35-D37 |
-| M23 | B80-B82 | Backup/restore + Gate 2 | All | ☐ | ☐ | ☐ | |
+| M23 | B80-B82 | Backup/restore + Gate 2 | All | ✅ 2026-10-16 | ☐ | ✅ gate M23 12:48 (28/28 files) | `tools/backup_restore.ps1`: dump 0.6 min (1.26 GB), restore + ANALYZE 9.5 min vs assumed RTO 60 min (D38), 203 tables / 53.7M rows match, 0 invalid indexes, 61/61 policies; `docs/phase5/gate2_checklist.md`; tag `gate2` |
 
 ## M2 / M3 verification checklists
 In `docs/phase1/entities.md` and `docs/phase1/relationships.md` (bottom of each file). Reviewer: C.

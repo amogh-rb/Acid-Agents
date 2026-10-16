@@ -79,15 +79,15 @@ python tools/design_docs.py compare docs/phase1/entities.md docs/phase1/relation
 6. Commit `MNN: <summary>` with a green suite. Push when the user says so.
 
 ## Current state
-- **Done:** M1-M22. Gate M22 PASS (27/27 files). Seed validated at full laptop scale. Tags `phase1`, `phase2`, `core-v1`, `phase4` (pushed to origin up to M18).
+- **Done:** M1-M23 and Gate 2. Gate M23 PASS (28/28 files). All milestones built and tested; only human Verified ticks remain. Seed validated at full laptop scale. Tags `phase1`, `phase2`, `core-v1`, `phase4` (pushed to origin up to M18).
   - Phase 1 AI pre-review: `docs/phase1/review.md`. Human reviewer sign-offs are still open.
 - **Environment changes made in M19:** tablespace `talentra_data` on `D:\talentra_pg`; `pg_wal` moved to `D:\talentra_pg_wal` (junction from the data dir); server tuned (shared_buffers 4GB, effective_cache_size 16GB, work_mem 32MB, maintenance_work_mem 1GB, max_wal_size 8GB, random_page_cost 1.1, track_io_timing, pg_stat_statements) and restarted.
 - **Seeded database:** `talentra_seed` (11 GB): 1M profiles, 100K jobs, 5M applications, 9.9M status history rows. Rebuild with `.\run.ps1 seed -Scale laptop` (~83 min) or `-Scale rehearsal` (1 min). `seed/90_validate.sql` (33 checks) can be rerun on its own.
-- **Next:** Phase 5 continues.
+- **Next:** human review and sign-off (Verified column, `docs/phase5/gate2_checklist.md` row 13); open items in `docs/phase5/m22_security.md` section 6 and the gap register. Phase 5 is complete.
   - **M20 queries:** done. `queries/Q01-Q13`, `perf/run_queries.ps1` (run against `talentra_seed`), baseline `perf/results/baseline_laptop.csv`, report `docs/phase5/m20_queries.md`. Slowest: Q05 name substring 62 ms, Q08 company jobs with counts 60 ms; Q09 skill match is the degradation candidate.
   - **M21 performance:** done. `docs/phase5/m21_performance.md`; `perf/index_experiments.ps1` (restores every index; strips `ON ONLY` for partitioned indexes), `perf/extrapolate.py`; second database `talentra_seed_small` (1% scale) used for the growth fit. First to degrade: Q05.
   - **M22 security:** done. `ddl/87_privacy.sql`, RLS performance fixes (D36), `docs/phase5/m22_security.md`, `perf/rls_overhead.ps1`, `tools/run_retention.ps1`.
-  - **M23:** backup/restore timing (pg_dump -Fd -j to D:), security note, Gate 2.
+  - **M23:** done. `tools/backup_restore.ps1` (restore 9.5 min vs assumed RTO 60 min, D38); `docs/phase5/gate2_checklist.md`; tag `gate2`.
 - **Rules learned:**
   - Keep constraint and index names at 62 bytes or less (lint).
   - FKs into `job.application` are composite `(application_id, candidate_profile_id)`.
@@ -157,3 +157,4 @@ python tools/design_docs.py compare docs/phase1/entities.md docs/phase1/relation
 - **M20 (2026-10-16):** 13 queries with name/kind/mode headers; runner measures 30 runs of EXPLAIN (ANALYZE, BUFFERS) in BEGIN/ROLLBACK; baseline + plans committed; `tests/docs/m20_query_set.ps1` checks completeness. Report includes the 33/33 seed validation against Section 5. Observations for M21: employer-side queries fan out over 32 partitions (D5 trade-off); Q09 relies on LIMIT.
 - **M21 (2026-10-16):** baseline at 1% and 100%; 11 index before/after experiments (every module justified, 20x-2290x; `idx_notification_unread` x1.1 -> D34); partitioning note D33; extrapolation by fitted exponent: Q05 name substring degrades first (62 ms -> ~0.74 s at 10M, ~8.7 s at 100M; lower bounds, hot cache). Incident: partitioned index rebuilt `ON ONLY` during the experiment, repaired and verified (0 invalid indexes). Settings evidence `docs/evidence/settings_m21_20261016.txt`.
 - **M22 (2026-10-16):** `ddl/87_privacy.sql`: RLS on 15 more Personal profile tables (identity documents owner/admin only), `admin.anonymise_user` (D37), `admin.run_retention` with the append-only guard exception (D35), `app.search_candidates_by_name`. RLS at 1M profiles was unusable at first (skill search 80 s, name count > 9 min); three fixes (D36) bring recruiter queries to 0.7-49 ms; an unbounded ILIKE count stays slow (91 s) and is replaced by the search function + statement_timeout. Security note and STRIDE threat model (11 threats, open items: verified actor, remaining tables, identifier reveal).
+- **M23 (2026-10-16):** backup/restore drill on `talentra_seed`: `pg_dump -Fd -j 6` 0.6 min (1.26 GB), `pg_restore -j 6` 8.6 min + ANALYZE 0.9 min; 203 tables / 53.7M rows equal, 0 invalid indexes, 61/61 policies. Assumed RTO 60 min (D38; docket Section 10 missing). Gate 2 checklist; `tests/docs/m23_gate2.ps1`. Backup kept at `D:	alentra_backup`.

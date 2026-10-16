@@ -1,0 +1,15 @@
+== backup/restore drill: talentra_seed -> D:\talentra_backup\talentra_seed_20261016_1236 -> talentra_seed_restore (jobs 6, assumed RTO 60 min) ==
+source size: 11 GB
+backup   pg_dump -Fd -j 6: 0.6 min, 1.26 GB on disk
+restore  pg_restore -j 6: 8.6 min
+analyze  0.9 min
+verify   203 tables, 5,36,53,780 rows; mismatches: 0
+  profile.candidate_profile          source    10,00,000  restore    10,00,000
+  job.job_requirement                source     1,00,000  restore     1,00,000
+  job.application                    source    50,00,000  restore    50,00,000
+  job.application_status_history     source    98,74,702  restore    98,74,702
+  billing.wallet_ledger_entry        source     5,77,640  restore     5,77,640
+  audit.audit_event                  source     5,00,671  restore     5,00,671
+objects  invalid indexes: 0; RLS policies: 61 (source 61)
+RESULT   restore + analyze = 9.5 min vs assumed RTO 60 min: WITHIN RTO; data check: PASS
+cleanup  dropped talentra_seed_restore (backup kept at D:\talentra_backup\talentra_seed_20261016_1236)
