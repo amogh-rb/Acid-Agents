@@ -1,0 +1,14 @@
+﻿Nested Loop  (cost=0.85..5.29 rows=1 width=37) (actual rows=1.00 loops=1)
+  Buffers: shared hit=8
+  ->  Index Scan using uq_candidate_contact_email on candidate_contact c  (cost=0.43..2.65 rows=1 width=8) (actual rows=1.00 loops=1)
+        Index Cond: ((email)::text = 'u500006@inbox.example'::text)
+        Index Searches: 1
+        Buffers: shared hit=4
+  ->  Index Scan using pk_candidate_profile on candidate_profile cp  (cost=0.42..2.64 rows=1 width=37) (actual rows=1.00 loops=1)
+        Index Cond: (id = c.candidate_profile_id)
+        Index Searches: 1
+        Buffers: shared hit=4
+Planning:
+  Buffers: shared hit=16
+Planning Time: 0.180 ms
+Execution Time: 0.034 ms

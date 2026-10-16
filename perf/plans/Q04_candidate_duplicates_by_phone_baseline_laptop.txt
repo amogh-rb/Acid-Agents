@@ -1,0 +1,24 @@
+﻿Nested Loop  (cost=1.28..6.60 rows=1 width=29) (actual rows=2.00 loops=1)
+  Buffers: shared hit=19
+  ->  Nested Loop  (cost=0.85..6.13 rows=1 width=8) (actual rows=2.00 loops=1)
+        Buffers: shared hit=11
+        ->  Index Scan using idx_candidate_contact_candidate_profile_id on candidate_contact c  (cost=0.43..3.48 rows=1 width=22) (actual rows=1.00 loops=1)
+              Index Cond: (candidate_profile_id = 2684)
+              Filter: (phone IS NOT NULL)
+              Rows Removed by Filter: 1
+              Index Searches: 1
+              Buffers: shared hit=5
+        ->  Index Scan using idx_candidate_contact_phone on candidate_contact c2  (cost=0.42..2.65 rows=1 width=22) (actual rows=2.00 loops=1)
+              Index Cond: ((phone)::text = (c.phone)::text)
+              Filter: (candidate_profile_id <> c.candidate_profile_id)
+              Rows Removed by Filter: 1
+              Index Searches: 1
+              Buffers: shared hit=6
+  ->  Index Scan using pk_candidate_profile on candidate_profile cp  (cost=0.42..0.46 rows=1 width=29) (actual rows=1.00 loops=2)
+        Index Cond: (id = c2.candidate_profile_id)
+        Index Searches: 2
+        Buffers: shared hit=8
+Planning:
+  Buffers: shared hit=16
+Planning Time: 0.713 ms
+Execution Time: 0.094 ms

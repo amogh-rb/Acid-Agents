@@ -1,0 +1,174 @@
+﻿Sort  (cost=1663.31..1663.32 rows=7 width=17) (actual rows=7.00 loops=1)
+  Sort Key: (count(*)) DESC
+  Sort Method: quicksort  Memory: 25kB
+  Buffers: shared hit=184
+  ->  HashAggregate  (cost=1663.14..1663.21 rows=7 width=17) (actual rows=7.00 loops=1)
+        Group Key: application.application_status_code
+        Batches: 1  Memory Usage: 32kB
+        Buffers: shared hit=184
+        ->  Append  (cost=0.42..1412.19 rows=50189 width=9) (actual rows=50061.00 loops=1)
+              Buffers: shared hit=184
+              ->  Index Only Scan using application_h00_job_requirement_id_application_status_code_idx on application_h00 application_1  (cost=0.42..36.57 rows=1563 width=9) (actual rows=1600.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=6
+              ->  Index Only Scan using application_h01_job_requirement_id_application_status_code_idx on application_h01 application_2  (cost=0.42..34.16 rows=1488 width=9) (actual rows=1560.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=6
+              ->  Index Only Scan using application_h02_job_requirement_id_application_status_code_idx on application_h02 application_3  (cost=0.42..37.40 rows=1610 width=9) (actual rows=1560.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=6
+              ->  Index Only Scan using application_h03_job_requirement_id_application_status_code_idx on application_h03 application_4  (cost=0.42..38.25 rows=1659 width=9) (actual rows=1600.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=6
+              ->  Index Only Scan using application_h04_job_requirement_id_application_status_code_idx on application_h04 application_5  (cost=0.42..33.22 rows=1434 width=9) (actual rows=1564.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=6
+              ->  Index Only Scan using application_h05_job_requirement_id_application_status_code_idx on application_h05 application_6  (cost=0.42..35.14 rows=1544 width=9) (actual rows=1564.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=6
+              ->  Index Only Scan using application_h06_job_requirement_id_application_status_code_idx on application_h06 application_7  (cost=0.42..38.45 rows=1670 width=9) (actual rows=1625.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=5
+              ->  Index Only Scan using application_h07_job_requirement_id_application_status_code_idx on application_h07 application_8  (cost=0.42..36.38 rows=1552 width=9) (actual rows=1606.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=6
+              ->  Index Only Scan using application_h08_job_requirement_id_application_status_code_idx on application_h08 application_9  (cost=0.42..37.08 rows=1592 width=9) (actual rows=1531.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=5
+              ->  Index Only Scan using application_h09_job_requirement_id_application_status_code_idx on application_h09 application_10  (cost=0.42..37.06 rows=1591 width=9) (actual rows=1575.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=6
+              ->  Index Only Scan using application_h10_job_requirement_id_application_status_code_idx on application_h10 application_11  (cost=0.42..34.98 rows=1535 width=9) (actual rows=1525.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=6
+              ->  Index Only Scan using application_h11_job_requirement_id_application_status_code_idx on application_h11 application_12  (cost=0.42..33.09 rows=1427 width=9) (actual rows=1497.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=5
+              ->  Index Only Scan using application_h12_job_requirement_id_application_status_code_idx on application_h12 application_13  (cost=0.42..38.90 rows=1696 width=9) (actual rows=1577.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=6
+              ->  Index Only Scan using application_h13_job_requirement_id_application_status_code_idx on application_h13 application_14  (cost=0.42..33.72 rows=1463 width=9) (actual rows=1558.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=6
+              ->  Index Only Scan using application_h14_job_requirement_id_application_status_code_idx on application_h14 application_15  (cost=0.42..39.78 rows=1746 width=9) (actual rows=1591.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=6
+              ->  Index Only Scan using application_h15_job_requirement_id_application_status_code_idx on application_h15 application_16  (cost=0.42..37.50 rows=1616 width=9) (actual rows=1597.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=6
+              ->  Index Only Scan using application_h16_job_requirement_id_application_status_code_idx on application_h16 application_17  (cost=0.42..37.85 rows=1636 width=9) (actual rows=1533.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=6
+              ->  Index Only Scan using application_h17_job_requirement_id_application_status_code_idx on application_h17 application_18  (cost=0.42..37.06 rows=1591 width=9) (actual rows=1581.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=5
+              ->  Index Only Scan using application_h18_job_requirement_id_application_status_code_idx on application_h18 application_19  (cost=0.42..32.52 rows=1394 width=9) (actual rows=1568.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=6
+              ->  Index Only Scan using application_h19_job_requirement_id_application_status_code_idx on application_h19 application_20  (cost=0.42..36.70 rows=1570 width=9) (actual rows=1540.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=6
+              ->  Index Only Scan using application_h20_job_requirement_id_application_status_code_idx on application_h20 application_21  (cost=0.42..33.95 rows=1476 width=9) (actual rows=1485.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=5
+              ->  Index Only Scan using application_h21_job_requirement_id_application_status_code_idx on application_h21 application_22  (cost=0.42..36.47 rows=1557 width=9) (actual rows=1474.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=5
+              ->  Index Only Scan using application_h22_job_requirement_id_application_status_code_idx on application_h22 application_23  (cost=0.42..37.89 rows=1638 width=9) (actual rows=1561.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=6
+              ->  Index Only Scan using application_h23_job_requirement_id_application_status_code_idx on application_h23 application_24  (cost=0.42..37.97 rows=1643 width=9) (actual rows=1606.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=6
+              ->  Index Only Scan using application_h24_job_requirement_id_application_status_code_idx on application_h24 application_25  (cost=0.42..40.73 rows=1738 width=9) (actual rows=1687.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=5
+              ->  Index Only Scan using application_h25_job_requirement_id_application_status_code_idx on application_h25 application_26  (cost=0.42..34.65 rows=1516 width=9) (actual rows=1540.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=6
+              ->  Index Only Scan using application_h26_job_requirement_id_application_status_code_idx on application_h26 application_27  (cost=0.42..33.83 rows=1469 width=9) (actual rows=1535.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=6
+              ->  Index Only Scan using application_h27_job_requirement_id_application_status_code_idx on application_h27 application_28  (cost=0.42..37.17 rows=1597 width=9) (actual rows=1535.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=5
+              ->  Index Only Scan using application_h28_job_requirement_id_application_status_code_idx on application_h28 application_29  (cost=0.42..34.39 rows=1501 width=9) (actual rows=1574.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=6
+              ->  Index Only Scan using application_h29_job_requirement_id_application_status_code_idx on application_h29 application_30  (cost=0.42..33.30 rows=1439 width=9) (actual rows=1528.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=6
+              ->  Index Only Scan using application_h30_job_requirement_id_application_status_code_idx on application_h30 application_31  (cost=0.42..38.36 rows=1665 width=9) (actual rows=1580.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=6
+              ->  Index Only Scan using application_h31_job_requirement_id_application_status_code_idx on application_h31 application_32  (cost=0.42..36.75 rows=1573 width=9) (actual rows=1604.00 loops=1)
+                    Index Cond: (job_requirement_id = 1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=6
+Planning:
+  Buffers: shared hit=32
+Planning Time: 2.047 ms
+Execution Time: 14.840 ms

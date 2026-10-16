@@ -1,0 +1,21 @@
+﻿Limit  (cost=0.58..25.07 rows=20 width=57) (actual rows=20.00 loops=1)
+  Buffers: shared hit=82
+  ->  Nested Loop  (cost=0.58..3577.43 rows=2922 width=57) (actual rows=20.00 loops=1)
+        Buffers: shared hit=82
+        ->  Index Scan using idx_job_requirement_open_published on job_requirement j  (cost=0.29..2501.78 rows=2922 width=44) (actual rows=20.00 loops=1)
+              Index Cond: (job_role_id = 3)
+              Index Searches: 1
+              Buffers: shared hit=22
+        ->  Memoize  (cost=0.30..0.43 rows=1 width=29) (actual rows=1.00 loops=20)
+              Cache Key: j.organisation_id
+              Cache Mode: logical
+              Hits: 0  Misses: 20  Evictions: 0  Overflows: 0  Memory Usage: 3kB
+              Buffers: shared hit=60
+              ->  Index Scan using pk_organisation on organisation o  (cost=0.29..0.42 rows=1 width=29) (actual rows=1.00 loops=20)
+                    Index Cond: (id = j.organisation_id)
+                    Index Searches: 20
+                    Buffers: shared hit=60
+Planning:
+  Buffers: shared hit=9
+Planning Time: 0.249 ms
+Execution Time: 0.141 ms

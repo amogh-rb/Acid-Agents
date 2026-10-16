@@ -1,0 +1,35 @@
+﻿Limit  (cost=4.52..4375.67 rows=50 width=16) (actual rows=50.00 loops=1)
+  Buffers: shared hit=114
+  InitPlan 1
+    ->  Aggregate  (cost=3.64..3.65 rows=1 width=8) (actual rows=1.00 loops=1)
+          Buffers: shared hit=4
+          ->  Index Scan using uq_job_requirement_skill_job_requirement_id_skill_id on job_requirement_skill  (cost=0.42..3.64 rows=2 width=0) (actual rows=2.00 loops=1)
+                Index Cond: (job_requirement_id = 1)
+                Filter: is_mandatory
+                Rows Removed by Filter: 1
+                Index Searches: 1
+                Buffers: shared hit=4
+  ->  GroupAggregate  (cost=0.86..134107.98 rows=1534 width=16) (actual rows=50.00 loops=1)
+        Group Key: cs.candidate_profile_id
+        Filter: (count(*) = (InitPlan 1).col1)
+        Rows Removed by Filter: 953
+        Buffers: shared hit=114
+        ->  Nested Loop  (cost=0.86..128739.92 rows=306746 width=8) (actual rows=1054.00 loops=1)
+              Buffers: shared hit=110
+              ->  Index Only Scan using uq_candidate_skill_candidate_profile_id_skill_id on candidate_skill cs  (cost=0.43..58644.69 rows=2834111 width=16) (actual rows=10420.00 loops=1)
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=47
+              ->  Memoize  (cost=0.43..0.45 rows=1 width=8) (actual rows=0.10 loops=10420)
+                    Cache Key: cs.skill_id
+                    Cache Mode: logical
+                    Hits: 10400  Misses: 20  Evictions: 0  Overflows: 0  Memory Usage: 2kB
+                    Buffers: shared hit=63
+                    ->  Index Scan using uq_job_requirement_skill_job_requirement_id_skill_id on job_requirement_skill jr  (cost=0.42..0.44 rows=1 width=8) (actual rows=0.10 loops=20)
+                          Index Cond: ((job_requirement_id = 1) AND (skill_id = cs.skill_id))
+                          Filter: is_mandatory
+                          Rows Removed by Filter: 0
+                          Index Searches: 20
+                          Buffers: shared hit=63
+Planning Time: 0.281 ms
+Execution Time: 3.186 ms

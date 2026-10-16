@@ -1,0 +1,151 @@
+﻿Limit  (cost=1561.33..1561.35 rows=8 width=36) (actual rows=9.00 loops=1)
+  Buffers: shared hit=46905
+  ->  Sort  (cost=1561.33..1561.35 rows=8 width=36) (actual rows=9.00 loops=1)
+        Sort Key: (count(a.id)) DESC
+        Sort Method: quicksort  Memory: 25kB
+        Buffers: shared hit=46905
+        ->  HashAggregate  (cost=1561.13..1561.21 rows=8 width=36) (actual rows=9.00 loops=1)
+              Group Key: j.id
+              Batches: 1  Memory Usage: 32kB
+              Buffers: shared hit=46905
+              ->  Nested Loop Left Join  (cost=0.71..1559.13 rows=400 width=36) (actual rows=50380.00 loops=1)
+                    Buffers: shared hit=46905
+                    ->  Index Scan using idx_job_requirement_organisation_id on job_requirement j  (cost=0.29..10.35 rows=8 width=28) (actual rows=9.00 loops=1)
+                          Index Cond: ((organisation_id = 6140) AND ((job_requirement_status_code)::text = 'open'::text))
+                          Filter: (deleted_at IS NULL)
+                          Index Searches: 1
+                          Buffers: shared hit=11
+                    ->  Append  (cost=0.42..192.32 rows=128 width=16) (actual rows=5597.78 loops=9)
+                          Buffers: shared hit=46894
+                          ->  Index Scan using application_h00_job_requirement_id_application_status_code_idx on application_h00 a_1  (cost=0.42..5.99 rows=4 width=16) (actual rows=178.89 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1470
+                          ->  Index Scan using application_h01_job_requirement_id_application_status_code_idx on application_h01 a_2  (cost=0.42..5.99 rows=4 width=16) (actual rows=174.22 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1454
+                          ->  Index Scan using application_h02_job_requirement_id_application_status_code_idx on application_h02 a_3  (cost=0.42..5.99 rows=4 width=16) (actual rows=174.56 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1474
+                          ->  Index Scan using application_h03_job_requirement_id_application_status_code_idx on application_h03 a_4  (cost=0.42..5.99 rows=4 width=16) (actual rows=178.78 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1487
+                          ->  Index Scan using application_h04_job_requirement_id_application_status_code_idx on application_h04 a_5  (cost=0.42..5.99 rows=4 width=16) (actual rows=174.67 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1469
+                          ->  Index Scan using application_h05_job_requirement_id_application_status_code_idx on application_h05 a_6  (cost=0.42..5.99 rows=4 width=16) (actual rows=174.78 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1461
+                          ->  Index Scan using application_h06_job_requirement_id_application_status_code_idx on application_h06 a_7  (cost=0.42..5.99 rows=4 width=16) (actual rows=181.89 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1523
+                          ->  Index Scan using application_h07_job_requirement_id_application_status_code_idx on application_h07 a_8  (cost=0.42..5.99 rows=4 width=16) (actual rows=180.11 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1505
+                          ->  Index Scan using application_h08_job_requirement_id_application_status_code_idx on application_h08 a_9  (cost=0.42..5.99 rows=4 width=16) (actual rows=171.67 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1447
+                          ->  Index Scan using application_h09_job_requirement_id_application_status_code_idx on application_h09 a_10  (cost=0.42..5.99 rows=4 width=16) (actual rows=175.67 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1480
+                          ->  Index Scan using application_h10_job_requirement_id_application_status_code_idx on application_h10 a_11  (cost=0.42..5.99 rows=4 width=16) (actual rows=170.00 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1439
+                          ->  Index Scan using application_h11_job_requirement_id_application_status_code_idx on application_h11 a_12  (cost=0.42..5.99 rows=4 width=16) (actual rows=167.89 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1407
+                          ->  Index Scan using application_h12_job_requirement_id_application_status_code_idx on application_h12 a_13  (cost=0.42..5.99 rows=4 width=16) (actual rows=176.11 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1473
+                          ->  Index Scan using application_h13_job_requirement_id_application_status_code_idx on application_h13 a_14  (cost=0.42..5.99 rows=4 width=16) (actual rows=173.67 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1449
+                          ->  Index Scan using application_h14_job_requirement_id_application_status_code_idx on application_h14 a_15  (cost=0.42..5.99 rows=4 width=16) (actual rows=177.67 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1492
+                          ->  Index Scan using application_h15_job_requirement_id_application_status_code_idx on application_h15 a_16  (cost=0.42..5.99 rows=4 width=16) (actual rows=179.00 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1494
+                          ->  Index Scan using application_h16_job_requirement_id_application_status_code_idx on application_h16 a_17  (cost=0.42..5.99 rows=4 width=16) (actual rows=171.56 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1449
+                          ->  Index Scan using application_h17_job_requirement_id_application_status_code_idx on application_h17 a_18  (cost=0.42..5.99 rows=4 width=16) (actual rows=176.78 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1494
+                          ->  Index Scan using application_h18_job_requirement_id_application_status_code_idx on application_h18 a_19  (cost=0.42..5.99 rows=4 width=16) (actual rows=175.11 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1466
+                          ->  Index Scan using application_h19_job_requirement_id_application_status_code_idx on application_h19 a_20  (cost=0.42..5.99 rows=4 width=16) (actual rows=171.89 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1446
+                          ->  Index Scan using application_h20_job_requirement_id_application_status_code_idx on application_h20 a_21  (cost=0.42..5.99 rows=4 width=16) (actual rows=165.89 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1407
+                          ->  Index Scan using application_h21_job_requirement_id_application_status_code_idx on application_h21 a_22  (cost=0.42..5.99 rows=4 width=16) (actual rows=165.00 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1374
+                          ->  Index Scan using application_h22_job_requirement_id_application_status_code_idx on application_h22 a_23  (cost=0.42..5.99 rows=4 width=16) (actual rows=174.89 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1449
+                          ->  Index Scan using application_h23_job_requirement_id_application_status_code_idx on application_h23 a_24  (cost=0.42..5.99 rows=4 width=16) (actual rows=179.00 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1488
+                          ->  Index Scan using application_h24_job_requirement_id_application_status_code_idx on application_h24 a_25  (cost=0.42..5.99 rows=4 width=16) (actual rows=188.22 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1566
+                          ->  Index Scan using application_h25_job_requirement_id_application_status_code_idx on application_h25 a_26  (cost=0.42..5.99 rows=4 width=16) (actual rows=172.56 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1448
+                          ->  Index Scan using application_h26_job_requirement_id_application_status_code_idx on application_h26 a_27  (cost=0.42..5.99 rows=4 width=16) (actual rows=172.11 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1445
+                          ->  Index Scan using application_h27_job_requirement_id_application_status_code_idx on application_h27 a_28  (cost=0.42..5.99 rows=4 width=16) (actual rows=171.78 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1437
+                          ->  Index Scan using application_h28_job_requirement_id_application_status_code_idx on application_h28 a_29  (cost=0.42..5.99 rows=4 width=16) (actual rows=176.56 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1482
+                          ->  Index Scan using application_h29_job_requirement_id_application_status_code_idx on application_h29 a_30  (cost=0.42..5.99 rows=4 width=16) (actual rows=170.78 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1446
+                          ->  Index Scan using application_h30_job_requirement_id_application_status_code_idx on application_h30 a_31  (cost=0.42..5.99 rows=4 width=16) (actual rows=176.11 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1485
+                          ->  Index Scan using application_h31_job_requirement_id_application_status_code_idx on application_h31 a_32  (cost=0.42..5.99 rows=4 width=16) (actual rows=180.00 loops=9)
+                                Index Cond: (job_requirement_id = j.id)
+                                Index Searches: 9
+                                Buffers: shared hit=1488
+Planning:
+  Buffers: shared hit=38
+Planning Time: 2.115 ms
+Execution Time: 65.614 ms

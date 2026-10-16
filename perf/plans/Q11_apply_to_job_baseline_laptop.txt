@@ -1,0 +1,18 @@
+﻿Insert on application  (cost=0.00..0.05 rows=0 width=0) (actual rows=0.00 loops=1)
+  Buffers: shared hit=17
+  ->  Result  (cost=0.00..0.05 rows=1 width=708) (actual rows=1.00 loops=1)
+        Buffers: shared hit=1
+Planning Time: 0.060 ms
+Trigger trg_application_status_transition on application_h00: calls=1
+Trigger for constraint fk_application_application_source_code on application_h00: calls=1
+Trigger for constraint fk_application_application_status_code on application_h00: calls=1
+Trigger for constraint fk_application_candidate_profile_id on application_h00: calls=1
+Trigger for constraint fk_application_job_requirement_id on application_h00: calls=1
+Trigger for constraint fk_application_referral_id on application_h00: calls=1
+Trigger for constraint fk_application_rejection_reason_code on application_h00: calls=1
+Trigger for constraint fk_application_resume_version_id on application_h00: calls=1
+Trigger for constraint fk_application_resume_version_owner on application_h00: calls=1
+Trigger for constraint fk_application_created_by on application_h00: calls=1
+Trigger for constraint fk_application_updated_by on application_h00: calls=1
+Trigger trg_application_status_history on application_h00: calls=1
+Execution Time: 0.955 ms
