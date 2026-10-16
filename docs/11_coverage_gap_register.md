@@ -1,13 +1,14 @@
-# 11 Coverage gap register (updated at each phase gate; current: M18)
+# 11 Coverage gap register (updated at each phase gate; current: M19)
 
 Every Tier 1/2 element of docket Section 4 not yet built, with its reason and the milestone that closes it. Status as of `phase4` (M1-M18).
+
+**Closed in M19:** laptop-scale seed (1M profiles, 100K jobs, 5M applications), validated by 33 checks (D30-D32).
 
 **Closed in M15-M18:** notifications and delivery status, all preferences (notification, job alert, language, privacy), RLS access layer, analytics star schema and KPI marts, community posts and reactions, support tickets, FAQs, review finding F3.
 
 ## Not built yet (planned)
 | Element | Tier | Module | Why not yet | Closes in |
 |---|---|---|---|---|
-| Seed data (1M profiles, 100K jobs, 5M applications) | Section 6 | All | Phase 5 by plan; tablespace on D: | M19 |
 | Query set, performance, extrapolation | Section 6 | All | Phase 5 by plan | M20-M21 |
 | Security note, threat model, access tests, backup/restore | Section 7 | All | Phase 5 by plan | M22-M23 |
 | Retention purge job (anonymise on request, inactivity) | RG4 | All | Rules are stated per table comment; the scheduled process comes with security | M22 |

@@ -21,7 +21,7 @@ A milestone is done only when it is **Defined** (deliverable committed), **Verif
 | M13 | B42-B44 | Columns | A / B / C | ✅ 14:00 | ☐ | ✅ gate M14 14:07 | `ddl/60_lic.sql`, `65_src.sql`, `70_billing.sql`; dictionary 1,827 columns |
 | M14 | B45-B47 | Keys and constraints + tests (incl. 20-login concurrency) | A / B / C | ✅ 14:07 | ☐ | ✅ gate M14 14:07 (19/19 files; m14: 23 + 15 + 24 checks, concurrency 5) | Core gate PASS, tag `core-v1` |
 | M15-M18 | B48-B59 | Shared access layer / Notifications / Analytics | A / B / C | ✅ 14:20 | ☐ | ✅ gate M18 14:21 (24/24 files; m18: access 23, notif 16, dw 14) | `ddl/80_notif.sql`, `85_access.sql`, `90_dw.sql`; `docs/phase4/*`; RLS (D26), monthly delivery partitions (D27), SCD2 marts (D28); F3 fixed; tag `phase4` |
-| M19 | B60-B64 | Seed (tablespace on D:) | B | ☐ | ☐ | ☐ | |
+| M19 | B60-B64 | Seed (tablespace on D:) | B | ✅ 2026-10-15 | ☐ | ✅ rehearsal 33/33 (1.0 min); laptop scale 33/33 2026-10-16 | `seed/00-90`, `distributions.yaml`, `data_quality_issues.md`; 1M profiles, 100K jobs, 5M applications, 9.9M history rows, 11 GB, load 83 min; 0 FK orphans across 817 FKs; D30-D32 (D31 is a deviation: replica-mode load, re-proved by validation) |
 | M20 | B65-B69 | Query set + validation | C, B | ☐ | ☐ | ☐ | |
 | M21 | B70-B74 | Performance + extrapolation | C | ☐ | ☐ | ☐ | |
 | M22 | B75-B79 | Security | A | ☐ | ☐ | ☐ | |

@@ -5,6 +5,8 @@ SET app.current_user_id = '1';
 SET work_mem = '256MB';
 SET temp_tablespaces = 'talentra_data';
 
+DROP FUNCTION IF EXISTS seed.check(text, text, text, text, boolean);
+DROP TABLE IF EXISTS seed.validation;
 CREATE TABLE seed.validation (
   id serial PRIMARY KEY, area text NOT NULL, check_name text NOT NULL, expected text NOT NULL, actual text NOT NULL, ok boolean NOT NULL
 );

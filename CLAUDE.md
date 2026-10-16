@@ -15,7 +15,7 @@ This file is the hand-off between chats. Each milestone is built in a fresh chat
 ## Environment
 - Windows 11, PowerShell 5.1, PostgreSQL 18.4 (local service), Python 3.11.
 - `.env` (git-ignored) holds PGHOST, PGUSER, PGPASSWORD, PGBIN and TALENTRA_DB. psql is at `C:\Program Files\PostgreSQL\18\bin`.
-- C: has about 20 GB free; D: has 170 GB. The seed goes in a tablespace on `D:\talentra_pg` (M19).
+- C: has about 19 GB free; D: has ~150 GB after the seed. Seed data is in tablespace `talentra_data` (`D:\talentra_pg`); WAL is on `D:\talentra_pg_wal`.
 - Git:
   - Remote: `origin` = github.com/amogh-rb/Acid-Agents (private). gh account: rsiddarth10 (write access).
   - `Desktop/` is an unrelated git repo. Never commit there.
@@ -39,6 +39,7 @@ python tools/design_docs.py compare docs/phase1/entities.md docs/phase1/relation
 - `ddl/NN_*.sql`: applied in order.
   - Already present: `00` extensions/schemas/roles, `05` domains, `06` base functions, `07` ui_label/language/ui_translation, `99_finalise` (always last).
   - Built: `10_ref`, `15_stubs`, `20_profile`, `30_jobs`, `40_admin`, `45_org`, `50_gig`, `60_lic`, `65_src`, `70_billing`, `80_notif`, `85_access`, `90_dw`, `99_finalise`.
+- `seed/NN_*.sql`: the M19 generator (server-side SQL); `seed/_preamble.sql` is included by each file. `.\run.ps1 seed -Scale rehearsal|laptop` builds `talentra_seed`.
 - `tests/_qa/`: the harness (`qa.expect_error`, `qa.expect_ok`, `qa.assert`, `qa.assert_equals`, `qa.lint_violations()`).
 - `tests/<area>/mNN_*.sql`: each file runs inside BEGIN ... ROLLBACK. `mNN_*.ps1` is for concurrency tests.
 - `tools/`: dictionary/ERD export, reserved-word lists and checker, `pg_settings.sql`.
@@ -78,19 +79,13 @@ python tools/design_docs.py compare docs/phase1/entities.md docs/phase1/relation
 6. Commit `MNN: <summary>` with a green suite. Push when the user says so.
 
 ## Current state
-- **Done:** M1-M18 (gate M18 PASS, 24/24 files). Tags `phase1`, `phase2`, `core-v1`, `phase4`. All local; nothing pushed yet.
-  - Phase 1 AI pre-review: `docs/phase1/review.md`.
-  - Human reviewer sign-offs are still open.
-- **Next:** Phase 5.
-  - **M19 seed (B60-B64):**
-    - Make `D:\talentra_pg` writable by the PostgreSQL service account (NETWORK SERVICE); this needs an admin shell. Then `CREATE TABLESPACE talentra_data LOCATION 'D:/talentra_pg'` (outside `run.ps1 up`, since tablespaces are cluster-level).
-    - Python generator `seed/gen_*.py` with Faker locales en_IN, hi_IN, ta_IN, ar, zh_CN; `seed/distributions.yaml`; `seed/data_quality_issues.md`. Load with COPY through `run.ps1 seed`.
-    - Volumes: 1M candidate profiles (2-3% near-duplicates: same email/phone variant, transliterated name), 100K jobs, 5M applications with a Zipf-skewed per-job distribution and the funnel applied 100 / shortlisted 30 / interviewed 12 / offered 4 / joined 3 (history rows!), plus orgs, recruiters, gig, sessions, ledger.
-    - Load as the owner. Generate actors via `created_by`, and disable no triggers.
-    - The application status history must be generated consistently with `job.application_status_transition`. Bypassing the trigger is not allowed, so either replay transitions or load history rows directly while the application rows carry the final status. The BEFORE trigger only validates UPDATEs and INSERT status `applied` (or source `imported`), so imported rows with `application_source_code = 'imported'` can carry any status. Decide and record.
-    - First run a 10K rehearsal with 0 FK failures.
-  - **M20 queries:** Q1-Q12 (`queries/`), EXPLAIN (ANALYZE, BUFFERS), seed validation report against Section 5.
-  - **M21 performance:** p50/p95/p99 over N runs, one index per module before/after, partitioning note (application is hash-partitioned already; event tables still need a decision), extrapolation to 10M/100M naming the first query to degrade. Apply the server settings from `docs/04_environment.md` first (service restart; ask the user).
+- **Done:** M1-M19. Gate M18 PASS (24/24 files). Seed validated at full laptop scale. Tags `phase1`, `phase2`, `core-v1`, `phase4` (pushed to origin up to M18).
+  - Phase 1 AI pre-review: `docs/phase1/review.md`. Human reviewer sign-offs are still open.
+- **Environment changes made in M19:** tablespace `talentra_data` on `D:\talentra_pg`; `pg_wal` moved to `D:\talentra_pg_wal` (junction from the data dir); server tuned (shared_buffers 4GB, effective_cache_size 16GB, work_mem 32MB, maintenance_work_mem 1GB, max_wal_size 8GB, random_page_cost 1.1, track_io_timing, pg_stat_statements) and restarted.
+- **Seeded database:** `talentra_seed` (11 GB): 1M profiles, 100K jobs, 5M applications, 9.9M status history rows. Rebuild with `.\run.ps1 seed -Scale laptop` (~83 min) or `-Scale rehearsal` (1 min). `seed/90_validate.sql` (33 checks) can be rerun on its own.
+- **Next:** Phase 5 continues.
+  - **M20 queries:** drafts exist (uncommitted): `queries/Q01-Q13*.sql`, `queries/_params.sql`, `perf/run_queries.ps1` (EXPLAIN ANALYZE BUFFERS, p50/p95/p99 to `perf/results/`). Not yet run. Then the seed validation report (33 checks already in `seed.validation`).
+  - **M21 performance:** `perf/index_experiments.ps1` drafted (one index per module, drop/measure/recreate). Not yet run; check every index name exists first. Then partitioning note and extrapolation to 10M/100M.
   - **M22 security:** PII notes, threat model, extend RLS to other Personal tables, retention purge job.
   - **M23:** backup/restore timing (pg_dump -Fd -j to D:), security note, Gate 2.
 - **Rules learned:**
@@ -101,12 +96,13 @@ python tools/design_docs.py compare docs/phase1/entities.md docs/phase1/relation
   - Active app_user rows need `login_email` or `login_phone`.
   - Comment tags drive grants: `[integration-write]`, `[api-write]`.
   - RLS tests: `SET LOCAL ROLE talentra_app` inside the test (superuser bypasses RLS); grant the qa harness to the role inside the test (it is rolled back).
-  - `run.ps1` prints with Write-Host, so pipe filters don't work. For a short summary run with `-Evidence *> $null` and `Select-String` the evidence file.
+  - `run.ps1` prints with Write-Host, so pipe filters don't work. Capture with `*>&1 | Out-String`, or run with `-Evidence *> $null` and read the evidence file.
   - Long scripted edits: write the Python to the scratchpad and run it; inline Bash heredocs with mixed quotes have failed.
+  - Seed SQL: `make_interval`, `chr` and date arithmetic need `int`, not `bigint`; `generate_series` over bigint params yields bigint. `seed.sync_sequences()` after any `OVERRIDING SYSTEM VALUE` load.
+  - Long loads: run in the background and do not poll in a loop; the full seed takes ~83 min.
 - **Open:**
   - Docket Sections 8 (KPIs), 10 (RTO) and 12 are missing.
-  - Reviewer sign-offs.
-  - Server tuning not applied.
+  - Reviewer sign-offs (all phases); D31 deviation needs reviewer acceptance.
   - F4.
 
 ## Handoff log
@@ -150,3 +146,7 @@ python tools/design_docs.py compare docs/phase1/entities.md docs/phase1/relation
     - `90_dw.sql`: dim_date, dim_organisation (SCD1), dim_candidate and dim_job_requirement (SCD2), fact_application (job + gig), agg_daily_funnel, etl_watermark, `dw.refresh_marts()` (idempotent), `dw.v_funnel_by_category`.
   - Harness: `qa.explain_lines`. Base: sequence USAGE grants.
   - Tests: m15/m16 docs, m18 access (23), notif (16), dw (14). Decisions D26-D29.
+- **M19 (2026-10-15/16):**
+  - Built: `seed/00-90` (server-side SQL generator, deterministic), `distributions.yaml`, `data_quality_issues.md`, `run.ps1 seed -Scale rehearsal|laptop [-Database] [-Tablespace]`; tablespace and WAL on D:, server tuned.
+  - Results: rehearsal 33/33 in 1 min; laptop scale 33/33 (1M/100K/5M, funnel 30.00/12.01/4.00/2.99%, 2.68% phone duplicates, 0 orphans over 817 FKs, 300/300 gig overlaps rejected), 11 GB, 83 min. Evidence `docs/evidence/seed_laptop_20261016.txt`.
+  - Decisions D30 (SQL generator, not Faker), D31 (deviation: replica-mode load re-proved by validation), D32 (placement on D:).
