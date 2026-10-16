@@ -1,4 +1,4 @@
-# 02 Environment (M1 verified; M21 performance evidence)
+# 04 Environment (M1 verified; settings applied in M19; M21 performance evidence)
 
 Recorded on 2026-10-15 from `.\run.ps1 settings` on the build laptop.
 
@@ -12,11 +12,13 @@ Recorded on 2026-10-15 from `.\run.ps1 settings` on the build laptop.
 | OS | Windows 11 Pro 10.0.22631 |
 
 The docket asks for 512 GB of free SSD. We have 190 GB in total, so the laptop-scale seed (1M profiles, 100K jobs, 5M applications) goes on D:.
-- **Plan for M19:** create the directory `D:\talentra_pg` and give the PostgreSQL service account (`NETWORK SERVICE`) write access to it. Then run `CREATE TABLESPACE talentra_data LOCATION 'D:/talentra_pg'` and put the big tables and indexes there (`SET default_tablespace` during the load).
+- **Done in M19 (D32):** `pg_wal` was also moved to `D:	alentra_pg_wal` (a junction in the data directory). Originally planned: create the directory `D:\talentra_pg` and give the PostgreSQL service account (`NETWORK SERVICE`) write access to it. Then run `CREATE TABLESPACE talentra_data LOCATION 'D:/talentra_pg'` and put the big tables and indexes there (`SET default_tablespace` during the load).
 - **Recorded here as a deviation from the docket sizing.**
 
 ## Server
-| Setting | Current | Source | Recommended before M21 (needs a restart, done by the team) |
+Applied on 2026-10-15 (M19, `ALTER SYSTEM` + service restart). The M21 measurements ran with the **Applied** column; evidence: `docs/evidence/settings_m21_20261016.txt`.
+
+| Setting | Before (M1) | Source | Applied (M19-M21) |
 |---|---|---|---|
 | server_version | 18.4 (x86_64-windows, msvc) | - | - |
 | server_encoding / database | UTF8; database `talentra` uses ICU locale `und` | - | - |
@@ -29,7 +31,7 @@ The docket asks for 512 GB of free SSD. We have 190 GB in total, so the laptop-s
 | io_method | worker | default (PG18 async I/O) | keep |
 | shared_preload_libraries | (empty) | default | `pg_stat_statements` (`ddl/00` then creates the extension automatically) |
 | track_io_timing | off | default | on (`EXPLAIN (ANALYZE, BUFFERS)` I/O timings) |
-| jit | on | default | off for OLTP latency runs; record the choice |
+| jit | on | default | left **on** (default). No query in the set is expensive enough to trigger JIT (cost thresholds 100K/500K), so it did not affect the measurements |
 | max_connections | 100 | config file | keep |
 
 Measurements in M21 state which settings were active; rerun `.\run.ps1 settings` and paste the output into `docs/evidence/`.

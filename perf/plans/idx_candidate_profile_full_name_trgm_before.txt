@@ -1,0 +1,12 @@
+﻿Limit  (cost=1000.00..24791.89 rows=50 width=29) (actual rows=50.00 loops=1)
+  Buffers: shared hit=13712
+  ->  Gather  (cost=1000.00..40018.69 rows=82 width=29) (actual rows=50.00 loops=1)
+        Workers Planned: 2
+        Workers Launched: 2
+        Buffers: shared hit=13712
+        ->  Parallel Seq Scan on candidate_profile  (cost=0.00..39010.49 rows=34 width=29) (actual rows=44.33 loops=3)
+              Filter: ((deleted_at IS NULL) AND ((full_name)::text ~~* '%Subramaniam%'::text))
+              Rows Removed by Filter: 135148
+              Buffers: shared hit=13712
+Planning Time: 0.336 ms
+Execution Time: 269.467 ms

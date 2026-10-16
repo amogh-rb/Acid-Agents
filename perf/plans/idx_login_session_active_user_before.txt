@@ -1,0 +1,13 @@
+﻿Aggregate  (cost=1994.50..1994.51 rows=1 width=8) (actual rows=1.00 loops=1)
+  Buffers: shared hit=298
+  ->  Bitmap Heap Scan on login_session  (cost=92.12..1994.49 rows=1 width=0) (actual rows=0.00 loops=1)
+        Recheck Cond: (ended_at IS NULL)
+        Filter: ((app_user_id = 1000007) AND (expires_at > now()))
+        Rows Removed by Filter: 11071
+        Heap Blocks: exact=266
+        Buffers: shared hit=298
+        ->  Bitmap Index Scan on idx_login_session_registered_device_id  (cost=0.00..92.12 rows=11107 width=0) (actual rows=11110.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=32
+Planning Time: 0.113 ms
+Execution Time: 1.883 ms

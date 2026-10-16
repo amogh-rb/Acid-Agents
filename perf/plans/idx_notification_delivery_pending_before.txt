@@ -1,0 +1,102 @@
+﻿Limit  (cost=36618.99..36630.64 rows=100 width=29) (actual rows=100.00 loops=1)
+  Buffers: shared hit=22404
+  ->  Gather Merge  (cost=36618.99..51271.99 rows=125813 width=29) (actual rows=100.00 loops=1)
+        Workers Planned: 2
+        Workers Launched: 2
+        Buffers: shared hit=22404
+        ->  Sort  (cost=35618.97..35750.02 rows=52422 width=29) (actual rows=100.00 loops=3)
+              Sort Key: notification_delivery.queued_at
+              Sort Method: top-N heapsort  Memory: 37kB
+              Buffers: shared hit=22404
+              Worker 0:  Sort Method: top-N heapsort  Memory: 36kB
+              Worker 1:  Sort Method: top-N heapsort  Memory: 36kB
+              ->  Parallel Append  (cost=0.00..33615.44 rows=52422 width=29) (actual rows=41666.67 loops=3)
+                    Buffers: shared hit=22324
+                    ->  Seq Scan on notification_delivery_p202508 notification_delivery_1  (cost=0.00..0.00 rows=1 width=56) (actual rows=0.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                    ->  Seq Scan on notification_delivery_p202509 notification_delivery_2  (cost=0.00..0.00 rows=1 width=56) (actual rows=0.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                    ->  Seq Scan on notification_delivery_p202510 notification_delivery_3  (cost=0.00..0.00 rows=1 width=56) (actual rows=0.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                    ->  Seq Scan on notification_delivery_p202611 notification_delivery_16  (cost=0.00..0.00 rows=1 width=56) (actual rows=0.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                    ->  Seq Scan on notification_delivery_p202612 notification_delivery_17  (cost=0.00..0.00 rows=1 width=56) (actual rows=0.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                    ->  Seq Scan on notification_delivery_p202701 notification_delivery_18  (cost=0.00..0.00 rows=1 width=56) (actual rows=0.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                    ->  Seq Scan on notification_delivery_p202702 notification_delivery_19  (cost=0.00..0.00 rows=1 width=56) (actual rows=0.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                    ->  Seq Scan on notification_delivery_p202703 notification_delivery_20  (cost=0.00..0.00 rows=1 width=56) (actual rows=0.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                    ->  Seq Scan on notification_delivery_p202704 notification_delivery_21  (cost=0.00..0.00 rows=1 width=56) (actual rows=0.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                    ->  Seq Scan on notification_delivery_p202705 notification_delivery_22  (cost=0.00..0.00 rows=1 width=56) (actual rows=0.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                    ->  Seq Scan on notification_delivery_p202706 notification_delivery_23  (cost=0.00..0.00 rows=1 width=56) (actual rows=0.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                    ->  Seq Scan on notification_delivery_p202707 notification_delivery_24  (cost=0.00..0.00 rows=1 width=56) (actual rows=0.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                    ->  Seq Scan on notification_delivery_p202708 notification_delivery_25  (cost=0.00..0.00 rows=1 width=56) (actual rows=0.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                    ->  Seq Scan on notification_delivery_p202709 notification_delivery_26  (cost=0.00..0.00 rows=1 width=56) (actual rows=0.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                    ->  Seq Scan on notification_delivery_p202710 notification_delivery_27  (cost=0.00..0.00 rows=1 width=56) (actual rows=0.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                    ->  Seq Scan on notification_delivery_p202711 notification_delivery_28  (cost=0.00..0.00 rows=1 width=56) (actual rows=0.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                    ->  Seq Scan on notification_delivery_p202712 notification_delivery_29  (cost=0.00..0.00 rows=1 width=56) (actual rows=0.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                    ->  Seq Scan on notification_delivery_default notification_delivery_30  (cost=0.00..0.00 rows=1 width=56) (actual rows=0.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                    ->  Parallel Seq Scan on notification_delivery_p202607 notification_delivery_12  (cost=0.00..3119.49 rows=6755 width=29) (actual rows=11675.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                          Rows Removed by Filter: 128607
+                          Buffers: shared hit=2088
+                    ->  Parallel Seq Scan on notification_delivery_p202512 notification_delivery_5  (cost=0.00..3110.81 rows=6831 width=29) (actual rows=11739.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                          Rows Removed by Filter: 128179
+                          Buffers: shared hit=2082
+                    ->  Parallel Seq Scan on notification_delivery_p202601 notification_delivery_6  (cost=0.00..3099.76 rows=6764 width=29) (actual rows=11542.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                          Rows Removed by Filter: 127825
+                          Buffers: shared hit=2075
+                    ->  Parallel Seq Scan on notification_delivery_p202603 notification_delivery_8  (cost=0.00..3095.80 rows=6774 width=29) (actual rows=11627.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                          Rows Removed by Filter: 127610
+                          Buffers: shared hit=2072
+                    ->  Parallel Seq Scan on notification_delivery_p202605 notification_delivery_10  (cost=0.00..3093.01 rows=6984 width=29) (actual rows=3880.33 loops=3)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                          Rows Removed by Filter: 42496
+                          Buffers: shared hit=2070
+                    ->  Parallel Seq Scan on notification_delivery_p202608 notification_delivery_13  (cost=0.00..3088.25 rows=6863 width=29) (actual rows=11500.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                          Rows Removed by Filter: 127390
+                          Buffers: shared hit=2067
+                    ->  Parallel Seq Scan on notification_delivery_p202609 notification_delivery_14  (cost=0.00..3007.12 rows=6675 width=29) (actual rows=11162.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                          Rows Removed by Filter: 124039
+                          Buffers: shared hit=2013
+                    ->  Parallel Seq Scan on notification_delivery_p202606 notification_delivery_11  (cost=0.00..3006.19 rows=6609 width=29) (actual rows=11238.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                          Rows Removed by Filter: 123972
+                          Buffers: shared hit=2012
+                    ->  Parallel Seq Scan on notification_delivery_p202604 notification_delivery_9  (cost=0.00..3004.90 rows=6743 width=29) (actual rows=11270.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                          Rows Removed by Filter: 123901
+                          Buffers: shared hit=2011
+                    ->  Parallel Seq Scan on notification_delivery_p202602 notification_delivery_7  (cost=0.00..2797.10 rows=6481 width=29) (actual rows=10621.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                          Rows Removed by Filter: 115193
+                          Buffers: shared hit=1872
+                    ->  Parallel Seq Scan on notification_delivery_p202610 notification_delivery_15  (cost=0.00..1476.07 rows=3335 width=29) (actual rows=5558.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                          Rows Removed by Filter: 60819
+                          Buffers: shared hit=988
+                    ->  Parallel Seq Scan on notification_delivery_p202511 notification_delivery_4  (cost=0.00..1454.91 rows=3170 width=29) (actual rows=5427.00 loops=1)
+                          Filter: ((delivery_status_code)::text = 'queued'::text)
+                          Rows Removed by Filter: 59977
+                          Buffers: shared hit=974
+Planning:
+  Buffers: shared hit=54
+Planning Time: 2.170 ms
+Execution Time: 146.476 ms

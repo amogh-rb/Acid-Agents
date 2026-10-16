@@ -1,0 +1,16 @@
+﻿HashAggregate  (cost=32520.52..32520.60 rows=8 width=30) (actual rows=1.00 loops=1)
+  Group Key: job_category
+  Batches: 1  Memory Usage: 32kB
+  Buffers: shared hit=1611
+  ->  Bitmap Heap Scan on fact_application  (cost=325.81..32241.84 rows=37158 width=15) (actual rows=49157.00 loops=1)
+        Recheck Cond: (applied_dim_date_id >= 990)
+        Heap Blocks: exact=1566
+        Buffers: shared hit=1611
+        ->  Bitmap Index Scan on idx_fact_application_applied_dim_date_id  (cost=0.00..316.52 rows=37158 width=0) (actual rows=49157.00 loops=1)
+              Index Cond: (applied_dim_date_id >= 990)
+              Index Searches: 1
+              Buffers: shared hit=45
+Planning:
+  Buffers: shared hit=4
+Planning Time: 0.231 ms
+Execution Time: 16.731 ms

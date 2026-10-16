@@ -15,5 +15,5 @@ SELECT app_user_id AS rec_user FROM lic.licence_seat WHERE released_at IS NULL O
 SELECT id AS wallet FROM billing.wallet ORDER BY id LIMIT 1 \gset
 -- a candidate whose phone number is shared with another profile (a seeded near-duplicate), for Q04
 SELECT min(c.candidate_profile_id) AS dup_cand FROM profile.candidate_contact c
- WHERE c.phone = (SELECT phone FROM profile.candidate_contact WHERE phone IS NOT NULL AND candidate_profile_id > 500000
+ WHERE c.phone = (SELECT phone FROM profile.candidate_contact WHERE phone IS NOT NULL AND candidate_profile_id > (SELECT max(id) / 2 FROM profile.candidate_profile)
                    GROUP BY phone HAVING count(*) > 1 ORDER BY phone LIMIT 1) \gset

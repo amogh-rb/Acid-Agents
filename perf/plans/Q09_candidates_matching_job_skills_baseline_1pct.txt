@@ -1,0 +1,39 @@
+﻿Limit  (cost=539.75..539.79 rows=16 width=16) (actual rows=50.00 loops=1)
+  Buffers: shared hit=734
+  InitPlan 1
+    ->  Aggregate  (cost=4.59..4.60 rows=1 width=8) (actual rows=1.00 loops=1)
+          Buffers: shared hit=5
+          ->  Index Scan using uq_job_requirement_skill_job_requirement_id_skill_id on job_requirement_skill  (cost=0.28..4.59 rows=2 width=0) (actual rows=2.00 loops=1)
+                Index Cond: (job_requirement_id = 1)
+                Filter: is_mandatory
+                Rows Removed by Filter: 1
+                Index Searches: 1
+                Buffers: shared hit=5
+  ->  Sort  (cost=535.14..535.18 rows=16 width=16) (actual rows=50.00 loops=1)
+        Sort Key: cs.candidate_profile_id
+        Sort Method: top-N heapsort  Memory: 28kB
+        Buffers: shared hit=734
+        ->  HashAggregate  (cost=495.88..534.82 rows=16 width=16) (actual rows=135.00 loops=1)
+              Group Key: cs.candidate_profile_id
+              Filter: (count(*) = (InitPlan 1).col1)
+              Batches: 1  Memory Usage: 217kB
+              Rows Removed by Filter: 2580
+              Buffers: shared hit=734
+              ->  Nested Loop  (cost=13.76..480.31 rows=3115 width=8) (actual rows=2850.00 loops=1)
+                    Buffers: shared hit=729
+                    ->  Index Scan using uq_job_requirement_skill_job_requirement_id_skill_id on job_requirement_skill jr  (cost=0.28..4.59 rows=2 width=8) (actual rows=2.00 loops=1)
+                          Index Cond: (job_requirement_id = 1)
+                          Filter: is_mandatory
+                          Rows Removed by Filter: 1
+                          Index Searches: 1
+                          Buffers: shared hit=5
+                    ->  Bitmap Heap Scan on candidate_skill cs  (cost=13.48..223.68 rows=1418 width=16) (actual rows=1425.00 loops=2)
+                          Recheck Cond: (jr.skill_id = skill_id)
+                          Heap Blocks: exact=719
+                          Buffers: shared hit=724
+                          ->  Bitmap Index Scan on idx_candidate_skill_skill_id  (cost=0.00..13.12 rows=1418 width=0) (actual rows=1425.00 loops=2)
+                                Index Cond: (skill_id = jr.skill_id)
+                                Index Searches: 2
+                                Buffers: shared hit=5
+Planning Time: 0.515 ms
+Execution Time: 2.728 ms

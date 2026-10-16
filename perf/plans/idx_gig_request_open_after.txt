@@ -1,0 +1,8 @@
+﻿Limit  (cost=0.29..16.64 rows=20 width=34) (actual rows=20.00 loops=1)
+  Buffers: shared hit=22
+  ->  Index Scan using idx_gig_request_open on gig_request  (cost=0.29..370.71 rows=453 width=34) (actual rows=20.00 loops=1)
+        Index Cond: (skill_id = 7)
+        Index Searches: 1
+        Buffers: shared hit=22
+Planning Time: 0.089 ms
+Execution Time: 0.046 ms

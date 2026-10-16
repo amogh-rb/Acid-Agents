@@ -1,0 +1,6 @@
+﻿Index Scan using idx_outreach_recipient_candidate_profile_id on outreach_recipient r  (cost=0.29..2.51 rows=1 width=15) (actual rows=2.00 loops=1)
+  Index Cond: (candidate_profile_id = 3876)
+  Index Searches: 1
+  Buffers: shared hit=4
+Planning Time: 0.045 ms
+Execution Time: 0.017 ms

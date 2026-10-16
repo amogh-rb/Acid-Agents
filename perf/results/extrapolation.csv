@@ -1,0 +1,14 @@
+query,name,p50_ms_1pct,p50_ms_laptop,growth_exponent_k,p50_ms_10x,p50_ms_100x,p95_ms_100x,degradation_rank
+Q05_candidate_name_fuzzy,"Candidate name search (substring, trigram index)",0.446,62.466,1.07,739.3,8748.9,18560.0,1
+Q08_org_open_jobs_with_counts,A company's open jobs with application counts,3.495,59.996,0.62,248.6,1029.9,1469.7,2
+Q02_job_search_fulltext,Job search by keyword (full text over title and description),0.137,10.2,0.94,88.0,759.4,869.7,3
+Q07_job_pipeline_counts,Pipeline counts of the most applied-to job,1.309,13.876,0.51,45.2,147.1,165.1,4
+Q09_candidates_matching_job_skills,Candidates holding every mandatory skill of a job,2.056,3.289,0.1,4.2,5.3,6.8,5
+Q10_monthly_funnel,Monthly hiring funnel by category (warehouse view),2.383,2.765,0.03,3.0,3.2,5.0,6
+Q12_start_session,Start a session (device-limit check with seat lock),0.719,0.913,0.05,1.0,1.2,2.7,7
+Q11_apply_to_job,Apply to a job (transactional; transition and history triggers fire),0.446,0.429,0.0,0.4,0.4,2.2,8
+Q13_post_ledger_entry,"Post a wallet debit (row lock, idempotent)",0.314,0.344,0.02,0.4,0.4,1.2,9
+Q01_job_search_by_role,"Job search by role (newest open, published, live jobs)",0.068,0.102,0.09,0.1,0.2,0.3,10
+Q04_candidate_duplicates_by_phone,Possible duplicate profiles sharing a phone number,0.046,0.056,0.04,0.1,0.1,0.1,11
+Q06_my_applications,A candidate's applications with job and status,0.047,0.053,0.03,0.1,0.1,0.1,12
+Q03_candidate_by_email,Candidate lookup by email (exact),0.04,0.041,0.01,0.0,0.0,0.1,13

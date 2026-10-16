@@ -1,0 +1,4 @@
+﻿Function Scan on start_session  (cost=0.28..10.28 rows=1000 width=40) (actual rows=1.00 loops=1)
+  Buffers: shared hit=142
+Planning Time: 0.036 ms
+Execution Time: 1.720 ms

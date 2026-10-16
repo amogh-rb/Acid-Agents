@@ -1,0 +1,15 @@
+﻿Aggregate  (cost=119.11..119.12 rows=1 width=8) (actual rows=1.00 loops=1)
+  Buffers: shared hit=183
+  ->  Bitmap Heap Scan on candidate_profile  (cost=7.61..118.80 rows=123 width=0) (actual rows=251.00 loops=1)
+        Recheck Cond: ((full_name)::text ~~* '%Iyer%'::text)
+        Filter: (deleted_at IS NULL)
+        Heap Blocks: exact=178
+        Buffers: shared hit=183
+        ->  Bitmap Index Scan on idx_candidate_profile_full_name_trgm  (cost=0.00..7.58 rows=123 width=0) (actual rows=251.00 loops=1)
+              Index Cond: ((full_name)::text ~~* '%Iyer%'::text)
+              Index Searches: 1
+              Buffers: shared hit=5
+Planning:
+  Buffers: shared hit=1
+Planning Time: 0.269 ms
+Execution Time: 0.449 ms

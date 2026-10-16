@@ -1,0 +1,16 @@
+﻿Limit  (cost=12716.95..12716.98 rows=11 width=31) (actual rows=20.00 loops=1)
+  Buffers: shared hit=9108
+  ->  Sort  (cost=12716.95..12716.98 rows=11 width=31) (actual rows=20.00 loops=1)
+        Sort Key: occurred_at DESC
+        Sort Method: quicksort  Memory: 27kB
+        Buffers: shared hit=9108
+        ->  Gather  (cost=1000.00..12716.76 rows=11 width=31) (actual rows=38.00 loops=1)
+              Workers Planned: 2
+              Workers Launched: 2
+              Buffers: shared hit=9108
+              ->  Parallel Seq Scan on audit_event  (cost=0.00..11715.66 rows=5 width=31) (actual rows=12.67 loops=3)
+                    Filter: (actor_app_user_id = 1007611)
+                    Rows Removed by Filter: 166878
+                    Buffers: shared hit=9108
+Planning Time: 0.148 ms
+Execution Time: 92.661 ms

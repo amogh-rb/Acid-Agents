@@ -1,0 +1,25 @@
+                                 version                                 
+-------------------------------------------------------------------------
+ PostgreSQL 18.4 on x86_64-windows, compiled by msvc-19.44.35227, 64-bit
+(1 row)
+
+              name               |      setting       | unit |       source       
+---------------------------------+--------------------+------+--------------------
+ effective_cache_size            | 2097152            | 8kB  | configuration file
+ effective_io_concurrency        | 16                 |      | default
+ io_method                       | worker             |      | default
+ jit                             | on                 |      | default
+ maintenance_work_mem            | 1048576            | kB   | configuration file
+ max_connections                 | 100                |      | configuration file
+ max_parallel_workers_per_gather | 2                  |      | default
+ max_wal_size                    | 8192               | MB   | configuration file
+ random_page_cost                | 1.1                |      | configuration file
+ server_encoding                 | UTF8               |      | default
+ server_version                  | 18.4               |      | default
+ shared_buffers                  | 524288             | 8kB  | configuration file
+ shared_preload_libraries        | pg_stat_statements |      | configuration file
+ track_io_timing                 | on                 |      | configuration file
+ work_mem                        | 32768              | kB   | configuration file
+(15 rows)
+
+

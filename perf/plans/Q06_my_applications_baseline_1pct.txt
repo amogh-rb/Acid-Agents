@@ -1,0 +1,18 @@
+﻿Sort  (cost=15.91..15.93 rows=5 width=44) (actual rows=5.00 loops=1)
+  Sort Key: a.applied_at DESC
+  Sort Method: quicksort  Memory: 25kB
+  Buffers: shared hit=18
+  ->  Nested Loop  (cost=0.55..15.86 rows=5 width=44) (actual rows=5.00 loops=1)
+        Buffers: shared hit=18
+        ->  Index Scan using application_h31_candidate_profile_id_job_requirement_id_key on application_h31 a  (cost=0.28..4.49 rows=5 width=33) (actual rows=5.00 loops=1)
+              Index Cond: (candidate_profile_id = 5001)
+              Index Searches: 1
+              Buffers: shared hit=3
+        ->  Index Scan using pk_job_requirement on job_requirement j  (cost=0.28..2.27 rows=1 width=27) (actual rows=1.00 loops=5)
+              Index Cond: (id = a.job_requirement_id)
+              Index Searches: 5
+              Buffers: shared hit=15
+Planning:
+  Buffers: shared hit=7
+Planning Time: 0.333 ms
+Execution Time: 0.047 ms

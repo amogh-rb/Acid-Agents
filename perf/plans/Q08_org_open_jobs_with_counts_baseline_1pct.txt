@@ -1,0 +1,279 @@
+﻿Limit  (cost=240.68..240.68 rows=2 width=35) (actual rows=3.00 loops=1)
+  Buffers: shared hit=1145
+  ->  Sort  (cost=240.68..240.68 rows=2 width=35) (actual rows=3.00 loops=1)
+        Sort Key: (count(a.id)) DESC
+        Sort Method: quicksort  Memory: 25kB
+        Buffers: shared hit=1145
+        ->  HashAggregate  (cost=240.65..240.67 rows=2 width=35) (actual rows=3.00 loops=1)
+              Group Key: j.id
+              Batches: 1  Memory Usage: 32kB
+              Buffers: shared hit=1145
+              ->  Nested Loop Left Join  (cost=1.67..240.15 rows=100 width=35) (actual rows=2955.00 loops=1)
+                    Buffers: shared hit=1145
+                    ->  Index Scan using idx_job_requirement_organisation_id on job_requirement j  (cost=0.28..3.61 rows=2 width=27) (actual rows=3.00 loops=1)
+                          Index Cond: ((organisation_id = 123) AND ((job_requirement_status_code)::text = 'open'::text))
+                          Filter: (deleted_at IS NULL)
+                          Index Searches: 1
+                          Buffers: shared hit=5
+                    ->  Append  (cost=1.39..117.60 rows=67 width=16) (actual rows=985.00 loops=3)
+                          Buffers: shared hit=1140
+                          ->  Bitmap Heap Scan on application_h00 a_1  (cost=1.39..3.56 rows=2 width=16) (actual rows=28.67 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=31
+                                Buffers: shared hit=37
+                                ->  Bitmap Index Scan on application_h00_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=28.67 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h01 a_2  (cost=1.39..3.56 rows=2 width=16) (actual rows=29.33 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=27
+                                Buffers: shared hit=33
+                                ->  Bitmap Index Scan on application_h01_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=29.33 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h02 a_3  (cost=1.39..3.57 rows=2 width=16) (actual rows=28.00 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=31
+                                Buffers: shared hit=37
+                                ->  Bitmap Index Scan on application_h02_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=28.00 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h03 a_4  (cost=1.39..3.56 rows=2 width=16) (actual rows=35.67 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=30
+                                Buffers: shared hit=36
+                                ->  Bitmap Index Scan on application_h03_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=35.67 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h04 a_5  (cost=1.39..3.56 rows=2 width=16) (actual rows=28.00 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=29
+                                Buffers: shared hit=35
+                                ->  Bitmap Index Scan on application_h04_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=28.00 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h05 a_6  (cost=1.39..3.56 rows=2 width=16) (actual rows=33.67 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=30
+                                Buffers: shared hit=36
+                                ->  Bitmap Index Scan on application_h05_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=33.67 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h06 a_7  (cost=1.39..3.56 rows=2 width=16) (actual rows=30.00 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=31
+                                Buffers: shared hit=37
+                                ->  Bitmap Index Scan on application_h06_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=30.00 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h07 a_8  (cost=1.39..3.56 rows=2 width=16) (actual rows=35.00 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=28
+                                Buffers: shared hit=34
+                                ->  Bitmap Index Scan on application_h07_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=35.00 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h08 a_9  (cost=1.40..4.64 rows=3 width=16) (actual rows=33.67 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=33
+                                Buffers: shared hit=39
+                                ->  Bitmap Index Scan on application_h08_job_requirement_id_application_status_code_idx  (cost=0.00..1.40 rows=3 width=0) (actual rows=33.67 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h09 a_10  (cost=1.39..3.57 rows=2 width=16) (actual rows=32.33 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=34
+                                Buffers: shared hit=40
+                                ->  Bitmap Index Scan on application_h09_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=32.33 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h10 a_11  (cost=1.39..3.56 rows=2 width=16) (actual rows=30.33 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=31
+                                Buffers: shared hit=37
+                                ->  Bitmap Index Scan on application_h10_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=30.33 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h11 a_12  (cost=1.39..3.56 rows=2 width=16) (actual rows=28.00 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=24
+                                Buffers: shared hit=30
+                                ->  Bitmap Index Scan on application_h11_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=28.00 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h12 a_13  (cost=1.39..3.56 rows=2 width=16) (actual rows=32.67 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=30
+                                Buffers: shared hit=36
+                                ->  Bitmap Index Scan on application_h12_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=32.67 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h13 a_14  (cost=1.39..3.56 rows=2 width=16) (actual rows=27.67 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=29
+                                Buffers: shared hit=35
+                                ->  Bitmap Index Scan on application_h13_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=27.67 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h14 a_15  (cost=1.39..3.56 rows=2 width=16) (actual rows=35.67 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=32
+                                Buffers: shared hit=38
+                                ->  Bitmap Index Scan on application_h14_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=35.67 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h15 a_16  (cost=1.39..3.57 rows=2 width=16) (actual rows=32.00 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=31
+                                Buffers: shared hit=37
+                                ->  Bitmap Index Scan on application_h15_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=32.00 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h16 a_17  (cost=1.39..3.56 rows=2 width=16) (actual rows=28.00 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=28
+                                Buffers: shared hit=34
+                                ->  Bitmap Index Scan on application_h16_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=28.00 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h17 a_18  (cost=1.39..3.56 rows=2 width=16) (actual rows=30.67 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=28
+                                Buffers: shared hit=34
+                                ->  Bitmap Index Scan on application_h17_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=30.67 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h18 a_19  (cost=1.39..3.56 rows=2 width=16) (actual rows=32.00 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=29
+                                Buffers: shared hit=35
+                                ->  Bitmap Index Scan on application_h18_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=32.00 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h19 a_20  (cost=1.39..3.56 rows=2 width=16) (actual rows=25.67 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=26
+                                Buffers: shared hit=32
+                                ->  Bitmap Index Scan on application_h19_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=25.67 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h20 a_21  (cost=1.39..3.56 rows=2 width=16) (actual rows=30.00 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=28
+                                Buffers: shared hit=34
+                                ->  Bitmap Index Scan on application_h20_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=30.00 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h21 a_22  (cost=1.39..3.56 rows=2 width=16) (actual rows=29.00 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=29
+                                Buffers: shared hit=35
+                                ->  Bitmap Index Scan on application_h21_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=29.00 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h22 a_23  (cost=1.40..4.64 rows=3 width=16) (actual rows=36.33 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=36
+                                Buffers: shared hit=42
+                                ->  Bitmap Index Scan on application_h22_job_requirement_id_application_status_code_idx  (cost=0.00..1.40 rows=3 width=0) (actual rows=36.33 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h23 a_24  (cost=1.39..3.56 rows=2 width=16) (actual rows=30.67 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=29
+                                Buffers: shared hit=35
+                                ->  Bitmap Index Scan on application_h23_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=30.67 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h24 a_25  (cost=1.39..3.56 rows=2 width=16) (actual rows=30.67 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=29
+                                Buffers: shared hit=35
+                                ->  Bitmap Index Scan on application_h24_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=30.67 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h25 a_26  (cost=1.40..4.64 rows=3 width=16) (actual rows=33.67 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=31
+                                Buffers: shared hit=37
+                                ->  Bitmap Index Scan on application_h25_job_requirement_id_application_status_code_idx  (cost=0.00..1.40 rows=3 width=0) (actual rows=33.67 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h26 a_27  (cost=1.39..3.56 rows=2 width=16) (actual rows=32.00 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=30
+                                Buffers: shared hit=36
+                                ->  Bitmap Index Scan on application_h26_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=32.00 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h27 a_28  (cost=1.39..3.56 rows=2 width=16) (actual rows=25.33 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=27
+                                Buffers: shared hit=33
+                                ->  Bitmap Index Scan on application_h27_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=25.33 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h28 a_29  (cost=1.39..3.56 rows=2 width=16) (actual rows=33.67 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=31
+                                Buffers: shared hit=37
+                                ->  Bitmap Index Scan on application_h28_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=33.67 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h29 a_30  (cost=1.39..3.56 rows=2 width=16) (actual rows=31.67 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=36
+                                Buffers: shared hit=42
+                                ->  Bitmap Index Scan on application_h29_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=31.67 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h30 a_31  (cost=1.39..3.56 rows=2 width=16) (actual rows=31.67 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=24
+                                Buffers: shared hit=30
+                                ->  Bitmap Index Scan on application_h30_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=31.67 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+                          ->  Bitmap Heap Scan on application_h31 a_32  (cost=1.39..3.56 rows=2 width=16) (actual rows=23.33 loops=3)
+                                Recheck Cond: (job_requirement_id = j.id)
+                                Heap Blocks: exact=26
+                                Buffers: shared hit=32
+                                ->  Bitmap Index Scan on application_h31_job_requirement_id_application_status_code_idx  (cost=0.00..1.39 rows=2 width=0) (actual rows=23.33 loops=3)
+                                      Index Cond: (job_requirement_id = j.id)
+                                      Index Searches: 3
+                                      Buffers: shared hit=6
+Planning:
+  Buffers: shared hit=38
+Planning Time: 1.892 ms
+Execution Time: 3.218 ms

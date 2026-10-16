@@ -1,0 +1,8 @@
+﻿Limit  (cost=0.42..14.60 rows=12 width=31) (actual rows=20.00 loops=1)
+  Buffers: shared hit=23
+  ->  Index Scan Backward using idx_audit_event_actor_app_user_id on audit_event  (cost=0.42..14.60 rows=12 width=31) (actual rows=20.00 loops=1)
+        Index Cond: (actor_app_user_id = 1001543)
+        Index Searches: 1
+        Buffers: shared hit=23
+Planning Time: 0.098 ms
+Execution Time: 0.063 ms

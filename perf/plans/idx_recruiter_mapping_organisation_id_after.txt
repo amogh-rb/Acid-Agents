@@ -1,0 +1,7 @@
+﻿Index Scan using idx_recruiter_mapping_organisation_id on recruiter_mapping  (cost=0.29..3.43 rows=2 width=8) (actual rows=2.00 loops=1)
+  Index Cond: (organisation_id = 7000)
+  Filter: (valid_period @> CURRENT_DATE)
+  Index Searches: 1
+  Buffers: shared hit=4
+Planning Time: 0.080 ms
+Execution Time: 0.025 ms

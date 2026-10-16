@@ -1,0 +1,419 @@
+== gate M21  (2026-10-16 11:19:15, db talentra) ==
+up    talentra rebuilt from 18 ddl files
+PASS  tests/constraints/m01_base.sql  (72 checks)
+        PASS  database encoding is UTF8 (= UTF8)
+        PASS  13 module schemas exist (= 13)
+        PASS  extensions btree_gist, pg_trgm, pgcrypto installed (= 3)
+        PASS  group roles exist
+        PASS  d_email rejects uppercase Foo@X.com: rejected by ck_d_email_lowercase
+        PASS  d_email rejects a value without @: rejected by ck_d_email_format
+        PASS  d_email accepts foo@x.com
+        PASS  d_phone_e164 accepts +919840012345
+        PASS  d_phone_e164 rejects 98400 12345: rejected by ck_d_phone_e164_format
+        PASS  d_pct rejects -1: rejected by ck_d_pct_range
+        PASS  d_pct rejects 100.01: rejected by ck_d_pct_range
+        PASS  d_pct accepts 0 and 100
+        PASS  d_person_name rejects blank: rejected by ck_d_person_name_not_blank
+        PASS  d_person_name accepts any script
+        PASS  d_lat rejects 90.5: rejected by ck_d_lat_range
+        PASS  d_lng rejects 181: rejected by ck_d_lng_range
+        PASS  d_code rejects Applied: rejected by ck_d_code_format
+        PASS  d_currency_code rejects inr: rejected by ck_d_currency_code_format
+        PASS  d_money is fixed precision numeric(14,2) (= numeric(14,2))
+        PASS  current_actor_id reads app.current_user_id (= 2)
+        PASS  created_by defaults to the current actor (= 2)
+        PASS  append-only table rejects UPDATE: rejected by forbid_update_delete
+        PASS  append-only table rejects DELETE: rejected by forbid_update_delete
+        PASS  append-only table rejects TRUNCATE: rejected by forbid_update_delete
+        PASS  talentra_app has no UPDATE on the append-only table
+        PASS  set_updated_at overrides a stale updated_at
+        PASS  set_updated_at records the updating actor (= 3)
+        PASS  created_by is immutable (= 2)
+        PASS  created_at is immutable
+        PASS  current_actor_id is NULL when unset
+        PASS  insert without an actor fails (no fake actor): rejected by created_by
+        PASS  soft-delete view v_probe_doc hides deleted rows (= 1)
+        PASS  compliant probe tables produce no lint violations (= 0)
+        PASS  exactly one default language (= 1)
+        PASS  ui_text returns the requested language (= खुला)
+        PASS  ui_text falls back to the default language (= Open)
+        PASS  ui_text never returns the key for an unknown label
+        PASS  second default language is rejected: rejected by uq_language_is_default
+        PASS  lookup code must be lowercase snake_case: rejected by ck_d_code_format
+        PASS  lookup label_key must exist in ref.ui_label: rejected by fk_probe_status_label_key
+        PASS  lookup tables built by the pattern pass the lint (= 0)
+        PASS  lint detects RG1 snake_case
+        PASS  lint detects RG1 singular
+        PASS  lint detects RG1 reserved word
+        PASS  lint detects RG1 constraint name
+        PASS  lint detects RG1 index name
+        PASS  lint detects RG1 trigger name
+        PASS  lint detects RG1 truncated name
+        PASS  lint detects RG2 primary key
+        PASS  lint detects RG2 surrogate key
+        PASS  lint detects RG2 foreign key
+        PASS  lint detects RG3 float
+        PASS  lint detects RG3 timestamp
+        PASS  lint detects RG3 money domain
+        PASS  lint detects RG3 money currency
+        PASS  lint detects RG3 unbounded text
+        PASS  lint detects RG3 email
+        PASS  lint detects RG3 phone
+        PASS  lint detects RG3 person name
+        PASS  lint detects RG3 coordinates
+        PASS  lint detects RG3 percentage
+        PASS  lint detects RG3 boolean
+        PASS  lint detects RG4 delete class
+        PASS  lint detects RG4 audit columns
+        PASS  lint detects RG4 soft delete
+        PASS  lint detects RG4 append-only
+        PASS  lint detects RG4 updated_at trigger
+        PASS  lint detects RG5 null reason
+        PASS  lint detects RG6 class tag
+        PASS  lint detects RG6 sensitive form
+        PASS  lint detects RG7 language
+        PASS  lint detects RG8 physical name
+PASS  tests/lint/m01_lint.sql  (1 checks)
+        PASS  lint: 0 violations across 275 tables and 3144 columns
+PASS  tests/docs/m02_entities.ps1  (2 checks)
+        PASS  96 names checked: snake_case, singular, no PostgreSQL/MySQL reserved words
+        PASS  96 entities: unique, schema, delete class, tier and owner valid
+PASS  tests/constraints/m03_stubs.sql  (12 checks)
+        PASS  system actor id 1 exists, active and flagged
+        PASS  audit FKs to app_user were added to earlier tables (ref.language)
+        PASS  soft-delete default views exist for both stubs
+        PASS  identity continues after the system actor (no id collision)
+        PASS  organisation created_by is the acting user (= 4)
+        PASS  organisation defaults to pending_verification (= pending_verification)
+        PASS  unknown user status is rejected: rejected by fk_app_user_user_status_code
+        PASS  unknown organisation status is rejected: rejected by fk_organisation_organisation_status_code
+        PASS  blank organisation name is rejected: rejected by ck_organisation_organisation_name_not_blank
+        PASS  system actor cannot be suspended: rejected by ck_app_user_system_actor_active
+        PASS  system actor cannot be deleted while it owns rows: rejected by violates RESTRICT setting of foreign key constraint
+        PASS  an actor that does not exist is rejected: rejected by fk_organisation_created_by
+PASS  tests/docs/m03_relationships.ps1  (3 checks)
+        PASS  334 names checked: snake_case, singular, no PostgreSQL/MySQL reserved words
+        PASS  166 relationships: known entities, naming, cardinality, ON DELETE and reasons valid
+        PASS  docs\erd\phase1.mmd matches the relationship table (166 lines)
+PASS  tests/constraints/m04_columns.sql  (15 checks)
+        PASS  application_status has the 7 pipeline codes (= applied,shortlisted,interviewed,offered,joined,rejected,withdrawn)
+        PASS  terminal statuses are joined, rejected, withdrawn (= joined,rejected,withdrawn)
+        PASS  application_status_transition is seeded and has no applied -> joined shortcut
+        PASS  disclosure codes (RG5 unknown vs not applicable) (= disclosed,not_disclosed,not_applicable)
+        PASS  job_requirement_status: only open accepts applications
+        PASS  publish_state seeded
+        PASS  languages, currencies, countries, cities seeded
+        PASS  every ui_label has a default-language translation (= 0)
+        PASS  ui_text resolves a lookup label in Hindi with English fallback (= Shortlisted)
+        PASS  text columns are exactly job_requirement.description and resume_version.body (= job.job_requirement.description,profile.resume_version.body)
+        PASS  candidate_profile.full_name uses d_person_name (= d_person_name)
+        PASS  candidate_contact email/phone use d_email/d_phone_e164 (= d_email,d_phone_e164)
+        PASS  salary columns use d_money (= 5)
+        PASS  candidate_identity_document has no clear identifier column
+        PASS  description/summary/body columns have a *_language_id companion (= 0)
+PASS  tests/docs/m05_design_vs_catalog.ps1  (4 checks)
+        PASS  dictionary rows = information_schema base-table columns (2076)
+        PASS  every dictionary row has a sensitive class; every nullable row has a reason
+        PASS  committed dictionary/*.csv equals the fresh catalog export
+        PASS  design matches the database: 203 entities (tables, delete classes) and 355 relationships (FK target, ON DELETE, nullability); no undocumented tables or FKs
+PASS  tests/constraints/m06_phase1.sql  (43 checks)
+        PASS  job.application is hash-partitioned on candidate_profile_id (= HASH (candidate_profile_id))
+        PASS  32 hash partitions (= 32)
+        PASS  each application row landed in exactly one partition and the parent sees both
+        PASS  1 salary_min 90000 > salary_max 50000: rejected by ck_job_requirement_salary_range
+        PASS  2 not_disclosed salary stored as 0 (sentinel): rejected by ck_job_requirement_salary_disclosure
+        PASS  3 education ends before it starts: rejected by ck_candidate_education_date_range
+        PASS  4 duplicate application for the same candidate and job: rejected by uq_application_candidate_profile_id_job_requirement_id (partition index application_h24_candidate_profile_id_job_requirement_id_key)
+        PASS  5 status applied -> joined skips the pipeline: rejected by trg_application_status_transition
+        PASS  6a UPDATE of a status-history row: rejected by forbid_update_delete
+        PASS  6b DELETE of a status-history row: rejected by forbid_update_delete
+        PASS  7a free-text status on an application: rejected by fk_application_application_status_code
+        PASS  7b free-text status in the history: rejected by fk_application_status_history_to_application_status_code
+        PASS  8a contact email in a different case cannot even be stored (lowercase domain): rejected by ck_d_email_lowercase
+        PASS  8b duplicate contact email on another profile: rejected by uq_candidate_contact_email
+        PASS  9 delete a job requirement that has applications: rejected by fk_application_job_requirement_id
+        PASS  apply to an on-hold job: rejected by trg_application_status_transition
+        PASS  a new application must start as applied: rejected by trg_application_status_transition
+        PASS  rejection without a reason: rejected by ck_application_rejection_reason
+        PASS  experience minimum above maximum: rejected by ck_job_requirement_experience_range
+        PASS  open to consultants without a fee: rejected by ck_job_requirement_consultant_fee
+        PASS  salary in an unknown currency: rejected by fk_job_requirement_currency_code
+        PASS  second profile for the same login: rejected by uq_candidate_profile_app_user_id
+        PASS  profile salary disclosed without currency: rejected by ck_candidate_profile_salary_currency
+        PASS  email contact carrying a phone number: rejected by ck_candidate_contact_value_by_type
+        PASS  work experience with neither a registered employer nor a name: rejected by ck_candidate_work_experience_employer
+        PASS  two highest qualifications: rejected by uq_candidate_education_one_highest
+        PASS  interview that ends before it starts: rejected by ck_interview_schedule
+        PASS  opening filled by an application to another job: rejected by fk_job_position_filled_by_application
+        PASS  history row whose candidate does not match its application (composite FK): rejected by fk_application_status_history_application
+        PASS  application attaching another candidate's resume: rejected by fk_application_resume_version_owner
+        PASS  application attaching the applicant's own resume
+        PASS  shortlist
+        PASS  interviewed
+        PASS  offered
+        PASS  joining against an offer made on another application: rejected by fk_joining_offer_id_application_id
+        PASS  joined
+        PASS  opening filled by the joined application
+        PASS  5 history rows trace the full pipeline (= ->applied applied>shortlisted shortlisted>interviewed interviewed>offered offered>joined)
+        PASS  history actor is the recruiter who moved the application (= 4)
+        PASS  joined is terminal (joined -> rejected): rejected by trg_application_status_transition
+        PASS  rejection with a reason
+        PASS  soft-deleted job leaves the default view but the row remains
+        PASS  apply to a soft-deleted job: rejected by trg_application_status_transition
+PASS  tests/docs/m07_phase2_entities.ps1  (6 checks)
+        PASS  14 names checked: snake_case, singular, no PostgreSQL/MySQL reserved words
+        PASS  14 entities: unique, schema, delete class, tier and owner valid
+        PASS  11 names checked: snake_case, singular, no PostgreSQL/MySQL reserved words
+        PASS  11 entities: unique, schema, delete class, tier and owner valid
+        PASS  19 names checked: snake_case, singular, no PostgreSQL/MySQL reserved words
+        PASS  19 entities: unique, schema, delete class, tier and owner valid
+PASS  tests/docs/m08_phase2_relationships.ps1  (9 checks)
+        PASS  34 names checked: snake_case, singular, no PostgreSQL/MySQL reserved words
+        PASS  17 relationships: known entities, naming, cardinality, ON DELETE and reasons valid
+        PASS  docs\erd\phase2_admin.mmd matches the relationship table (17 lines)
+        PASS  40 names checked: snake_case, singular, no PostgreSQL/MySQL reserved words
+        PASS  20 relationships: known entities, naming, cardinality, ON DELETE and reasons valid
+        PASS  docs\erd\phase2_org.mmd matches the relationship table (20 lines)
+        PASS  72 names checked: snake_case, singular, no PostgreSQL/MySQL reserved words
+        PASS  36 relationships: known entities, naming, cardinality, ON DELETE and reasons valid
+        PASS  docs\erd\phase2_gig.mmd matches the relationship table (36 lines)
+PASS  tests/constraints/m10_admin.sql  (27 checks)
+        PASS  active user without any login identifier: rejected by ck_app_user_login_identifier
+        PASS  duplicate login email: rejected by uq_app_user_login_email
+        PASS  login phone without its country: rejected by ck_app_user_login_phone_country
+        PASS  second credential for the same user: rejected by uq_user_credential_app_user_id
+        PASS  plain-text password is not a PHC hash: rejected by ck_user_credential_password_hash_format
+        PASS  bcrypt hash labelled as argon2id: rejected by ck_user_credential_hash_matches_algorithm
+        PASS  credential change was audited
+        PASS  overlapping grant of the same role: rejected by ex_user_role_no_overlap
+        PASS  back-to-back grant after the first period closes
+        PASS  organisation-scoped role without an organisation: rejected by trg_user_role_scope
+        PASS  platform role scoped to an organisation: rejected by trg_user_role_scope
+        PASS  recruiter role for an organisation
+        PASS  role grants and revocations were audited
+        PASS  recruiter role carries the candidate_search permission
+        PASS  block row naming both a user and an organisation: rejected by ck_block_list_single_target
+        PASS  block row naming no target: rejected by ck_block_list_single_target
+        PASS  blocking yourself: rejected by ck_block_list_not_self
+        PASS  duplicate active block of the same company: rejected by uq_block_list_active_organisation_pair
+        PASS  block again after unblocking (history kept)
+        PASS  block, unblock and re-block are all audited (= 3)
+        PASS  consent rows cannot be edited: rejected by forbid_update_delete
+        PASS  latest consent row is the withdrawal
+        PASS  log_event records the session actor, not a parameter (= 10)
+        PASS  UPDATE of an audit row: rejected by forbid_update_delete
+        PASS  DELETE of an audit row: rejected by forbid_update_delete
+        PASS  free-text audit action: rejected by fk_audit_event_audit_action_code
+        PASS  application role cannot update or delete the audit trail
+PASS  tests/constraints/m10_gig.sql  (22 checks)
+        PASS  overlapping availability slots for one worker: rejected by ex_gig_availability_no_overlap
+        PASS  gig window that ends before it starts: rejected by ck_gig_request_window
+        PASS  fixed-price gig that also carries a rate: rejected by ck_gig_request_pricing
+        PASS  rate-based gig without a unit: rejected by ck_gig_request_pricing
+        PASS  applying twice to the same gig: rejected by uq_gig_application_gig_request_id_gig_worker_profile_id
+        PASS  the worker accepting their own application (bids do not flow both ways): rejected by trg_gig_application_decision
+        PASS  assignment for an application that was not accepted: rejected by trg_gig_assignment_accepted
+        PASS  assignment whose worker is not the applicant (composite FK): rejected by fk_gig_assignment_application
+        PASS  overlapping active assignments for one worker: rejected by ex_gig_assignment_worker_window
+        PASS  the same overlap once the first assignment is cancelled
+        PASS  reactivating the cancelled assignment now overlaps: rejected by ex_gig_assignment_worker_window
+        PASS  duplicate handoff idempotency key: rejected by uq_gig_fulfilment_handoff_idempotency_key
+        PASS  acknowledged without an external reference: rejected by ck_gig_fulfilment_handoff_acknowledged
+        PASS  application role can read but not write earnings
+        PASS  integration role can insert earnings but not update them
+        PASS  replayed earnings event (idempotency): rejected by uq_gig_earning_reference_source
+        PASS  earnings rows cannot be edited: rejected by forbid_update_delete
+        PASS  rating an assignment that is not completed: rejected by trg_gig_rating_completed_assignment
+        PASS  rating of 6: rejected by ck_gig_rating_rating_score
+        PASS  requester rates the completed gig
+        PASS  second rating for the same assignment: rejected by uq_gig_rating_gig_assignment_id
+        PASS  blacklisted worker applying: rejected by trg_gig_application_blacklist
+PASS  tests/constraints/m10_org.sql  (16 checks)
+        PASS  organisation that is its own parent: rejected by ck_organisation_not_own_parent
+        PASS  3-level cycle (group placed under its own grandchild): rejected by trg_organisation_hierarchy
+        PASS  moving a division under another branch is fine
+        PASS  recruiter mapped to two companies in overlapping periods: rejected by ex_recruiter_mapping_valid_range
+        PASS  back-to-back mapping to the next company
+        PASS  current_recruiter_organisation returns the mapping in force today (= 8)
+        PASS  identifier without an encryption key in the session: rejected by app.encryption_key is not set
+        PASS  GSTIN in the wrong format: rejected by does not match the gstin format
+        PASS  person-only identifier type on an organisation: rejected by is not an organisation identifier type
+        PASS  identifier is stored encrypted, never in clear
+        PASS  decrypting with the session key returns the normalised value (= 33AABCN1234F1Z5)
+        PASS  only the last 4 characters are kept for display (= F1Z5)
+        PASS  the same GSTIN registered for a second organisation (duplicate hash): rejected by uq_organisation_identifier_value_hash
+        PASS  second headquarters: rejected by uq_organisation_location_one_headquarters
+        PASS  retried verification with the same idempotency key: rejected by uq_verification_idempotency_key
+        PASS  verification marked verified without a completion time: rejected by ck_verification_completed
+PASS  tests/docs/m11_phase3_entities.ps1  (6 checks)
+        PASS  10 names checked: snake_case, singular, no PostgreSQL/MySQL reserved words
+        PASS  10 entities: unique, schema, delete class, tier and owner valid
+        PASS  7 names checked: snake_case, singular, no PostgreSQL/MySQL reserved words
+        PASS  7 entities: unique, schema, delete class, tier and owner valid
+        PASS  23 names checked: snake_case, singular, no PostgreSQL/MySQL reserved words
+        PASS  23 entities: unique, schema, delete class, tier and owner valid
+PASS  tests/docs/m12_phase3_relationships.ps1  (9 checks)
+        PASS  28 names checked: snake_case, singular, no PostgreSQL/MySQL reserved words
+        PASS  14 relationships: known entities, naming, cardinality, ON DELETE and reasons valid
+        PASS  docs\erd\phase3_lic.mmd matches the relationship table (14 lines)
+        PASS  32 names checked: snake_case, singular, no PostgreSQL/MySQL reserved words
+        PASS  16 relationships: known entities, naming, cardinality, ON DELETE and reasons valid
+        PASS  docs\erd\phase3_src.mmd matches the relationship table (16 lines)
+        PASS  90 names checked: snake_case, singular, no PostgreSQL/MySQL reserved words
+        PASS  45 relationships: known entities, naming, cardinality, ON DELETE and reasons valid
+        PASS  docs\erd\phase3_billing.mmd matches the relationship table (45 lines)
+PASS  tests/concurrency/m14_device_limit.ps1  (5 checks)
+        PASS  20 concurrent logins all completed
+        PASS  exactly 3 sessions started
+        PASS  17 logins rejected at the device limit
+        PASS  every rejection audited as device_limit_exceeded
+        PASS  every rejection in the login history
+PASS  tests/constraints/m14_billing.sql  (24 checks)
+        PASS  overlapping subscriptions on one licence: rejected by ex_subscription_licence_period
+        PASS  cancellation marks the subscription cancelled (= cancelled)
+        PASS  the same overlap once the first subscription is cancelled
+        PASS  a subscription period without an end date: rejected by ck_subscription_period
+        PASS  a captured webhook moves the order to captured (= captured)
+        PASS  the same webhook delivered twice: rejected by uq_payment_event_gateway_event
+        PASS  a payment order for both a subscription and a wallet: rejected by ck_payment_order_single_purpose
+        PASS  posting the same key again is idempotent (same entry) (= 1)
+        PASS  balance after recharge and one debit (= 7500.00)
+        PASS  debit that would make the balance negative: rejected by ck_wallet_balance_non_negative
+        PASS  UPDATE of a ledger row: rejected by forbid_update_delete
+        PASS  DELETE of a ledger row: rejected by forbid_update_delete
+        PASS  a correction reverses the original amount exactly (= 2500.00)
+        PASS  balance reconciles with the ledger (sum of entries = balance = last balance_after)
+        PASS  reversing the same entry twice: rejected by uq_wallet_ledger_entry_reverses_wallet_ledger_entry_id
+        PASS  a recharge entry with the wrong sign: rejected by ck_wallet_ledger_entry_sign
+        PASS  application role cannot write the wallet or ledger directly
+        PASS  refunds larger than the payment: rejected by trg_refund_within_payment
+        PASS  a refund up to the remaining amount
+        PASS  download event, consumption and audit written together
+        PASS  a retried download call does not charge twice (= 1)
+        PASS  a download without a ledger entry: rejected by wallet_ledger_entry_id
+        PASS  a download pointing at a credit instead of a debit: rejected by trg_profile_download_event_debit
+        PASS  download history rows cannot be edited: rejected by forbid_update_delete
+PASS  tests/constraints/m14_lic.sql  (23 checks)
+        PASS  max_devices_per_user = 0: rejected by ck_licence_max_devices_per_user_positive
+        PASS  max_users = 0: rejected by ck_licence_max_users_positive
+        PASS  third seat on a 2-user licence: rejected by trg_licence_seat_limit
+        PASS  second active seat for the same user (on another licence): rejected by uq_licence_seat_active_user
+        PASS  user without a seat is refused (= no_seat)
+        PASS  first device: session started (= started)
+        PASS  second device: session started (= started)
+        PASS  third device: rejected at the limit (= device_limit)
+        PASS  rejection is audited as device_limit_exceeded
+        PASS  rejection is in the login history
+        PASS  logout releases the session
+        PASS  after logout a new device can log in (= started)
+        PASS  revoking a session
+        PASS  revocation is audited and recorded
+        PASS  a revoked session does not count against the limit (= started)
+        PASS  an expired (not yet swept) session does not count (= started)
+        PASS  the sweep releases expired sessions
+        PASS  swept session is marked expired
+        PASS  revoking a device ends its open session (= 1)
+        PASS  a revoked device cannot start a session (= device_revoked)
+        PASS  session on another user's device (composite FK): rejected by fk_login_session_device
+        PASS  ended session without a reason: rejected by ck_login_session_end_pair
+        PASS  application role cannot write sessions directly (session API only)
+PASS  tests/constraints/m14_src.sql  (15 checks)
+        PASS  consultant request on a job not open to consultants: rejected by trg_sourcing_request_consultant_open
+        PASS  the same request on a job open to consultants
+        PASS  a user without the consultant role cannot request: rejected by trg_sourcing_request_consultant_open
+        PASS  a second live request by the same consultant for the same job: rejected by uq_sourcing_request_live_per_consultant
+        PASS  declined without a reason: rejected by ck_sourcing_request_decline_reason
+        PASS  accepted without recording who decided: rejected by ck_sourcing_request_decision
+        PASS  the consultant cannot accept their own request: rejected by trg_sourcing_request_consultant_open
+        PASS  the employer accepts
+        PASS  link the sourcing request to its job shortlist
+        PASS  link it to a shortlist of another job: rejected by fk_sourcing_shortlist_shortlist_job
+        PASS  duplicate batch idempotency key: rejected by uq_outreach_batch_idempotency_key
+        PASS  same candidate twice in one batch: rejected by uq_outreach_recipient_batch_candidate
+        PASS  outreach to a candidate who blocked the sender: rejected by trg_outreach_recipient_not_blocked
+        PASS  outreach from a company the candidate blocked: rejected by trg_outreach_recipient_not_blocked
+        PASS  free-text message template key: rejected by ck_outreach_batch_message_template_key_format
+PASS  tests/docs/m15_phase4_entities.ps1  (4 checks)
+        PASS  19 names checked: snake_case, singular, no PostgreSQL/MySQL reserved words
+        PASS  19 entities: unique, schema, delete class, tier and owner valid
+        PASS  7 names checked: snake_case, singular, no PostgreSQL/MySQL reserved words
+        PASS  7 entities: unique, schema, delete class, tier and owner valid
+PASS  tests/docs/m16_phase4_relationships.ps1  (6 checks)
+        PASS  70 names checked: snake_case, singular, no PostgreSQL/MySQL reserved words
+        PASS  35 relationships: known entities, naming, cardinality, ON DELETE and reasons valid
+        PASS  docs\erd\phase4_notif.mmd matches the relationship table (35 lines)
+        PASS  12 names checked: snake_case, singular, no PostgreSQL/MySQL reserved words
+        PASS  6 relationships: known entities, naming, cardinality, ON DELETE and reasons valid
+        PASS  docs\erd\phase4_dw.mmd matches the relationship table (6 lines)
+PASS  tests/access/m18_access.sql  (23 checks)
+        PASS  interviewer from another company: rejected by trg_interview_interviewer_organisation
+        PASS  interviewer from the hiring company
+        PASS  recruiter sees only own company's jobs (published and draft) (= 11,12)
+        PASS  recruiter cannot change another company's job (0 rows) (= 0)
+        PASS  recruiter cannot post a job for another company: rejected by row-level security
+        PASS  recruiter posts for own company
+        PASS  blocked and hidden candidates are invisible to the recruiter (= 7)
+        PASS  blocker's contact details are invisible too
+        PASS  recruiter sees applications to own jobs (= 1)
+        PASS  recruiter cannot register a candidate: rejected by row-level security
+        PASS  other recruiter sees only Bolt jobs (= 13)
+        PASS  a block on Acme does not hide the candidate from Bolt
+        PASS  Bolt sees no applications to Acme jobs (= 0)
+        PASS  consultant sees only published jobs open to consultants (= 11)
+        PASS  candidate sees published jobs only (= 11,13)
+        PASS  candidate sees only their own profile (= 7)
+        PASS  candidate sees only their own applications (= 1)
+        PASS  a user registers their own candidate profile
+        PASS  guest sees published jobs only (= 2)
+        PASS  guest sees no candidate profiles (= 0)
+        PASS  admin sees every profile (= 3)
+        PASS  application role cannot edit the audit trail: rejected by permission denied
+        PASS  application role cannot write the ledger directly: rejected by permission denied
+PASS  tests/constraints/m18_dw.sql  (14 checks)
+        PASS  one current version per candidate (= 1)
+        PASS  candidate dimension derives band and highest level (= 2-5y/bachelor)
+        PASS  job dimension bands the annualised salary (= 6-12L)
+        PASS  fact holds the job and the gig application (one pipeline view) (= gig,job)
+        PASS  funnel flags come from the status history
+        PASS  aggregate equals the fact
+        PASS  refresh run twice gives the same counts (= 1/1/2/2)
+        PASS  second run reports zero changed rows (= 0)
+        PASS  the candidate now has two versions (= 2)
+        PASS  the old version is closed and the new one is current
+        PASS  the fact still points at the version valid when the candidate applied (= Chennai)
+        PASS  two current versions of one candidate: rejected by uq_dim_candidate_current
+        PASS  KPI view answers
+        PASS  application role reads the warehouse but cannot write it
+PASS  tests/constraints/m18_notif.sql  (16 checks)
+        PASS  UI language the UI is not translated into: rejected by trg_user_preference_ui_language
+        PASS  Hindi UI with privacy settings
+        PASS  duplicate preference for the same event and channel: rejected by uq_notification_preference_user_event_channel
+        PASS  two email alerts on the same saved search: rejected by uq_job_alert_saved_search_id_channel
+        PASS  notification whose message key does not exist: rejected by fk_notification_message_label_key
+        PASS  notification_delivery is range-partitioned on queued_at (= RANGE (queued_at))
+        PASS  a delivery lands in its month's partition (= notif.notification_delivery_p202610)
+        PASS  a delivery outside the prepared months lands in the default partition
+        PASS  partition pruning: a one-month query touches one partition
+        PASS  failed delivery without a reason: rejected by ck_notification_delivery_failure
+        PASS  sent status without a send time: rejected by ck_notification_delivery_sent
+        PASS  duplicate provider message id (replayed callback): rejected by uq_delivery_provider_receipt_provider_message
+        PASS  ensure_delivery_partitions creates missing months only (= 1)
+        PASS  detaching an old month removes it from the table (= 25)
+        PASS  blank community post: rejected by ck_community_post_post_body_not_blank
+        PASS  ticket resolved without a resolution time: rejected by ck_support_ticket_resolved
+PASS  tests/docs/m20_query_set.ps1  (7 checks)
+        PASS  at least 12 queries in queries/ (13)
+        PASS  every query declares name, kind and mode
+        PASS  baseline results exist (perf/results/baseline_laptop.csv)
+        PASS  baseline covers every query
+        PASS  every query ran 30 measured runs without error
+        PASS  an EXPLAIN (ANALYZE, BUFFERS) plan is saved for every query
+        PASS  M20 report exists (docs/phase5/m20_queries.md)
+PASS  tests/docs/m21_performance.ps1  (6 checks)
+        PASS  baseline has p50/p95/p99 for every query at both scales
+        PASS  every module has an index justified by a before/after measurement (speed-up >= 2)
+        PASS  before and after plans saved for every index experiment
+        PASS  extrapolation covers every query and ranks one first
+        PASS  the report names the first query to degrade (Q05_candidate_name_fuzzy)
+        PASS  the report contains the partitioning note
+== gate M21: PASS (26/26 files) ==

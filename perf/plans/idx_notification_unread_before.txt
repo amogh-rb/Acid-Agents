@@ -1,0 +1,9 @@
+﻿Aggregate  (cost=3.76..3.77 rows=1 width=8) (actual rows=1.00 loops=1)
+  Buffers: shared hit=9
+  ->  Index Scan using idx_notification_recipient_app_user_id on notification  (cost=0.42..3.76 rows=1 width=0) (actual rows=6.00 loops=1)
+        Index Cond: (recipient_app_user_id = 132993)
+        Filter: (read_at IS NULL)
+        Index Searches: 1
+        Buffers: shared hit=9
+Planning Time: 0.070 ms
+Execution Time: 0.037 ms

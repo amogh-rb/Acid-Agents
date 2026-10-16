@@ -1,0 +1,9 @@
+﻿Aggregate  (cost=2.50..2.51 rows=1 width=8) (actual rows=1.00 loops=1)
+  Buffers: shared hit=2
+  ->  Index Only Scan using idx_login_session_active_user on login_session  (cost=0.29..2.50 rows=1 width=0) (actual rows=0.00 loops=1)
+        Index Cond: ((app_user_id = 1000007) AND (expires_at > now()))
+        Heap Fetches: 0
+        Index Searches: 1
+        Buffers: shared hit=2
+Planning Time: 0.113 ms
+Execution Time: 0.034 ms

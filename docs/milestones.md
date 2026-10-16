@@ -23,7 +23,7 @@ A milestone is done only when it is **Defined** (deliverable committed), **Verif
 | M15-M18 | B48-B59 | Shared access layer / Notifications / Analytics | A / B / C | ✅ 14:20 | ☐ | ✅ gate M18 14:21 (24/24 files; m18: access 23, notif 16, dw 14) | `ddl/80_notif.sql`, `85_access.sql`, `90_dw.sql`; `docs/phase4/*`; RLS (D26), monthly delivery partitions (D27), SCD2 marts (D28); F3 fixed; tag `phase4` |
 | M19 | B60-B64 | Seed (tablespace on D:) | B | ✅ 2026-10-15 | ☐ | ✅ rehearsal 33/33 (1.0 min); laptop scale 33/33 2026-10-16 | `seed/00-90`, `distributions.yaml`, `data_quality_issues.md`; 1M profiles, 100K jobs, 5M applications, 9.9M history rows, 11 GB, load 83 min; 0 FK orphans across 817 FKs; D30-D32 (D31 is a deviation: replica-mode load, re-proved by validation) |
 | M20 | B65-B69 | Query set + validation | C, B | ✅ 2026-10-16 | ☐ | ✅ gate M20 11:11 (25/25 files) | `queries/Q01-Q13`, `perf/run_queries.ps1`, baseline p50/p95/p99 (30 runs) in `perf/results/baseline_laptop.csv`, plans in `perf/plans/`; report `docs/phase5/m20_queries.md` incl. seed validation 33/33 |
-| M21 | B70-B74 | Performance + extrapolation | C | ☐ | ☐ | ☐ | |
+| M21 | B70-B74 | Performance + extrapolation | C | ✅ 2026-10-16 | ☐ | ✅ gate M21 11:20 (26/26 files) | baseline p50/p95/p99 at 1% and 100%; 11 index before/after experiments (10 modules justified, 20x-2290x; idx_notification_unread x1.1, D34); partitioning note D33; extrapolation: Q05 name substring degrades first (62 ms -> ~0.74 s at 10x, ~8.7 s at 100x); report `docs/phase5/m21_performance.md` |
 | M22 | B75-B79 | Security | A | ☐ | ☐ | ☐ | |
 | M23 | B80-B82 | Backup/restore + Gate 2 | All | ☐ | ☐ | ☐ | |
 

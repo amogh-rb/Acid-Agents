@@ -1,0 +1,6 @@
+﻿Seq Scan on recruiter_mapping  (cost=0.00..458.75 rows=2 width=8) (actual rows=2.00 loops=1)
+  Filter: ((organisation_id = 7000) AND (valid_period @> CURRENT_DATE))
+  Rows Removed by Filter: 15355
+  Buffers: shared hit=190
+Planning Time: 0.119 ms
+Execution Time: 1.506 ms

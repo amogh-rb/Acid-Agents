@@ -1,0 +1,18 @@
+﻿Limit  (cost=6470.65..6472.98 rows=20 width=36) (actual rows=20.00 loops=1)
+  Buffers: shared hit=4787
+  ->  Gather Merge  (cost=6470.65..6832.63 rows=3108 width=36) (actual rows=20.00 loops=1)
+        Workers Planned: 2
+        Workers Launched: 2
+        Buffers: shared hit=4787
+        ->  Sort  (cost=5470.63..5473.86 rows=1295 width=36) (actual rows=6.67 loops=3)
+              Sort Key: published_at DESC
+              Sort Method: top-N heapsort  Memory: 27kB
+              Buffers: shared hit=4787
+              Worker 0:  Sort Method: quicksort  Memory: 25kB
+              Worker 1:  Sort Method: quicksort  Memory: 25kB
+              ->  Parallel Seq Scan on job_requirement j  (cost=0.00..5436.17 rows=1295 width=36) (actual rows=1715.00 loops=3)
+                    Filter: ((deleted_at IS NULL) AND ((job_requirement_status_code)::text = 'open'::text) AND ((publish_state_code)::text = 'published'::text) AND (job_role_id = 12))
+                    Rows Removed by Filter: 31618
+                    Buffers: shared hit=4707
+Planning Time: 0.201 ms
+Execution Time: 78.941 ms

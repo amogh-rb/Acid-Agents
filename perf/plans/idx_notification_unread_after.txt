@@ -1,0 +1,9 @@
+﻿Aggregate  (cost=1.54..1.55 rows=1 width=8) (actual rows=1.00 loops=1)
+  Buffers: shared hit=4
+  ->  Index Only Scan using idx_notification_unread on notification  (cost=0.42..1.54 rows=1 width=0) (actual rows=6.00 loops=1)
+        Index Cond: (recipient_app_user_id = 132993)
+        Heap Fetches: 0
+        Index Searches: 1
+        Buffers: shared hit=4
+Planning Time: 0.073 ms
+Execution Time: 0.032 ms

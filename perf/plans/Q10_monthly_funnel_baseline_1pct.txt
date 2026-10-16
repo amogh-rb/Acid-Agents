@@ -1,0 +1,24 @@
+﻿Sort  (cost=218.94..220.14 rows=480 width=90) (actual rows=128.00 loops=1)
+  Sort Key: d.year_number, d.month_number, f.job_category
+  Sort Method: quicksort  Memory: 35kB
+  Buffers: shared hit=52
+  ->  HashAggregate  (cost=185.56..197.56 rows=480 width=90) (actual rows=128.00 loops=1)
+        Group Key: d.year_number, d.month_number, f.job_category
+        Batches: 1  Memory Usage: 57kB
+        Buffers: shared hit=52
+        ->  Hash Join  (cost=53.10..133.90 rows=2583 width=38) (actual rows=3230.00 loops=1)
+              Hash Cond: (f.dim_date_id = d.id)
+              Buffers: shared hit=52
+              ->  Seq Scan on agg_daily_funnel f  (cost=0.00..72.30 rows=3230 width=42) (actual rows=3230.00 loops=1)
+                    Buffers: shared hit=40
+              ->  Hash  (cost=34.84..34.84 rows=1461 width=12) (actual rows=1461.00 loops=1)
+                    Buckets: 2048  Batches: 1  Memory Usage: 85kB
+                    Buffers: shared hit=12
+                    ->  Seq Scan on dim_date d  (cost=0.00..34.84 rows=1461 width=12) (actual rows=1461.00 loops=1)
+                          Filter: (year_number >= 2025)
+                          Rows Removed by Filter: 366
+                          Buffers: shared hit=12
+Planning:
+  Buffers: shared hit=6
+Planning Time: 0.397 ms
+Execution Time: 2.541 ms

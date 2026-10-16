@@ -1,0 +1,2 @@
+﻿"module","index","index_size","build_seconds","before_p50_ms","before_p95_ms","after_p50_ms","after_p95_ms","speedup"
+"Notifications (delivery queue)","notif.idx_notification_delivery_pending","0 bytes","1.2","162.114","258.809","0.396","0.448","409.4"

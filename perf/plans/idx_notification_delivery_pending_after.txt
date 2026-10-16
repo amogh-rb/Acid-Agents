@@ -1,0 +1,99 @@
+﻿Limit  (cost=6.40..30.78 rows=100 width=29) (actual rows=100.00 loops=1)
+  Buffers: shared hit=153
+  ->  Merge Append  (cost=6.40..30582.41 rows=125396 width=29) (actual rows=100.00 loops=1)
+        Sort Key: notification_delivery.queued_at
+        Buffers: shared hit=153
+        ->  Index Scan using notification_delivery_p202508_queued_at_idx on notification_delivery_p202508 notification_delivery_1  (cost=0.12..2.34 rows=1 width=56) (actual rows=0.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=1
+        ->  Index Scan using notification_delivery_p202509_queued_at_idx on notification_delivery_p202509 notification_delivery_2  (cost=0.12..2.34 rows=1 width=56) (actual rows=0.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=1
+        ->  Index Scan using notification_delivery_p202510_queued_at_idx on notification_delivery_p202510 notification_delivery_3  (cost=0.12..2.34 rows=1 width=56) (actual rows=0.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=1
+        ->  Index Scan using notification_delivery_p202511_queued_at_idx on notification_delivery_p202511 notification_delivery_4  (cost=0.28..1170.62 rows=5350 width=29) (actual rows=100.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=102
+        ->  Index Scan using notification_delivery_p202512_queued_at_idx on notification_delivery_p202512 notification_delivery_5  (cost=0.29..2505.13 rows=11818 width=29) (actual rows=1.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=3
+        ->  Index Scan using notification_delivery_p202601_queued_at_idx on notification_delivery_p202601 notification_delivery_6  (cost=0.29..2494.29 rows=11684 width=29) (actual rows=1.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=3
+        ->  Index Scan using notification_delivery_p202602_queued_at_idx on notification_delivery_p202602 notification_delivery_7  (cost=0.29..2254.43 rows=10724 width=29) (actual rows=1.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=3
+        ->  Index Scan using notification_delivery_p202603_queued_at_idx on notification_delivery_p202603 notification_delivery_8  (cost=0.29..2486.13 rows=11357 width=29) (actual rows=1.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=3
+        ->  Index Scan using notification_delivery_p202604_queued_at_idx on notification_delivery_p202604 notification_delivery_9  (cost=0.29..2415.19 rows=11174 width=29) (actual rows=1.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=3
+        ->  Index Scan using notification_delivery_p202605_queued_at_idx on notification_delivery_p202605 notification_delivery_10  (cost=0.29..2488.28 rows=11650 width=29) (actual rows=1.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=3
+        ->  Index Scan using notification_delivery_p202606_queued_at_idx on notification_delivery_p202606 notification_delivery_11  (cost=0.29..2419.59 rows=11394 width=29) (actual rows=1.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=3
+        ->  Index Scan using notification_delivery_p202607_queued_at_idx on notification_delivery_p202607 notification_delivery_12  (cost=0.29..2506.32 rows=11545 width=29) (actual rows=1.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=3
+        ->  Index Scan using notification_delivery_p202608_queued_at_idx on notification_delivery_p202608 notification_delivery_13  (cost=0.29..2486.05 rows=11718 width=29) (actual rows=1.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=3
+        ->  Index Scan using notification_delivery_p202609_queued_at_idx on notification_delivery_p202609 notification_delivery_14  (cost=0.29..2418.70 rows=11262 width=29) (actual rows=1.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=3
+        ->  Index Scan using notification_delivery_p202610_queued_at_idx on notification_delivery_p202610 notification_delivery_15  (cost=0.28..1191.31 rows=5702 width=29) (actual rows=1.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=3
+        ->  Index Scan using notification_delivery_p202611_queued_at_idx on notification_delivery_p202611 notification_delivery_16  (cost=0.12..2.34 rows=1 width=56) (actual rows=0.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=1
+        ->  Index Scan using notification_delivery_p202612_queued_at_idx on notification_delivery_p202612 notification_delivery_17  (cost=0.12..2.34 rows=1 width=56) (actual rows=0.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=1
+        ->  Index Scan using notification_delivery_p202701_queued_at_idx on notification_delivery_p202701 notification_delivery_18  (cost=0.12..2.34 rows=1 width=56) (actual rows=0.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=1
+        ->  Index Scan using notification_delivery_p202702_queued_at_idx on notification_delivery_p202702 notification_delivery_19  (cost=0.12..2.34 rows=1 width=56) (actual rows=0.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=1
+        ->  Index Scan using notification_delivery_p202703_queued_at_idx on notification_delivery_p202703 notification_delivery_20  (cost=0.12..2.34 rows=1 width=56) (actual rows=0.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=1
+        ->  Index Scan using notification_delivery_p202704_queued_at_idx on notification_delivery_p202704 notification_delivery_21  (cost=0.12..2.34 rows=1 width=56) (actual rows=0.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=1
+        ->  Index Scan using notification_delivery_p202705_queued_at_idx on notification_delivery_p202705 notification_delivery_22  (cost=0.12..2.34 rows=1 width=56) (actual rows=0.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=1
+        ->  Index Scan using notification_delivery_p202706_queued_at_idx on notification_delivery_p202706 notification_delivery_23  (cost=0.12..2.34 rows=1 width=56) (actual rows=0.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=1
+        ->  Index Scan using notification_delivery_p202707_queued_at_idx on notification_delivery_p202707 notification_delivery_24  (cost=0.12..2.34 rows=1 width=56) (actual rows=0.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=1
+        ->  Index Scan using notification_delivery_p202708_queued_at_idx on notification_delivery_p202708 notification_delivery_25  (cost=0.12..2.34 rows=1 width=56) (actual rows=0.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=1
+        ->  Index Scan using notification_delivery_p202709_queued_at_idx on notification_delivery_p202709 notification_delivery_26  (cost=0.12..2.34 rows=1 width=56) (actual rows=0.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=1
+        ->  Index Scan using notification_delivery_p202710_queued_at_idx on notification_delivery_p202710 notification_delivery_27  (cost=0.12..2.34 rows=1 width=56) (actual rows=0.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=1
+        ->  Index Scan using notification_delivery_p202711_queued_at_idx on notification_delivery_p202711 notification_delivery_28  (cost=0.12..2.34 rows=1 width=56) (actual rows=0.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=1
+        ->  Index Scan using notification_delivery_p202712_queued_at_idx on notification_delivery_p202712 notification_delivery_29  (cost=0.12..2.34 rows=1 width=56) (actual rows=0.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=1
+        ->  Index Scan using notification_delivery_default_queued_at_idx on notification_delivery_default notification_delivery_30  (cost=0.12..2.34 rows=1 width=56) (actual rows=0.00 loops=1)
+              Index Searches: 1
+              Buffers: shared hit=1
+Planning:
+  Buffers: shared hit=72
+Planning Time: 1.983 ms
+Execution Time: 0.435 ms

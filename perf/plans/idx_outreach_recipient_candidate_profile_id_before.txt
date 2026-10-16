@@ -1,0 +1,6 @@
+﻿Index Scan using uq_outreach_recipient_batch_candidate on outreach_recipient r  (cost=0.42..1334.53 rows=1 width=15) (actual rows=2.00 loops=1)
+  Index Cond: (candidate_profile_id = 3876)
+  Index Searches: 1
+  Buffers: shared hit=530
+Planning Time: 0.098 ms
+Execution Time: 2.226 ms

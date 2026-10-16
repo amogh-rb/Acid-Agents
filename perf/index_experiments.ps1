@@ -11,7 +11,8 @@
 param(
   [string]$Database = 'talentra_seed',
   [int]$Runs = 20,
-  [string]$Label = 'index_experiments'
+  [string]$Label = 'index_experiments',
+  [string]$Only = ''
 )
 $ErrorActionPreference = 'Stop'
 Set-Location (Split-Path $PSScriptRoot -Parent)
@@ -56,6 +57,12 @@ function Measure-Query([string]$setup, [string]$query, [string]$planFile) {
 
 # Experiments: module, index, the query that justifies it. Parameters are looked up from the data, so every query finds rows.
 $experiments = @(
+  @{ module = 'Profile'; index = 'profile.idx_candidate_profile_full_name_trgm'
+     setup = "SELECT 1 AS one \gset"
+     query = "SELECT id, full_name FROM profile.candidate_profile WHERE full_name ILIKE '%Subramaniam%' AND deleted_at IS NULL LIMIT 50" },
+  @{ module = 'Jobs and applications'; index = 'job.idx_job_requirement_open_published'
+     setup = "SELECT job_role_id AS role_id FROM job.job_requirement GROUP BY 1 ORDER BY count(*) DESC LIMIT 1 \gset"
+     query = "SELECT j.id, j.job_title, j.published_at FROM job.job_requirement j WHERE j.job_requirement_status_code = 'open' AND j.publish_state_code = 'published' AND j.deleted_at IS NULL AND j.job_role_id = :role_id ORDER BY j.published_at DESC LIMIT 20" },
   @{ module = 'Administration'; index = 'audit.idx_audit_event_actor_app_user_id'
      setup = "SELECT actor_app_user_id AS actor FROM audit.audit_event WHERE actor_app_user_id IS NOT NULL GROUP BY 1 ORDER BY count(*) DESC LIMIT 1 \gset"
      query = "SELECT id, audit_action_code, occurred_at FROM audit.audit_event WHERE actor_app_user_id = :actor ORDER BY occurred_at DESC LIMIT 20" },
@@ -77,6 +84,9 @@ $experiments = @(
   @{ module = 'Notifications'; index = 'notif.idx_notification_unread'
      setup = "SELECT recipient_app_user_id AS u FROM notif.notification WHERE read_at IS NULL GROUP BY 1 ORDER BY count(*) DESC, 1 LIMIT 1 \gset"
      query = "SELECT count(*) FROM notif.notification WHERE recipient_app_user_id = :u AND read_at IS NULL" },
+  @{ module = 'Notifications (delivery queue)'; index = 'notif.idx_notification_delivery_pending'
+     setup = "SELECT 1 AS one \gset"
+     query = "SELECT id, notification_id, notification_channel_code FROM notif.notification_delivery WHERE delivery_status_code = 'queued' ORDER BY queued_at LIMIT 100" },
   @{ module = 'Analytics'; index = 'dw.idx_fact_application_applied_dim_date_id'
      setup = "SELECT max(applied_dim_date_id) - 30 AS d FROM dw.fact_application \gset"
      query = "SELECT job_category, count(*), count(*) FILTER (WHERE is_joined) FROM dw.fact_application WHERE applied_dim_date_id >= :d GROUP BY 1" }
@@ -84,10 +94,15 @@ $experiments = @(
 
 $rows = @()
 foreach ($e in $experiments) {
+  if ($Only -and $e.module -notlike "$Only*") { continue }
   $parts = $e.index -split '\.'
   $schema = $parts[0]; $idx = $parts[1]
   $def = Invoke-Sql "SELECT pg_get_indexdef(c.oid) FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = '$schema' AND c.relname = '$idx'"
   if (-not $def) { Write-Host "SKIP  $($e.index): index not found" -ForegroundColor Yellow; continue }
+  # a partitioned table's index definition says ON ONLY; recreating it that way would build an invalid parent index
+  # with no partition indexes, so recreate it on the whole partitioned table
+  $def = $def -replace ' ON ONLY ', ' ON '
+  $table = $def -replace '^.*? ON (\S+) USING .*$', '$1'
   $size = Invoke-Sql "SELECT pg_size_pretty(pg_relation_size('$($e.index)'))"
   $dropped = $false
   try {
@@ -96,7 +111,7 @@ foreach ($e in $experiments) {
     $t0 = Get-Date
     Invoke-Sql $def | Out-Null; $dropped = $false
     $build = ((Get-Date) - $t0).TotalSeconds
-    Invoke-Sql "ANALYZE $schema.$($def -replace '^.*? ON (\S+) .*$', '$1' -replace '^\S+\.', '')" 2>$null | Out-Null
+    Invoke-Sql "ANALYZE $table" | Out-Null
     $after = Measure-Query $e.setup $e.query ("perf/plans/{0}_after.txt" -f $idx)
   } finally {
     if ($dropped) { Invoke-Sql $def | Out-Null }

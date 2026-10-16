@@ -1,0 +1,8 @@
+﻿Limit  (cost=0.42..23.04 rows=20 width=38) (actual rows=20.00 loops=1)
+  Buffers: shared hit=16
+  ->  Index Scan Backward using idx_wallet_ledger_entry_wallet_id on wallet_ledger_entry  (cost=0.42..93.16 rows=82 width=38) (actual rows=20.00 loops=1)
+        Index Cond: (wallet_id = 7000)
+        Index Searches: 1
+        Buffers: shared hit=16
+Planning Time: 0.081 ms
+Execution Time: 0.035 ms

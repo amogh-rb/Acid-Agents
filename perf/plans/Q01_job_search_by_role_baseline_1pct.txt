@@ -1,0 +1,16 @@
+﻿Limit  (cost=0.42..28.28 rows=20 width=56) (actual rows=20.00 loops=1)
+  Buffers: shared hit=62
+  ->  Nested Loop  (cost=0.42..38.04 rows=27 width=56) (actual rows=20.00 loops=1)
+        Buffers: shared hit=62
+        ->  Index Scan using idx_job_requirement_open_published on job_requirement j  (cost=0.28..24.85 rows=27 width=43) (actual rows=20.00 loops=1)
+              Index Cond: (job_role_id = 3)
+              Index Searches: 1
+              Buffers: shared hit=22
+        ->  Index Scan using pk_organisation on organisation o  (cost=0.14..0.49 rows=1 width=29) (actual rows=1.00 loops=20)
+              Index Cond: (id = j.organisation_id)
+              Index Searches: 20
+              Buffers: shared hit=40
+Planning:
+  Buffers: shared hit=8
+Planning Time: 0.342 ms
+Execution Time: 0.072 ms

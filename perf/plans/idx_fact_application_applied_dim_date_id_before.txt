@@ -1,0 +1,25 @@
+﻿Finalize GroupAggregate  (cost=109261.16..109263.59 rows=8 width=30) (actual rows=1.00 loops=1)
+  Group Key: job_category
+  Buffers: shared hit=81636
+  ->  Gather Merge  (cost=109261.16..109263.37 rows=19 width=30) (actual rows=3.00 loops=1)
+        Workers Planned: 2
+        Workers Launched: 2
+        Buffers: shared hit=81636
+        ->  Sort  (cost=108261.13..108261.15 rows=8 width=30) (actual rows=1.00 loops=3)
+              Sort Key: job_category
+              Sort Method: quicksort  Memory: 25kB
+              Buffers: shared hit=81636
+              Worker 0:  Sort Method: quicksort  Memory: 25kB
+              Worker 1:  Sort Method: quicksort  Memory: 25kB
+              ->  Partial HashAggregate  (cost=108260.93..108261.01 rows=8 width=30) (actual rows=1.00 loops=3)
+                    Group Key: job_category
+                    Batches: 1  Memory Usage: 32kB
+                    Buffers: shared hit=81618
+                    Worker 0:  Batches: 1  Memory Usage: 32kB
+                    Worker 1:  Batches: 1  Memory Usage: 32kB
+                    ->  Parallel Seq Scan on fact_application  (cost=0.00..108146.91 rows=15203 width=15) (actual rows=16385.67 loops=3)
+                          Filter: (applied_dim_date_id >= 990)
+                          Rows Removed by Filter: 1681889
+                          Buffers: shared hit=81618
+Planning Time: 0.192 ms
+Execution Time: 344.953 ms
